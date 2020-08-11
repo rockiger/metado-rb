@@ -6,23 +6,30 @@
 
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Route } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
+
+import { selectIsAuthenticated } from 'app/containers/Database/selectors';
 
 import { useInjectReducer } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
-import { selectPrivateRoute } from './selectors';
 
 interface Props {
   component: (props) => JSX.Element;
+  exact?: boolean;
+  path?: string;
 }
 
 export function PrivateRoute({ component: Component, ...rest }: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const privateRoute = useSelector(selectPrivateRoute);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
-  return <Route {...rest} render={props => <Component {...props} />} />;
+  return (
+    <Route
+      {...rest}
+      render={props =>
+        isAuthenticated ? <Component {...props} /> : <Redirect to="/" />
+      }
+    />
+  );
 }
