@@ -27,6 +27,7 @@ import { theme } from 'styles/theme';
 
 // Initialize languages
 import './locales/i18n';
+import { Database } from 'app/containers/Database';
 
 // Observe loading of Inter (to remove 'Inter', remove the <link> tag in
 // the index.html file and this observer)
@@ -45,6 +46,7 @@ interface Props {
 }
 const ConnectedApp = ({ Component }: Props) => (
   <Provider store={store}>
+    <Database />
     <ThemeProvider theme={theme}>
       <HelmetProvider>
         <React.StrictMode>
