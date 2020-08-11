@@ -13,9 +13,9 @@ import styled from 'styled-components/macro';
 
 import { GlobalStyle } from 'styles/global-styles';
 
-import { PrivateRoute } from './components/PrivateRoute';
-import { HomePage } from './containers/HomePage/Loadable';
 import { NotFoundPage } from './components/NotFoundPage/Loadable';
+import { HomePage } from './containers/HomePage/Loadable';
+import { PrivateRoute } from './containers/PrivateRoute';
 import { BoardsPage } from './containers/BoardsPage/Loadable';
 
 export function App() {
