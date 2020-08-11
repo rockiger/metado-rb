@@ -13,6 +13,7 @@ import styled from 'styled-components/macro';
 
 import { GlobalStyle } from 'styles/global-styles';
 
+import { PrivateRoute } from './components/PrivateRoute';
 import { HomePage } from './containers/HomePage/Loadable';
 import { NotFoundPage } from './components/NotFoundPage/Loadable';
 import { BoardsPage } from './containers/BoardsPage/Loadable';
@@ -32,7 +33,7 @@ export function App() {
       </Horizontal>
       <Switch>
         <Route exact path="/" component={HomePage} />
-        <Route exact path="/boards" component={BoardsPage} />
+        <PrivateRoute exact path="/boards" component={BoardsPage} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />
