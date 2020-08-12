@@ -15,6 +15,7 @@ const myFirebaseApp = firebase.initializeApp({
 
 const reduxSagaFirebase = new ReduxSagaFirebase(myFirebaseApp);
 const authProvider = new firebase.auth.GithubAuthProvider();
+const firebaseAuth = firebase.auth();
 const fireStore = myFirebaseApp.firestore();
 
-export { reduxSagaFirebase, authProvider, fireStore };
+export { reduxSagaFirebase, authProvider, fireStore, firebaseAuth };
