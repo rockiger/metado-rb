@@ -13,10 +13,11 @@ import styled from 'styled-components/macro';
 
 import { GlobalStyle } from 'styles/global-styles';
 
+import { LoginPage } from './components/LoginPage/Loadable';
 import { NotFoundPage } from './components/NotFoundPage/Loadable';
+import { BoardsPage } from './containers/BoardsPage/Loadable';
 import { HomePage } from './containers/HomePage/Loadable';
 import { PrivateRoute } from './containers/PrivateRoute';
-import { BoardsPage } from './containers/BoardsPage/Loadable';
 
 export function App() {
   return (
@@ -30,10 +31,12 @@ export function App() {
       <Horizontal>
         <Link to="/">Home</Link>
         <Link to="/boards">Boards</Link>
+        <Link to="/login">Login</Link>
       </Horizontal>
       <Switch>
         <Route exact path="/" component={HomePage} />
         <PrivateRoute exact path="/boards" component={BoardsPage} />
+        <Route exact path="/login" component={LoginPage} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />
