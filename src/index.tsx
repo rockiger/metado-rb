@@ -11,7 +11,9 @@ import 'react-app-polyfill/stable';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import FontFaceObserver from 'fontfaceobserver';
 import * as serviceWorker from 'serviceWorker';
+import { ThemeProvider } from 'styled-components';
 import 'sanitize.css/sanitize.css';
 
 // Import root app
@@ -21,8 +23,20 @@ import { HelmetProvider } from 'react-helmet-async';
 
 import { configureAppStore } from 'store/configureStore';
 
+import { theme } from 'styles/theme';
+
 // Initialize languages
 import './locales/i18n';
+import { Database } from 'app/containers/Database';
+
+// Observe loading of Inter (to remove 'Inter', remove the <link> tag in
+// the index.html file and this observer)
+const openSansObserver = new FontFaceObserver('Inter', {});
+
+// When Inter is loaded, add a font-family using Inter to the body
+openSansObserver.load().then(() => {
+  document.body.classList.add('fontLoaded');
+});
 
 const store = configureAppStore();
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
@@ -32,11 +46,14 @@ interface Props {
 }
 const ConnectedApp = ({ Component }: Props) => (
   <Provider store={store}>
-    <HelmetProvider>
-      <React.StrictMode>
-        <Component />
-      </React.StrictMode>
-    </HelmetProvider>
+    <Database />
+    <ThemeProvider theme={theme}>
+      <HelmetProvider>
+        <React.StrictMode>
+          <Component />
+        </React.StrictMode>
+      </HelmetProvider>
+    </ThemeProvider>
   </Provider>
 );
 const render = (Component: typeof App) => {

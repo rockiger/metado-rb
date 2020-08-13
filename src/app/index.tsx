@@ -8,12 +8,16 @@
 
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Switch, Route, BrowserRouter } from 'react-router-dom';
+import { Switch, Route, BrowserRouter, Link } from 'react-router-dom';
+import styled from 'styled-components/macro';
 
 import { GlobalStyle } from 'styles/global-styles';
 
-import { HomePage } from './containers/HomePage/Loadable';
+import { LoginPage } from './components/LoginPage/Loadable';
 import { NotFoundPage } from './components/NotFoundPage/Loadable';
+import { BoardsPage } from './containers/BoardsPage/Loadable';
+import { HomePage } from './containers/HomePage/Loadable';
+import { PrivateRoute } from './containers/PrivateRoute';
 
 export function App() {
   return (
@@ -24,12 +28,26 @@ export function App() {
       >
         <meta name="description" content="A React Boilerplate application" />
       </Helmet>
-
+      <Horizontal>
+        <Link to="/">Home</Link>
+        <Link to="/boards">Boards</Link>
+        <Link to="/login">Login</Link>
+      </Horizontal>
       <Switch>
         <Route exact path="/" component={HomePage} />
+        <PrivateRoute exact path="/boards" component={BoardsPage} />
+        <Route exact path="/login" component={LoginPage} />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />
     </BrowserRouter>
   );
 }
+
+const Horizontal = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-evenly;
+  height: 5rem;
+  box-shadow: ${p => p.theme.shadows[4]};
+`;
