@@ -29,9 +29,17 @@ export function LoginPage(props: Props) {
   return (
     <Container>
       <Left>
+        <LogoContainer>
+          <Img
+            src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
+            alt="Metado logo"
+          />
+        </LogoContainer>
         <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />
       </Left>
-      <Right></Right>
+      <Right>
+        <H1>Plan Your Life</H1>
+      </Right>
     </Container>
   );
 }
@@ -42,21 +50,61 @@ const Container = styled.div`
 `;
 
 const Left = styled.div`
-  padding-top: 6rem;
-  width: 100%;
   height: 100%;
+  padding-top: 16vh;
+  width: 100%;
   ${media.greaterThan('medium')`
     width: 34%;
   `}
+
+  .firebaseui-idp-list>.firebaseui-list-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .firebaseui-idp-button {
+    height: 3.5rem;
+    max-width: 16rem;
+  }
+
+  .firebaseui-idp-icon {
+    height: 1.5rem;
+    width: 1.5rem;
+  }
+
+  .firebaseui-idp-text {
+    font-family: ${p => p.theme.fontFamily};
+    font-size: 1.2rem;
+  }
 `;
 
+const LogoContainer = styled.div`
+  max-width: 16rem;
+  margin: 0 auto;
+  padding-bottom: 16vh;
+`;
+const Img = styled.img``;
+
 const Right = styled.div`
-  background-color: blue;
   display: none;
-  height: 100%;
-  width: 64%;
   ${media.greaterThan('medium')`
-    /* screen width is greater than 1170px (large) */
-    display: block;
+    background-color: ${p => p.theme.palette.tertiary.light};
+    background-image: url("${
+      process.env.PUBLIC_URL
+    }/images/login-background.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 8rem;
+    width: 66%;
   `}
+`;
+
+const H1 = styled.h1`
+  color: white;
+  font-size: 4rem;
+  padding-bottom: 20vh;
 `;
