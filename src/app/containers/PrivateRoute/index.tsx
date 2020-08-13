@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Redirect, useLocation } from 'react-router-dom';
 
 import { selectIsAuthenticated } from 'app/containers/Database/selectors';
 
@@ -23,12 +23,19 @@ export function PrivateRoute({ component: Component, ...rest }: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const location = useLocation();
 
   return (
     <Route
       {...rest}
       render={props =>
-        isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />
+        isAuthenticated ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{ pathname: '/login', state: { from: location.pathname } }}
+          />
+        )
       }
     />
   );

@@ -10,22 +10,22 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import media from 'styled-media-query';
 import { firebaseAuth } from 'app/containers/Database/firebase';
 
-interface Props {}
+interface Props {
+  location: any;
+}
 
-// Configure FirebaseUI.
-const uiConfig = {
-  // Popup signin flow rather than redirect flow.
-  signInFlow: 'redirect',
-  // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
-  signInSuccessUrl: '/boards',
-  // We will display Google and Facebook as auth providers.
-  signInOptions: [
-    firebase.auth.GithubAuthProvider.PROVIDER_ID,
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-  ],
-};
+export function LoginPage({ location }: Props) {
+  const from = location && location.state && location.state.from;
+  const signInSuccessUrl = from || '/boards';
+  const uiConfig = {
+    signInFlow: 'redirect',
+    signInSuccessUrl,
+    signInOptions: [
+      firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    ],
+  };
 
-export function LoginPage(props: Props) {
   return (
     <Container>
       <Left>
