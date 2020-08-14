@@ -4,12 +4,15 @@
  *
  */
 import React from 'react';
-import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro';
-import firebase from 'firebase';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
+import { Link, Redirect } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import firebase from 'firebase';
+import styled from 'styled-components/macro';
 import media from 'styled-media-query';
+
 import { firebaseAuth } from 'app/containers/Database/firebase';
+import { selectIsAuthenticated } from 'app/containers/Database/selectors';
 
 interface Props {
   location: any;
@@ -17,7 +20,8 @@ interface Props {
 
 export function LoginPage({ location }: Props) {
   const from = location && location.state && location.state.from;
-  const signInSuccessUrl = from || '/boards';
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const signInSuccessUrl = from || '/board';
   const uiConfig = {
     signInFlow: 'redirect',
     signInSuccessUrl,
@@ -26,6 +30,10 @@ export function LoginPage({ location }: Props) {
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     ],
   };
+
+  if (isAuthenticated) {
+    return <Redirect to="/board" />;
+  }
 
   return (
     <Container>

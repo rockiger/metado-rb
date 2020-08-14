@@ -1,6 +1,6 @@
 /**
  *
- * BoardsPage
+ * BoardPage
  *
  */
 
@@ -10,27 +10,27 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
-import { selectBoardsPage } from './selectors';
-import { boardsPageSaga } from './saga';
+import { selectBoardPage } from './selectors';
+import { boardPageSaga } from './saga';
 
 interface Props {}
 
-export function BoardsPage(props: Props) {
+export function BoardPage(props: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
-  useInjectSaga({ key: sliceKey, saga: boardsPageSaga });
+  useInjectSaga({ key: sliceKey, saga: boardPageSaga });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const boardsPage = useSelector(selectBoardsPage);
+  const boardPage = useSelector(selectBoardPage);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dispatch = useDispatch();
 
   return (
     <>
       <Helmet>
-        <title>BoardsPage</title>
-        <meta name="description" content="Description of BoardsPage" />
+        <title>BoardPage</title>
+        <meta name="description" content="Description of BoardPage" />
       </Helmet>
-      <div>BoardsPage</div>
+      <div>BoardPage</div>
     </>
   );
 }

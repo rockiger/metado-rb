@@ -4,8 +4,6 @@ import { Helmet } from 'react-helmet-async';
 import { Composite, useCompositeState } from 'reakit/Composite';
 import styled from 'styled-components/macro';
 
-import { Horizontal } from 'app/components/Horizontal';
-
 export function HomePage() {
   const composite = useCompositeState();
   return (
@@ -17,7 +15,7 @@ export function HomePage() {
 
       <Navbar {...composite} role="navbar" aria-label="Main navigation">
         <Link to="/">Home</Link>
-        <Link to="/boards">Boards</Link>
+        <Link to="/board">Board</Link>
         <Link to="/login">Login</Link>
       </Navbar>
       <span>HomePage container</span>
