@@ -4,6 +4,7 @@
  *
  */
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import firebase from 'firebase';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
@@ -30,10 +31,12 @@ export function LoginPage({ location }: Props) {
     <Container>
       <Left>
         <LogoContainer>
-          <Img
-            src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
-            alt="Metado logo"
-          />
+          <Link to="/">
+            <Img
+              src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
+              alt="Metado logo"
+            />
+          </Link>
         </LogoContainer>
         <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />
       </Left>
