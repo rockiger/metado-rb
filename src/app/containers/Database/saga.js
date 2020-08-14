@@ -1,5 +1,4 @@
-import { take, call, put, select, takeLatest, all } from 'redux-saga/effects';
-import { fork } from 'child_process';
+import { take, call, put, all } from 'redux-saga/effects';
 import { actions } from './slice';
 
 import { reduxSagaFirebase as rsf, fireStore } from './firebase';
@@ -13,7 +12,7 @@ function* syncUserSaga() {
     const { error, user } = yield take(channel);
 
     if (user) yield put(actions.syncUser(user.toJSON()));
-    else yield put(actions.syncUserError);
+    else yield put(actions.syncUserError(error));
   }
 }
 

@@ -1,4 +1,4 @@
-import { BoardsPageState } from 'app/containers/BoardsPage/types';
+import { BoardPageState } from 'app/containers/BoardPage/types';
 import { PrivateRouteState } from 'app/containers/PrivateRoute/types';
 import { DatabaseState } from 'app/containers/Database/types';
 // [IMPORT NEW CONTAINERSTATE ABOVE] < Needed for generating containers seamlessly
@@ -8,7 +8,7 @@ import { DatabaseState } from 'app/containers/Database/types';
   You have to declare them here manually
 */
 export interface RootState {
-  boardsPage?: BoardsPageState;
+  boardPage?: BoardPageState;
   privateRoute?: PrivateRouteState;
   database?: DatabaseState;
   // [INSERT NEW REDUCER KEY ABOVE] < Needed for generating containers seamlessly
