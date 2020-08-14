@@ -28,11 +28,6 @@ export function App() {
       >
         <meta name="description" content="A React Boilerplate application" />
       </Helmet>
-      <Horizontal>
-        <Link to="/">Home</Link>
-        <Link to="/boards">Boards</Link>
-        <Link to="/login">Login</Link>
-      </Horizontal>
       <Switch>
         <Route exact path="/" component={HomePage} />
         <PrivateRoute exact path="/boards" component={BoardsPage} />
@@ -43,11 +38,3 @@ export function App() {
     </BrowserRouter>
   );
 }
-
-const Horizontal = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-evenly;
-  height: 5rem;
-  box-shadow: ${p => p.theme.shadows[4]};
-`;
