@@ -163,7 +163,7 @@ export const theme = {
   spacing: { unit: 8 },
   palette: {
     tonalOffset: 0.2,
-    background: { paper: '#fff', default: '#fafafa' },
+    background: { paper: '#fff', default: '#f6f7fb' },
     contrastThreshold: 3,
     grey: {
       '50': '#fafafa',
