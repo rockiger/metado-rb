@@ -15,7 +15,7 @@ export function HomePage() {
 
       <Navbar {...composite} role="navbar" aria-label="Main navigation">
         <Link to="/">Home</Link>
-        <Link to="/board">Board</Link>
+        <Link to="/b">Board</Link>
         <Link to="/login">Login</Link>
       </Navbar>
       <span>HomePage container</span>

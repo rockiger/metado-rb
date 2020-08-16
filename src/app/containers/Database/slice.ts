@@ -31,6 +31,16 @@ const databaseSlice = createSlice({
     setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
       state.tasks = action.payload.tasks;
     },
+    openBoardChannel(
+      state,
+      action: PayloadAction<{ uid: string; boardId: string }>,
+    ) {},
+    closeBoardChannel() {},
+    openTasksChannel(
+      state,
+      action: PayloadAction<{ uid: string; projectIds: string[] }>,
+    ) {},
+    closeTasksChannel() {},
     syncUser(state, action: PayloadAction<{ [key: string]: any }>) {
       setLocalAuthUser(action.payload);
       state.authUser = action.payload;

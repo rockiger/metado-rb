@@ -3,6 +3,7 @@ import { actions } from './slice';
 
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
 import { TaskMap } from './types';
+import { eventChannel } from 'redux-saga';
 
 //////////////////
 // Worker Sagas //
@@ -44,13 +45,69 @@ export function* getTasks(action) {
   yield put(actions.setTasks({ tasks }));
 }
 
+function* openBoardChannel(action) {
+  const { uid, boardId } = action.payload;
+
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(boardId);
+
+  const channel = eventChannel(emit => boardRef.onSnapshot(emit));
+  console.log('open board channel');
+
+  yield takeLatest(actions.closeBoardChannel.type, function () {
+    console.log('close board channel');
+    channel.close();
+  });
+
+  while (true) {
+    const snapshot = yield take(channel);
+    console.log(snapshot.data());
+    yield put(actions.setBoard({ board: snapshot.data() }));
+  }
+}
+
+function* openTasksChannel(action) {
+  const { uid, projectIds } = action.payload;
+
+  const tasksRef = db
+    .collection('tasks')
+    .where('project', 'in', projectIds)
+    .where('user', '==', uid);
+
+  const channel = eventChannel(emit => tasksRef.onSnapshot(emit));
+  console.log('open tasks channel');
+
+  yield takeLatest(actions.closeTasksChannel.type, function () {
+    console.log('close tasks channel');
+    channel.close();
+  });
+
+  while (true) {
+    const snapshot = yield take(channel);
+    let tasks: TaskMap = {};
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      tasks[doc.id] = {
+        ...data,
+        created: convertTimestamp(data.created),
+        edited: convertTimestamp(data.edited),
+        finished: convertTimestamp(data.finished),
+      };
+    });
+    yield put(actions.setTasks({ tasks }));
+  }
+}
+
 ///////////////////
 // Watcher Sagas //
 ///////////////////
 
 function* databaseWatcherSaga() {
-  yield takeLatest(actions.getBoard.type, getBoard);
-  yield takeLatest(actions.getTasks.type, getTasks);
+  yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
+  yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
 }
 
 function* syncUserSaga() {

@@ -4,10 +4,10 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
-import { useParams, Redirect } from 'react-router-dom';
+import { Link, Redirect, useParams } from 'react-router-dom';
 import {
   useToolbarState,
   Toolbar,
@@ -47,18 +47,35 @@ export function BoardPage(props: Props) {
 
   console.log({ ownerId, boardId, uid, currentBoard: activeBoard, board });
 
+  useEffect(() => {
+    if (boardId && board.id !== boardId && ownerId && ownerId === uid) {
+      dispatch(databaseActions.openBoardChannel({ uid: ownerId, boardId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, boardId, ownerId, uid]);
+
+  useEffect(() => {
+    if (board.id && _.isEmpty(tasks)) {
+      dispatch(
+        databaseActions.openTasksChannel({
+          uid: ownerId,
+          projectIds: board.projects,
+        }),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, ownerId, tasks]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(databaseActions.closeBoardChannel());
+      dispatch(databaseActions.closeTasksChannel());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
-  }
-
-  if (board.id !== boardId) {
-    dispatch(databaseActions.getBoard({ uid: ownerId, boardId }));
-  }
-
-  if (board.id) {
-    dispatch(
-      databaseActions.getTasks({ uid: ownerId, projectIds: board.projects }),
-    );
   }
 
   return (
@@ -67,13 +84,13 @@ export function BoardPage(props: Props) {
         <title>BoardPage</title>
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
-      <Navbar {...toolbar} aria-label="Board Navbar">
+      <Navbar {...toolbar} aria-label="Board Navbar" role="navigation">
         <ToolbarItem {...toolbar} as={Button}>
           Item 1
         </ToolbarItem>
         <ToolbarSeparator {...toolbar} />
-        <ToolbarItem {...toolbar} as={Button}>
-          Item 2
+        <ToolbarItem {...toolbar} as={Link} to="/">
+          Home
         </ToolbarItem>
         <ToolbarSeparator {...toolbar} />
         <ToolbarItem {...toolbar} as={Button}>
