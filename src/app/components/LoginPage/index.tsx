@@ -21,7 +21,7 @@ interface Props {
 export function LoginPage({ location }: Props) {
   const from = location && location.state && location.state.from;
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const signInSuccessUrl = from || '/board';
+  const signInSuccessUrl = from || '/b';
   const uiConfig = {
     signInFlow: 'redirect',
     signInSuccessUrl,
@@ -33,7 +33,7 @@ export function LoginPage({ location }: Props) {
   };
 
   if (isAuthenticated) {
-    return <Redirect to="/board" />;
+    return <Redirect to="/b" />;
   }
 
   return (
