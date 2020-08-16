@@ -1,16 +1,36 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from 'utils/@reduxjs/toolkit';
-import { AuthUser, ContainerState } from './types';
+import { AuthUser, Board, ContainerState, TaskMap } from './types';
 
 // The initial state of the Database container
 export const initialState: ContainerState = {
   authUser: getLocalAuthUser(),
+  board: {
+    columns: [],
+    id: '',
+    isDeleted: false,
+    projects: [],
+    showBacklog: true,
+    title: '',
+  },
+  tasks: {},
 };
 
 const databaseSlice = createSlice({
   name: 'database',
   initialState,
   reducers: {
+    getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
+    setBoard(state, action: PayloadAction<{ board: Board }>) {
+      state.board = action.payload.board;
+    },
+    getTasks(
+      state,
+      action: PayloadAction<{ uid: string; projectIds: string[] }>,
+    ) {},
+    setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
+      state.tasks = action.payload.tasks;
+    },
     syncUser(state, action: PayloadAction<{ [key: string]: any }>) {
       setLocalAuthUser(action.payload);
       state.authUser = action.payload;
