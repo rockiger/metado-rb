@@ -6,12 +6,20 @@ import { initialState } from './slice';
 
 const selectDomain = (state: RootState) => state.database || initialState;
 
-export const selectDatabase = createSelector(
+export const selectBoard = createSelector([selectDomain], state => state.board);
+export const selectActiveBoard = createSelector(
   [selectDomain],
-  databaseState => databaseState,
+  state => state.authUser.profile.activeBoard,
 );
 
 export const selectIsAuthenticated = createSelector(
   [selectDomain],
-  databaseState => !_.isEmpty(databaseState.authUser),
+  state => !_.isEmpty(state.authUser),
+);
+
+export const selectTasks = createSelector([selectDomain], state => state.tasks);
+
+export const selectUid = createSelector(
+  [selectDomain],
+  state => state.authUser.uid,
 );

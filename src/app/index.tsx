@@ -29,7 +29,9 @@ export function App() {
       </Helmet>
       <Switch>
         <Route exact path="/" component={HomePage} />
-        <PrivateRoute exact path="/board" component={BoardPage} />
+        <PrivateRoute path="/b/:ownerId/:boardId" component={BoardPage} />
+        <PrivateRoute path="/b/:ownerId" component={BoardPage} />
+        <PrivateRoute path="/b" component={BoardPage} />
         <Route exact path="/login" component={LoginPage} />
         <Route component={NotFoundPage} />
       </Switch>

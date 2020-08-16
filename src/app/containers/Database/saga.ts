@@ -1,10 +1,57 @@
-import { take, call, put, all } from 'redux-saga/effects';
+import { all, call, put, take, takeLatest } from 'redux-saga/effects';
 import { actions } from './slice';
 
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
-// export function* doSomething() {}
+import { TaskMap } from './types';
 
-console.log({ db });
+//////////////////
+// Worker Sagas //
+//////////////////
+
+export function* getBoard(action) {
+  console.log({ action });
+  const { uid, boardId } = action.payload;
+
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(boardId);
+  const boardSnapshot = yield call([boardRef, boardRef.get]);
+  const board = boardSnapshot.data();
+  yield put(actions.setBoard({ board }));
+}
+
+export function* getTasks(action) {
+  console.log({ action });
+  const { uid, projectIds } = action.payload;
+
+  const tasksRef = db
+    .collection('tasks')
+    .where('project', 'in', projectIds)
+    .where('user', '==', uid);
+  const taskSnapshot = yield call([tasksRef, tasksRef.get]);
+  let tasks: TaskMap = {};
+  taskSnapshot.forEach(doc => {
+    const data = doc.data();
+    tasks[doc.id] = {
+      ...data,
+      created: convertTimestamp(data.created),
+      edited: convertTimestamp(data.edited),
+      finished: convertTimestamp(data.finished),
+    };
+  });
+  yield put(actions.setTasks({ tasks }));
+}
+
+///////////////////
+// Watcher Sagas //
+///////////////////
+
+function* databaseWatcherSaga() {
+  yield takeLatest(actions.getBoard.type, getBoard);
+  yield takeLatest(actions.getTasks.type, getTasks);
+}
 
 function* syncUserSaga() {
   const channel = yield call(rsf.auth.channel);
@@ -23,6 +70,18 @@ function* syncUserSaga() {
 }
 
 export function* databaseSaga() {
-  yield all([syncUserSaga()]);
-  // yield takeLatest(actions.someAction.type, doSomething);
+  yield all([syncUserSaga(), databaseWatcherSaga()]);
+}
+
+////////////
+// Helper //
+////////////
+
+function convertTimestamp(date) {
+  if (!date) return '';
+  if (typeof date === 'string') return date;
+  if (date && date.toDate()) {
+    return date.toDate().toISOString();
+  }
+  return '';
 }

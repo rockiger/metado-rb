@@ -7,6 +7,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
+import { useParams, Redirect } from 'react-router-dom';
 import {
   useToolbarState,
   Toolbar,
@@ -14,24 +15,52 @@ import {
   ToolbarSeparator,
 } from 'reakit/Toolbar';
 import { Button } from 'reakit/Button';
+import * as _ from 'lodash';
+import styled from 'styled-components/macro';
+import media from 'styled-media-query';
+
+import { Horizontal } from 'app/components/Horizontal';
+import {
+  selectActiveBoard,
+  selectBoard,
+  selectTasks,
+  selectUid,
+} from 'app/containers/Database/selectors';
+import { actions as databaseActions } from 'app/containers/Database/slice';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
-import { selectBoardPage } from './selectors';
 import { boardPageSaga } from './saga';
-import styled from 'styled-components';
 
 interface Props {}
 
 export function BoardPage(props: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: boardPageSaga });
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const boardPage = useSelector(selectBoardPage);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dispatch = useDispatch();
+  const { ownerId, boardId } = useParams();
+  const activeBoard = useSelector(selectActiveBoard);
+  const board = useSelector(selectBoard);
+  const tasks = useSelector(selectTasks);
+  const uid = useSelector(selectUid);
   const toolbar = useToolbarState({ loop: true });
+
+  console.log({ ownerId, boardId, uid, currentBoard: activeBoard, board });
+
+  if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
+    return <Redirect to={`/b/${uid}/${activeBoard}`} />;
+  }
+
+  if (board.id !== boardId) {
+    dispatch(databaseActions.getBoard({ uid: ownerId, boardId }));
+  }
+
+  if (board.id) {
+    dispatch(
+      databaseActions.getTasks({ uid: ownerId, projectIds: board.projects }),
+    );
+  }
+
   return (
     <BoardPageContainer>
       <Helmet>
@@ -51,7 +80,18 @@ export function BoardPage(props: Props) {
           Item 3
         </ToolbarItem>
       </Navbar>
-      <Board>BoardPage</Board>
+      <Board>
+        {board.columns.map(col => (
+          <Column key={col.title}>
+            <h2>{col.title}</h2>
+            {!_.isEmpty(tasks) &&
+              col.taskIds.map(id => {
+                const task = tasks[id];
+                return <Card key={id}>{task.title}</Card>;
+              })}
+          </Column>
+        ))}
+      </Board>
     </BoardPageContainer>
   );
 }
@@ -75,6 +115,25 @@ const NavbarSeparator = styled(ToolbarSeparator)`
 
 const IconButton = styled(ToolbarItem)``;
 
-const Board = styled.div`
+const Board = styled(Horizontal)`
+  align-items: flex-start;
+  gap: 1.5rem;
+  justify-content: space-evenly;
+  overflow: auto;
+  padding: 2rem;
+  width: 100% ${media.greaterThan('medium')`
   padding: 2rem 4rem;
+  `};
+`;
+
+const Column = styled.div`
+  background-color: white;
+  min-height: 10rem;
+  min-width: 16rem;
+  width: 25%;
+`;
+
+const Card = styled.div`
+  border: 1px solid grey;
+  border-radius: 4px;
 `;
