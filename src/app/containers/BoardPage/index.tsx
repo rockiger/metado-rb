@@ -5,6 +5,12 @@
  */
 
 import React, { useEffect } from 'react';
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
@@ -27,6 +33,11 @@ import {
   selectUid,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
+import {
+  Board as BoardType,
+  Column as ColumnType,
+  TaskMap,
+} from 'app/containers/Database/types';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
@@ -98,19 +109,76 @@ export function BoardPage(props: Props) {
         </ToolbarItem>
       </Navbar>
       <Board>
-        {board.columns.map(col => (
-          <Column key={col.title}>
-            <h2>{col.title}</h2>
-            {!_.isEmpty(tasks) &&
-              col.taskIds.map(id => {
-                const task = tasks[id];
-                return <Card key={id}>{task.title}</Card>;
-              })}
-          </Column>
-        ))}
+        <DragDropContext onDragEnd={result => onDragEnd(result, board, tasks)}>
+          {board.columns.map((col, index) => (
+            <Column key={col.title}>
+              <h2>{col.title}</h2>
+              <Droppable droppableId={`${index}`}>
+                {provided => (
+                  <Cards
+                    className="list-content"
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    <div ref={provided.innerRef} {...provided.droppableProps}>
+                      {!_.isEmpty(tasks) &&
+                        col.taskIds.map((id, index) => {
+                          const task = tasks[id];
+                          return (
+                            <Draggable draggableId={id} key={id} index={index}>
+                              {provided => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  onClick={() => 'onClick(task)'}
+                                >
+                                  <Card key={id}>{task.title}</Card>
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                      {provided.placeholder}
+                    </div>
+                  </Cards>
+                )}
+              </Droppable>
+            </Column>
+          ))}
+        </DragDropContext>
       </Board>
     </BoardPageContainer>
   );
+
+  function onDragEnd(result: DropResult, board: BoardType, tasks: TaskMap) {
+    const { destination, source, draggableId } = result;
+    // nothing changed
+    if (
+      !destination ||
+      (destination.droppableId === source.droppableId &&
+        destination.index === source.index)
+    ) {
+      return;
+    }
+    const column = board.columns[source.droppableId];
+    const newTaskIds = Array.from(column.taskIds);
+    newTaskIds.splice(source.index, 1);
+    newTaskIds.splice(destination.index, 0, draggableId);
+    const newColumn = { ...column, taskIds: newTaskIds };
+
+    const newColumns = [...board.columns];
+    newColumns[source.droppableId] = newColumn;
+
+    const newBoard = {
+      ...board,
+      columns: newColumns,
+    };
+    // console.log({ source, destination, draggableId });
+    console.log({ board, newBoard });
+    dispatch(databaseActions.updateBoard({ board: newBoard, uid: ownerId }));
+    //dispatch(editTask({ ...task, listPosition, status }));
+  }
 }
 
 const BoardPageContainer = styled.div`
@@ -139,7 +207,7 @@ const Board = styled(Horizontal)`
   overflow: auto;
   padding: 2rem;
   width: 100% ${media.greaterThan('medium')`
-  padding: 2rem 4rem;
+    padding: 2rem 4rem;
   `};
 `;
 
@@ -147,10 +215,19 @@ const Column = styled.div`
   background-color: white;
   min-height: 10rem;
   min-width: 16rem;
+  padding: 1rem;
   width: 25%;
 `;
 
+const Cards = styled.div``;
+
 const Card = styled.div`
+  background-color: white;
   border: 1px solid grey;
   border-radius: 4px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  &:last-child {
+    margin-bottom: 1rem;
+  }
 `;
