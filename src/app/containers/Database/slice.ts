@@ -24,6 +24,10 @@ const databaseSlice = createSlice({
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;
     },
+    updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
+      state.board = action.payload.board;
+      //! write to database.
+    },
     getTasks(
       state,
       action: PayloadAction<{ uid: string; projectIds: string[] }>,

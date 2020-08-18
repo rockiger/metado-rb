@@ -101,6 +101,21 @@ function* openTasksChannel(action) {
   }
 }
 
+function* updateBoard(action) {
+  console.log('updateBoard', { action });
+  const { board, uid } = action.payload;
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(board.id);
+  try {
+    yield call([boardRef, boardRef.set], board);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 ///////////////////
 // Watcher Sagas //
 ///////////////////
@@ -108,6 +123,7 @@ function* openTasksChannel(action) {
 function* databaseWatcherSaga() {
   yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
   yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
+  yield takeLatest(actions.updateBoard.type, updateBoard);
 }
 
 function* syncUserSaga() {
