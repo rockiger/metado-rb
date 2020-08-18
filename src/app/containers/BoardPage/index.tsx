@@ -33,11 +33,7 @@ import {
   selectUid,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
-import {
-  Board as BoardType,
-  Column as ColumnType,
-  TaskMap,
-} from 'app/containers/Database/types';
+import { Board as BoardType, TaskMap } from 'app/containers/Database/types';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
@@ -161,23 +157,53 @@ export function BoardPage(props: Props) {
     ) {
       return;
     }
-    const column = board.columns[source.droppableId];
-    const newTaskIds = Array.from(column.taskIds);
-    newTaskIds.splice(source.index, 1);
-    newTaskIds.splice(destination.index, 0, draggableId);
-    const newColumn = { ...column, taskIds: newTaskIds };
+    const startColumn = board.columns[source.droppableId];
+    const finishColumn = board.columns[destination.droppableId];
+
+    // same column
+    if (startColumn.title === finishColumn.title) {
+      const newTaskIds = Array.from(startColumn.taskIds);
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
+      const newColumn = { ...startColumn, taskIds: newTaskIds };
+
+      const newColumns = [...board.columns];
+      newColumns[source.droppableId] = newColumn;
+
+      const newBoard = {
+        ...board,
+        columns: newColumns,
+      };
+      dispatch(databaseActions.updateBoard({ board: newBoard, uid: ownerId }));
+      return;
+    }
+
+    // moving from one column to another
+    const startTaskIds = Array.from(startColumn.taskIds);
+    startTaskIds.splice(source.index, 1);
+    const newStartColumn = {
+      ...startColumn,
+      taskIds: startTaskIds,
+    };
+
+    const finishTaskIds = Array.from(finishColumn.taskIds);
+    finishTaskIds.splice(destination.index, 0, draggableId);
+    const newFinishColumn = {
+      ...finishColumn,
+      taskIds: finishTaskIds,
+    };
 
     const newColumns = [...board.columns];
-    newColumns[source.droppableId] = newColumn;
-
+    newColumns[source.droppableId] = newStartColumn;
+    newColumns[destination.droppableId] = newFinishColumn;
     const newBoard = {
       ...board,
       columns: newColumns,
     };
-    // console.log({ source, destination, draggableId });
-    console.log({ board, newBoard });
     dispatch(databaseActions.updateBoard({ board: newBoard, uid: ownerId }));
-    //dispatch(editTask({ ...task, listPosition, status }));
+    //! TODO change state of task
+    const newTask = { ...tasks[draggableId], status: newFinishColumn.title };
+    dispatch(databaseActions.updateTask({ task: newTask }));
   }
 }
 
@@ -192,10 +218,6 @@ const Navbar = styled(Toolbar)`
   display: flex;
   height: 4rem;
   padding: 1rem 2rem;
-`;
-
-const NavbarSeparator = styled(ToolbarSeparator)`
-  margin: 0 0 0 0.5rem;
 `;
 
 const IconButton = styled(ToolbarItem)``;
@@ -219,7 +241,9 @@ const Column = styled.div`
   width: 25%;
 `;
 
-const Cards = styled.div``;
+const Cards = styled.div`
+  min-height: 10rem;
+`;
 
 const Card = styled.div`
   background-color: white;

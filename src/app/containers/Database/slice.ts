@@ -1,6 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from 'utils/@reduxjs/toolkit';
-import { AuthUser, Board, ContainerState, TaskMap } from './types';
+import { AuthUser, Board, ContainerState, Task, TaskMap } from './types';
 
 // The initial state of the Database container
 export const initialState: ContainerState = {
@@ -34,6 +34,10 @@ const databaseSlice = createSlice({
     ) {},
     setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
       state.tasks = action.payload.tasks;
+    },
+    updateTask(state, action: PayloadAction<{ task: Task }>) {
+      const { task } = action.payload;
+      state.tasks[task.id] = task;
     },
     openBoardChannel(
       state,
