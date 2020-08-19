@@ -14,13 +14,14 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
+import { Button } from 'reakit/Button';
 import {
   useToolbarState,
   Toolbar,
   ToolbarItem,
   ToolbarSeparator,
 } from 'reakit/Toolbar';
-import { Button } from 'reakit/Button';
+import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
@@ -105,7 +106,9 @@ export function BoardPage(props: Props) {
         </ToolbarItem>
       </Navbar>
       <Board>
-        <DragDropContext onDragEnd={result => onDragEnd(result, board, tasks)}>
+        <DragDropContext
+          onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
+        >
           {board.columns.map((col, index) => (
             <Column key={col.title}>
               <h2>{col.title}</h2>
@@ -147,64 +150,100 @@ export function BoardPage(props: Props) {
     </BoardPageContainer>
   );
 
-  function onDragEnd(result: DropResult, board: BoardType, tasks: TaskMap) {
-    const { destination, source, draggableId } = result;
-    // nothing changed
-    if (
-      !destination ||
-      (destination.droppableId === source.droppableId &&
-        destination.index === source.index)
-    ) {
-      return;
-    }
-    const startColumn = board.columns[source.droppableId];
-    const finishColumn = board.columns[destination.droppableId];
-
-    // same column
-    if (startColumn.title === finishColumn.title) {
-      const newTaskIds = Array.from(startColumn.taskIds);
-      newTaskIds.splice(source.index, 1);
-      newTaskIds.splice(destination.index, 0, draggableId);
-      const newColumn = { ...startColumn, taskIds: newTaskIds };
-
-      const newColumns = [...board.columns];
-      newColumns[source.droppableId] = newColumn;
-
-      const newBoard = {
-        ...board,
-        columns: newColumns,
-      };
-      dispatch(databaseActions.updateBoard({ board: newBoard, uid: ownerId }));
-      return;
-    }
-
-    // moving from one column to another
-    const startTaskIds = Array.from(startColumn.taskIds);
-    startTaskIds.splice(source.index, 1);
-    const newStartColumn = {
-      ...startColumn,
-      taskIds: startTaskIds,
-    };
-
-    const finishTaskIds = Array.from(finishColumn.taskIds);
-    finishTaskIds.splice(destination.index, 0, draggableId);
-    const newFinishColumn = {
-      ...finishColumn,
-      taskIds: finishTaskIds,
-    };
-
-    const newColumns = [...board.columns];
-    newColumns[source.droppableId] = newStartColumn;
-    newColumns[destination.droppableId] = newFinishColumn;
-    const newBoard = {
-      ...board,
-      columns: newColumns,
-    };
-    dispatch(databaseActions.updateBoard({ board: newBoard, uid: ownerId }));
-    //! TODO change state of task
-    const newTask = { ...tasks[draggableId], status: newFinishColumn.title };
-    dispatch(databaseActions.updateTask({ task: newTask }));
+  function onDragEnd(
+    result: DropResult,
+    board: BoardType,
+    ownerId: string,
+    tasks: TaskMap,
+  ) {
+    console.log({ result });
+    const dragResult = onDragEndResult(result, board, ownerId, tasks);
+    dragResult.forEach(el => dispatch(el));
   }
+}
+
+/**
+ * Produces an array with the actions to perform to change
+ * the state accordingly to the users drag and drop actions .
+ * @param result the dropResult from react-beautiful-dnd
+ * @param board the current board
+ * @param ownerId the owner of the board
+ * @param tasks the current tasks
+ * @returns the array with the actions
+ */
+export function onDragEndResult(
+  result: DropResult,
+  board: BoardType,
+  ownerId: string,
+  tasks: TaskMap,
+) {
+  const { destination, source, draggableId } = result;
+  // nothing changed
+  if (
+    !destination ||
+    (destination.droppableId === source.droppableId &&
+      destination.index === source.index)
+  ) {
+    return [];
+  }
+  const startColumn = board.columns[source.droppableId];
+  const finishColumn = board.columns[destination.droppableId];
+  const title = finishColumn.title;
+
+  // same column
+  if (startColumn.title === finishColumn.title) {
+    const newTaskIds = produce(startColumn.taskIds, draftTaskIds => {
+      draftTaskIds.splice(source.index, 1);
+      draftTaskIds.splice(destination.index, 0, draggableId);
+    });
+    const newColumn = produce(startColumn, draftColumn => {
+      draftColumn.taskIds = newTaskIds;
+    });
+
+    const newColumns = produce(board.columns, draftColumns => {
+      draftColumns[source.droppableId] = newColumn;
+    });
+
+    const newBoard = produce(board, draftBoard => {
+      draftBoard.columns = newColumns;
+    });
+
+    return [databaseActions.updateBoard({ board: newBoard, uid: ownerId })];
+  }
+
+  // moving from one column to another
+  const startTaskIds = produce(startColumn.taskIds, draftTaskIds => {
+    draftTaskIds.splice(source.index, 1);
+  });
+  const newStartColumn = produce(startColumn, draftColumn => {
+    draftColumn.taskIds = startTaskIds;
+  });
+
+  const finishTaskIds = produce(finishColumn.taskIds, draftTaskIds => {
+    draftTaskIds.splice(destination.index, 0, draggableId);
+  });
+  const newFinishColumn = produce(finishColumn, draftColumn => {
+    draftColumn.taskIds = finishTaskIds;
+  });
+
+  const newColumns = produce(board.columns, draftColumns => {
+    draftColumns[source.droppableId] = newStartColumn;
+    draftColumns[destination.droppableId] = newFinishColumn;
+  });
+
+  const newBoard = produce(board, draftBoard => {
+    draftBoard.columns = newColumns;
+  });
+
+  //change state of task
+  const newTask = produce(tasks[draggableId], draftTask => {
+    draftTask.status = title;
+  });
+
+  return [
+    databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
+    databaseActions.updateTask({ task: newTask }),
+  ];
 }
 
 const BoardPageContainer = styled.div`
