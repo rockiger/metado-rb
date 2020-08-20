@@ -3,6 +3,6 @@
 
 // export function* doSomething() {}
 
-export function* boardsPageSaga() {
+export function* boardPageSaga() {
   // yield takeLatest(actions.someAction.type, doSomething);
 }

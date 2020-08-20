@@ -4,11 +4,15 @@
  *
  */
 import React from 'react';
-import styled from 'styled-components/macro';
-import firebase from 'firebase';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
+import { Link, Redirect } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import firebase from 'firebase';
+import styled from 'styled-components/macro';
 import media from 'styled-media-query';
+
 import { firebaseAuth } from 'app/containers/Database/firebase';
+import { selectIsAuthenticated } from 'app/containers/Database/selectors';
 
 interface Props {
   location: any;
@@ -16,24 +20,32 @@ interface Props {
 
 export function LoginPage({ location }: Props) {
   const from = location && location.state && location.state.from;
-  const signInSuccessUrl = from || '/boards';
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const signInSuccessUrl = from || '/b';
   const uiConfig = {
     signInFlow: 'redirect',
     signInSuccessUrl,
     signInOptions: [
+      firebase.auth.EmailAuthProvider.PROVIDER_ID,
       firebase.auth.GithubAuthProvider.PROVIDER_ID,
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     ],
   };
 
+  if (isAuthenticated) {
+    return <Redirect to="/b" />;
+  }
+
   return (
     <Container>
       <Left>
         <LogoContainer>
-          <Img
-            src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
-            alt="Metado logo"
-          />
+          <Link to="/">
+            <Img
+              src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
+              alt="Metado logo"
+            />
+          </Link>
         </LogoContainer>
         <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebaseAuth} />
       </Left>
