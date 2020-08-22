@@ -23,3 +23,8 @@ export const selectUid = createSelector(
   [selectDomain],
   state => state.authUser.uid,
 );
+
+export const selectUserProfile = createSelector(
+  [selectDomain],
+  state => state.authUser.profile,
+);

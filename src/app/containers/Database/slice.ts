@@ -57,6 +57,12 @@ const databaseSlice = createSlice({
       setLocalAuthUser(null);
       console.log(action);
     },
+    syncBoardFromProviders(
+      state,
+      action: PayloadAction<{ board: Board; tasks: TaskMap; uid: string }>,
+    ) {
+      console.log('syncBoardFromProviders');
+    },
   },
 });
 

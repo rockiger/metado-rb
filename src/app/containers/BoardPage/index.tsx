@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   DragDropContext,
   Draggable,
@@ -51,9 +51,8 @@ export function BoardPage(props: Props) {
   const board = useSelector(selectBoard);
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
+  const [isBoardUpdated, setIsBoardUpdated] = useState(false);
   const toolbar = useToolbarState({ loop: true });
-
-  console.log({ ownerId, boardId, uid, currentBoard: activeBoard, board });
 
   useEffect(() => {
     if (boardId && board.id !== boardId && ownerId && ownerId === uid) {
@@ -81,6 +80,14 @@ export function BoardPage(props: Props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!isBoardUpdated && board.id && !_.isEmpty(tasks) && uid) {
+      dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
+      setIsBoardUpdated(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, isBoardUpdated, tasks, uid]);
 
   if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
