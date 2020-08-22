@@ -23,6 +23,20 @@ export interface Column {
   title: string;
 }
 
+export interface Project {
+  created: string;
+  fullname: string;
+  id: string;
+  name: string;
+  owner: string;
+  type: string;
+  user: string;
+}
+
+export interface ProjectMap {
+  [key: string]: Project;
+}
+
 export interface Task {
   created: string;
   description: string;
