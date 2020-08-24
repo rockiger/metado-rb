@@ -26,7 +26,6 @@ const databaseSlice = createSlice({
     },
     updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
       state.board = action.payload.board;
-      //! write to database.
     },
     getTasks(
       state,
@@ -35,7 +34,7 @@ const databaseSlice = createSlice({
     setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
       state.tasks = action.payload.tasks;
     },
-    updateTask(state, action: PayloadAction<{ task: Task }>) {
+    updateTask(state, action: PayloadAction<{ oldTask: Task; task: Task }>) {
       const { task } = action.payload;
       state.tasks[task.id] = task;
     },

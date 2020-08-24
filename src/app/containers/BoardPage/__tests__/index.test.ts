@@ -83,7 +83,10 @@ describe('onDragEndResult', () => {
 
     expect(onDragEndResult(result, board, ownerId, tasks)).toEqual([
       databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
-      databaseActions.updateTask({ task: newTask }),
+      databaseActions.updateTask({
+        oldTask: tasks[result.draggableId],
+        task: newTask,
+      }),
     ]);
   });
 });
