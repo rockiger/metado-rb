@@ -6,6 +6,7 @@ export { createOrUpdateTask, syncGithub, closeIssue, openIssue };
 /**
  * Sync all issues from a given github repo with our tasks database.
  */
+//! rewrite to sage to make it testable
 async function syncGithub(
   db: any,
   githubToken: string,
@@ -45,6 +46,7 @@ async function syncGithub(
  * @param {string} uid
  * @returns {import('store/store.types').Task|null}
  */
+//! test
 function createOrUpdateTask(externalTask, internalTasks, projectId, uid) {
   const internalTaskId = `${projectId}-${externalTask.number}`;
   const internalTask = internalTasks[internalTaskId];

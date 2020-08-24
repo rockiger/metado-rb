@@ -243,13 +243,14 @@ export function onDragEndResult(
   });
 
   //change state of task
-  const newTask = produce(tasks[draggableId], draftTask => {
+  const oldTask = tasks[draggableId];
+  const newTask = produce(oldTask, draftTask => {
     draftTask.status = title;
   });
 
   return [
     databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
-    databaseActions.updateTask({ task: newTask }),
+    databaseActions.updateTask({ oldTask, task: newTask }),
   ];
 }
 

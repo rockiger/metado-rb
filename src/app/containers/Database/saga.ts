@@ -5,8 +5,8 @@ import { all, call, put, take, takeLatest, select } from 'redux-saga/effects';
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
 import { selectUserProfile } from './selectors';
 import { actions } from './slice';
-import { Board, TaskMap } from './types';
-import { syncGithub } from './connectors/github';
+import { Board, TaskMap, TaskState } from './types';
+import { closeIssue, openIssue, syncGithub } from './connectors/github';
 
 //////////////////
 // Worker Sagas //
@@ -104,6 +104,7 @@ function* openTasksChannel(action) {
   }
 }
 
+//! test
 function* syncBoardFromProviders(
   action: PayloadAction<{ board: Board; tasks: TaskMap; uid: string }>,
 ) {
@@ -171,10 +172,19 @@ function* updateBoard(action) {
 
 function* updateTask(action) {
   console.log('updateTask', { action });
-  const { task } = action.payload;
+  const { oldTask, task } = action.payload;
+  const profile = yield select(selectUserProfile);
   const taskRef = db.collection('tasks').doc(task.id);
   try {
     yield call([taskRef, taskRef.set], task);
+    if (task.id.startsWith('github') && profile.githubToken) {
+      if (oldTask.status === TaskState.Done && task.status !== TaskState.Done) {
+        yield call(openIssue, profile.githubToken, task.id);
+      }
+      if (oldTask.status !== TaskState.Done && task.status === TaskState.Done) {
+        yield call(closeIssue, profile.githubToken, task.id);
+      }
+    }
   } catch (error) {
     console.error(error);
   }
@@ -196,8 +206,6 @@ function* syncUserSaga() {
   const channel = yield call(rsf.auth.channel);
   while (true) {
     const { error, user } = yield take(channel);
-    //! get grofile and
-
     if (user) {
       const profileRef = db.collection('users').doc(user.uid);
       const profileSnapshot = yield call([profileRef, profileRef.get]);
@@ -246,6 +254,7 @@ function correctPositionsInBoard(board, tasks) {
 }
 
 function correctPositionsInBoardHelper(board, task) {
+  //! test
   let needsUpdate = false; //
   const columns = board.columns.map(col => {
     const column = { ...col };
