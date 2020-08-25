@@ -5,7 +5,7 @@ import { all, call, put, take, takeLatest, select } from 'redux-saga/effects';
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
 import { selectUserProfile } from './selectors';
 import { actions } from './slice';
-import { Board, TaskMap, TaskState } from './types';
+import { Board, TaskMap, TaskState, Task } from './types';
 import { closeIssue, openIssue, syncGithub } from './connectors/github';
 
 //////////////////
@@ -235,11 +235,8 @@ function convertTimestamp(date) {
 
 /**
  * Check for all given tasks if they have the right position in the given board
- * @param {Object.<string, any>} board
- * @param {import('./board-utils').Task[]} tasks
- * @returns board
  */
-function correctPositionsInBoard(board, tasks) {
+export function correctPositionsInBoard(board: Board, tasks: Task[]): Board {
   let updatedBoard = { ...board };
   for (const task of tasks) {
     const { needsUpdate, columns } = correctPositionsInBoardHelper(
@@ -247,20 +244,20 @@ function correctPositionsInBoard(board, tasks) {
       task,
     );
     if (needsUpdate) {
+      console.log('needsUpdate');
       updatedBoard = { ...updatedBoard, columns };
     }
   }
   return updatedBoard;
 }
 
-function correctPositionsInBoardHelper(board, task) {
-  //! test
-  let needsUpdate = false; //
+export function correctPositionsInBoardHelper(board: Board, task: Task) {
+  let needsUpdate = false;
   const columns = board.columns.map(col => {
     const column = { ...col };
-    const index = column.taskIds.indexOf(task.id);
+    const taskIndex = column.taskIds.indexOf(task.id);
     if (column.title === task.status) {
-      if (index !== -1) {
+      if (taskIndex !== -1) {
         return column;
       } else {
         needsUpdate = true;
@@ -271,12 +268,11 @@ function correctPositionsInBoardHelper(board, task) {
       if (column.taskIds.indexOf(task.id) !== -1) {
         needsUpdate = true;
         console.log('Remove: ', task.id, ' from ', column.title);
-        console.log(column.taskIds);
         return {
           ...column,
           taskIds: [
-            ...column.taskIds.slice(0, index),
-            ...column.taskIds.slice(index + 1),
+            ...column.taskIds.slice(0, taskIndex),
+            ...column.taskIds.slice(taskIndex + 1),
           ],
         };
       } else {
