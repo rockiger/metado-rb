@@ -48,6 +48,7 @@
     "redux-injectors": "1.3.0",
     "redux-saga": "1.1.3",
     "redux-saga-firebase": "0.15.0",
+    "redux-saga-test-plan": "4.0.0-rc.3",
     "sanitize.css": "11.0.0",
     "serve": "11.3.0",
     "shelljs": "0.8.3",
