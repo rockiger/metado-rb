@@ -40,18 +40,16 @@ async function syncGithub(
  * Check if a github issue is represented in our tasks and if they values
  * correspond to the values in the github issues. If not a corrected version is produced.
  * If there is no task a new one is created. If there is nothing to do null is returned.
- * @param {Object.<string,string>} externalTask
- * @param {Object.<string,import('store/store.types').Task>} internalTasks
- * @param {*} firebase
- * @param {string} uid
- * @returns {import('store/store.types').Task|null}
  */
-//! test
-function createOrUpdateTask(externalTask, internalTasks, projectId, uid) {
+function createOrUpdateTask(
+  externalTask: { [key: string]: string },
+  internalTasks: TaskMap,
+  projectId: string,
+  uid: string,
+): Task | null {
   const internalTaskId = `${projectId}-${externalTask.number}`;
   const internalTask = internalTasks[internalTaskId];
   if (internalTask) {
-    console.log({ id: internalTask.id });
     if (
       (externalTask.state === 'open' &&
         internalTask.status === TaskState.Done) ||
@@ -90,9 +88,9 @@ function createOrUpdateTask(externalTask, internalTasks, projectId, uid) {
     const created = new Date(externalTask.created_at).toISOString();
     const edited = new Date(externalTask.updated_at).toISOString();
     const finished = externalTask.closed_at
-      ? new Date(externalTask.closed_at)
+      ? new Date(externalTask.closed_at).toISOString()
       : '';
-    const newTask = {
+    const newTask: Task = {
       created,
       edited,
       finished,
