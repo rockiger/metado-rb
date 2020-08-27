@@ -14,7 +14,6 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
-import { Button } from 'reakit/Button';
 import {
   useToolbarState,
   Toolbar,
@@ -24,6 +23,8 @@ import {
 import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
+import { RadioCircle } from 'styled-icons/boxicons-regular';
+import { Github } from 'styled-icons/boxicons-logos';
 import media from 'styled-media-query';
 
 import { Horizontal } from 'app/components/Horizontal';
@@ -100,25 +101,27 @@ export function BoardPage(props: Props) {
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
       <Navbar {...toolbar} aria-label="Board Navbar" role="navigation">
-        <ToolbarItem {...toolbar} as={Button}>
-          Item 1
-        </ToolbarItem>
         <ToolbarSeparator {...toolbar} />
-        <ToolbarItem {...toolbar} as={Link} to="/">
-          Home
-        </ToolbarItem>
+        <LogoLink as={Link} to="/">
+          <Logo
+            src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
+            alt="Metado logo"
+          />
+        </LogoLink>
         <ToolbarSeparator {...toolbar} />
-        <ToolbarItem {...toolbar} as={Button}>
-          Item 3
-        </ToolbarItem>
       </Navbar>
+      <BoardHeader>
+        <BoardTitle>{board.title}</BoardTitle>
+      </BoardHeader>
       <Board>
         <DragDropContext
           onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
         >
           {board.columns.map((col, index) => (
             <Column key={col.title}>
-              <h2>{col.title}</h2>
+              <ColumnTitle>
+                <ColumnIcon size="1rem" /> {col.title}
+              </ColumnTitle>
               <Droppable droppableId={`${index}`}>
                 {provided => (
                   <Cards
@@ -139,7 +142,16 @@ export function BoardPage(props: Props) {
                                   {...provided.dragHandleProps}
                                   onClick={() => 'onClick(task)'}
                                 >
-                                  <Card key={id}>{task.title}</Card>
+                                  <Card key={id}>
+                                    <CardTitle>{task.title}</CardTitle>
+                                    <CardFooter>
+                                      <Spacer />
+                                      <GithubBadge>
+                                        <GithubLogo size="1.25rem" />
+                                        {task.project.split('-')[2]}
+                                      </GithubBadge>
+                                    </CardFooter>
+                                  </Card>
                                 </div>
                               )}
                             </Draggable>
@@ -267,7 +279,24 @@ const Navbar = styled(Toolbar)`
   padding: 1rem 2rem;
 `;
 
-const IconButton = styled(ToolbarItem)``;
+const LogoLink = styled(ToolbarItem)`
+  align-items: center;
+  display: flex;
+`;
+
+const Logo = styled.img`
+  height: 1.25rem;
+`;
+
+const BoardHeader = styled(Horizontal)`
+  padding: 2rem 2rem 0;
+`;
+
+const BoardTitle = styled.h1`
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0;
+`;
 
 const Board = styled(Horizontal)`
   align-items: flex-start;
@@ -283,9 +312,22 @@ const Board = styled(Horizontal)`
 const Column = styled.div`
   background-color: white;
   min-height: 10rem;
-  min-width: 16rem;
   padding: 1rem;
   width: 25%;
+`;
+
+const ColumnTitle = styled.h2`
+  align-items: center;
+  display: flex;
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 1rem 0 2rem;
+`;
+
+const ColumnIcon = styled(RadioCircle)`
+  color: ${p => p.theme.palette.grey[600]};
+  margin-right: 0.25rem;
 `;
 
 const Cards = styled.div`
@@ -294,11 +336,35 @@ const Cards = styled.div`
 
 const Card = styled.div`
   background-color: white;
-  border: 1px solid grey;
+  border: 1px solid ${p => p.theme.palette.grey[300]};
   border-radius: 4px;
   margin-bottom: 1rem;
   padding: 1rem;
   &:last-child {
     margin-bottom: 1rem;
   }
+`;
+
+const CardTitle = styled.div``;
+
+const CardFooter = styled.div`
+  display: flex;
+  padding-top: 0.25rem;
+`;
+
+const Spacer = styled.div`
+  flex-grow: 1;
+`;
+
+const GithubBadge = styled.div`
+  background-color: black;
+  border-radius: 2px;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 0.25rem;
+`;
+
+const GithubLogo = styled(Github)`
+  padding-right: 0.1rem;
 `;
