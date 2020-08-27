@@ -53,6 +53,7 @@
     "serve": "11.3.0",
     "shelljs": "0.8.3",
     "styled-components": "5.0.1",
+    "styled-icons": "10.17.0",
     "styled-media-query": "2.1.2",
     "stylelint": "13.2.1",
     "stylelint-config-recommended": "3.0.0",
