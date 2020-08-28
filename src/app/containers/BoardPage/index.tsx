@@ -340,6 +340,9 @@ const Card = styled.div`
   border-radius: 4px;
   margin-bottom: 1rem;
   padding: 1rem;
+  &:hover {
+    box-shadow: ${p => p.theme.shadows[3]};
+  }
   &:last-child {
     margin-bottom: 1rem;
   }
@@ -349,7 +352,7 @@ const CardTitle = styled.div``;
 
 const CardFooter = styled.div`
   display: flex;
-  padding-top: 0.25rem;
+  padding-top: 0.5rem;
 `;
 
 const Spacer = styled.div`
