@@ -14,6 +14,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
+import { Button } from 'reakit/Button';
 import {
   useToolbarState,
   Toolbar,
@@ -112,6 +113,10 @@ export function BoardPage(props: Props) {
       </Navbar>
       <BoardHeader>
         <BoardTitle>{board.title}</BoardTitle>
+        <Spacer />
+        <Button as={Link} to={`/projects/add/github`}>
+          Add GitHub Project
+        </Button>
       </BoardHeader>
       <Board>
         <DragDropContext
