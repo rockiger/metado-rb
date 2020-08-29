@@ -17,6 +17,7 @@ import { NotFoundPage } from './components/NotFoundPage/Loadable';
 import { BoardPage } from './containers/BoardPage/Loadable';
 import { HomePage } from './containers/HomePage/Loadable';
 import { PrivateRoute } from './containers/PrivateRoute';
+import { AddGithubRepo } from './containers/AddGithubRepo';
 
 export function App() {
   return (
@@ -33,6 +34,12 @@ export function App() {
         <PrivateRoute path="/b/:ownerId" component={BoardPage} />
         <PrivateRoute path="/b" component={BoardPage} />
         <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/projects/add/github" component={AddGithubRepo} />
+        <Route
+          exact
+          path="/projects/add/github/:step"
+          component={AddGithubRepo}
+        />
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />

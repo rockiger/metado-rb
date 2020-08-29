@@ -15,20 +15,21 @@ import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
 import { Button } from 'reakit/Button';
-import {
-  useToolbarState,
-  Toolbar,
-  ToolbarItem,
-  ToolbarSeparator,
-} from 'reakit/Toolbar';
 import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import { RadioCircle } from 'styled-icons/boxicons-regular';
 import { Github } from 'styled-icons/boxicons-logos';
-import media from 'styled-media-query';
 
-import { Horizontal } from 'app/components/Horizontal';
+import { Navbar } from 'app/components/Navbar';
+import {
+  Content,
+  PageHeader,
+  PageTitle,
+  PrivatePage,
+  Spacer,
+} from 'app/components/UiComponents';
+
 import {
   selectActiveBoard,
   selectBoard,
@@ -54,7 +55,6 @@ export function BoardPage(props: Props) {
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
   const [isBoardUpdated, setIsBoardUpdated] = useState(false);
-  const toolbar = useToolbarState({ loop: true });
 
   useEffect(() => {
     if (boardId && board.id !== boardId && ownerId && ownerId === uid) {
@@ -96,29 +96,20 @@ export function BoardPage(props: Props) {
   }
 
   return (
-    <BoardPageContainer>
+    <PrivatePage>
       <Helmet>
         <title>BoardPage</title>
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
-      <Navbar {...toolbar} aria-label="Board Navbar" role="navigation">
-        <ToolbarSeparator {...toolbar} />
-        <LogoLink as={Link} to="/">
-          <Logo
-            src={`${process.env.PUBLIC_URL}/metado_logo_primary.svg`}
-            alt="Metado logo"
-          />
-        </LogoLink>
-        <ToolbarSeparator {...toolbar} />
-      </Navbar>
-      <BoardHeader>
-        <BoardTitle>{board.title}</BoardTitle>
+      <Navbar />
+      <PageHeader>
+        <PageTitle>{board.title}</PageTitle>
         <Spacer />
         <Button as={Link} to={`/projects/add/github`}>
           Add GitHub Project
         </Button>
-      </BoardHeader>
-      <Board>
+      </PageHeader>
+      <Content>
         <DragDropContext
           onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
         >
@@ -170,8 +161,8 @@ export function BoardPage(props: Props) {
             </Column>
           ))}
         </DragDropContext>
-      </Board>
-    </BoardPageContainer>
+      </Content>
+    </PrivatePage>
   );
 
   function onDragEnd(
@@ -271,49 +262,6 @@ export function onDragEndResult(
   ];
 }
 
-const BoardPageContainer = styled.div`
-  background-color: ${p => p.theme.palette.background.default};
-  min-height: 100vh;
-`;
-
-const Navbar = styled(Toolbar)`
-  background-color: white;
-  box-shadow: ${p => p.theme.shadows[3]};
-  display: flex;
-  height: 4rem;
-  padding: 1rem 2rem;
-`;
-
-const LogoLink = styled(ToolbarItem)`
-  align-items: center;
-  display: flex;
-`;
-
-const Logo = styled.img`
-  height: 1.25rem;
-`;
-
-const BoardHeader = styled(Horizontal)`
-  padding: 2rem 2rem 0;
-`;
-
-const BoardTitle = styled.h1`
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin: 0;
-`;
-
-const Board = styled(Horizontal)`
-  align-items: flex-start;
-  gap: 1.5rem;
-  justify-content: space-evenly;
-  overflow: auto;
-  padding: 2rem;
-  width: 100% ${media.greaterThan('medium')`
-    padding: 2rem 4rem;
-  `};
-`;
-
 const Column = styled.div`
   background-color: white;
   min-height: 10rem;
@@ -358,10 +306,6 @@ const CardTitle = styled.div``;
 const CardFooter = styled.div`
   display: flex;
   padding-top: 0.5rem;
-`;
-
-const Spacer = styled.div`
-  flex-grow: 1;
 `;
 
 const GithubBadge = styled.div`
