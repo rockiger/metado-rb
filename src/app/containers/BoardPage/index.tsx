@@ -20,10 +20,11 @@ import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import { RadioCircle } from 'styled-icons/boxicons-regular';
 import { Github } from 'styled-icons/boxicons-logos';
+import media from 'styled-media-query';
 
 import { Navbar } from 'app/components/Navbar';
 import {
-  Content,
+  Horizontal,
   PageHeader,
   PageTitle,
   PrivatePage,
@@ -109,7 +110,7 @@ export function BoardPage(props: Props) {
           Add GitHub Project
         </Button>
       </PageHeader>
-      <Content>
+      <BoardContent>
         <DragDropContext
           onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
         >
@@ -161,7 +162,7 @@ export function BoardPage(props: Props) {
             </Column>
           ))}
         </DragDropContext>
-      </Content>
+      </BoardContent>
     </PrivatePage>
   );
 
@@ -261,6 +262,17 @@ export function onDragEndResult(
     databaseActions.updateTask({ oldTask, task: newTask }),
   ];
 }
+
+export const BoardContent = styled(Horizontal)`
+  align-items: flex-start;
+  gap: 1.5rem;
+  justify-content: space-evenly;
+  overflow: auto;
+  padding: 2rem;
+  width: 100% ${media.greaterThan('medium')`
+    padding: 2rem 4rem;
+  `};
+`;
 
 const Column = styled.div`
   background-color: white;
