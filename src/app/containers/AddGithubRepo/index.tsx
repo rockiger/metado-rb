@@ -24,6 +24,7 @@ import {
   Button,
 } from 'app/components/UiComponents';
 import { selectUserProfile } from 'app/containers/Database/selectors';
+import { actions as databaseActions } from 'app/containers/Database/slice';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { actions, reducer, sliceKey } from './slice';
@@ -44,10 +45,14 @@ console.log({ BASE_URL });
 
 export function AddGithubRepo(props: Props) {
   // DONE look for github key of user
-  // TODO look into github if how githubToken is present
+  // TODO if github token is not present, let the user create one.
   // DONE get repos
-  // TODO Add repo/project to board and user if not allready present
-  //  TODO Handler
+  //  TODO filter projects that are allready part of board
+  // DONE Add repo/project to board
+  //  DONE Handler
+  //  TODO Check if project allready in database
+  // TODO Think about state machine
+  // TODO Step 4 with Confirmation or directly redirecting to board
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
   const dispatch = useDispatch();
@@ -55,12 +60,17 @@ export function AddGithubRepo(props: Props) {
   const { step } = useParams();
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
   const { repos, status } = useSelector(selectAddGithubRepo);
-  const [selectedRepo, setSelectedRepo] = useState<null | number>(null);
+  const [selectedRepo, setSelectedRepo] = useState<number>(-1);
+  const [repo, setRepo] = useState(repos[selectedRepo]);
 
   useEffect(() => {
     if (githubToken && repos.length === 0)
       dispatch(actions.fetchGithubRepos({ githubToken }));
   }, [githubToken, repos]);
+
+  useEffect(() => {
+    setRepo(repos[selectedRepo]);
+  }, [repos, selectedRepo]);
 
   console.log({ activeBoard, githubToken, step, steps: STEPS });
 
@@ -108,7 +118,7 @@ export function AddGithubRepo(props: Props) {
             )}
             {step === STEPS[1] && (
               <>
-                {typeof selectedRepo === 'number' && (
+                {selectedRepo !== -1 && (
                   <Redirect to={`/projects/add/github/3`} />
                 )}
                 <p>
@@ -136,18 +146,15 @@ export function AddGithubRepo(props: Props) {
             )}
             {step === STEPS[2] && (
               <>
-                {typeof selectedRepo !== 'number' && (
+                {selectedRepo === -1 && (
                   <Redirect to={`/projects/add/github/2`} />
                 )}
-                {typeof selectedRepo === 'number' && (
+                {selectedRepo !== -1 && repo && (
                   <>
-                    <h2>
-                      Add {repos[selectedRepo].name}
-                      to your tasks ?
-                    </h2>
+                    <h2>Add {repo.name} to your tasks ?</h2>
                     <Card>
-                      <h3>{repos[selectedRepo].full_name} </h3>
-                      <div> {repos[selectedRepo].description} </div>
+                      <h3>{repo.full_name} </h3>
+                      <div> {repo.description} </div>
                     </Card>
                     <p>
                       Open GitHub issues will show in your 'Backlog' column.When
@@ -156,11 +163,11 @@ export function AddGithubRepo(props: Props) {
                       automatically in the 'Done' column.
                     </p>
                     <div>
-                      <Button onClick={() => 'onClickGoBack'}>
+                      <Button onClick={onClickGoBack}>
                         Back to Selection{' '}
                       </Button>
-                      <Button onClick={() => 'onClickAdd'}>
-                        Add <b> {` ${repos[selectedRepo].name} `} </b> to task
+                      <Button onClick={() => onClickAdd(repo)}>
+                        Add <b> {` ${repo.name} `} </b> to task
                       </Button>
                     </div>
                   </>
@@ -172,17 +179,24 @@ export function AddGithubRepo(props: Props) {
       </PrivatePage>
     </>
   );
-}
 
-type StepProps = {
-  isActive: boolean;
-};
+  function onClickGoBack() {
+    setSelectedRepo(-1);
+  }
+
+  function onClickAdd(repo: { [x: string]: any }) {
+    dispatch(databaseActions.addGithubProject({ activeBoard, repo }));
+  }
+}
 
 const Steps = styled(Horizontal)`
   display: flex;
   padding: 2rem 0;
 `;
 
+type StepProps = {
+  isActive: boolean;
+};
 const Step = styled.div<StepProps>`
   font-weight: ${p => (p.isActive ? 600 : 'normal')};
 `;
