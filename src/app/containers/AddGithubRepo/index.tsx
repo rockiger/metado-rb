@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Redirect, useParams } from 'react-router-dom';
@@ -44,15 +44,18 @@ console.log({ BASE_URL });
 
 export function AddGithubRepo(props: Props) {
   // DONE look for github key of user
-  // TODO log into github if how githubToken is present
-  // TODO get repos
+  // TODO look into github if how githubToken is present
+  // DONE get repos
   // TODO Add repo/project to board and user if not allready present
+  //  TODO Handler
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
+  const dispatch = useDispatch();
+
   const { step } = useParams();
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
   const { repos, status } = useSelector(selectAddGithubRepo);
-  const dispatch = useDispatch();
+  const [selectedRepo, setSelectedRepo] = useState<null | number>(null);
 
   useEffect(() => {
     if (githubToken && repos.length === 0)
@@ -105,25 +108,65 @@ export function AddGithubRepo(props: Props) {
             )}
             {step === STEPS[1] && (
               <>
+                {typeof selectedRepo === 'number' && (
+                  <Redirect to={`/projects/add/github/3`} />
+                )}
                 <p>
                   Please select the repository from which you want to add the
                   issues to your tasks.
                 </p>
+                {status === 'fetching' && <p>Loading...</p>}
                 <table>
-                  {repos.map(repo => (
-                    <tr key={repo.node_id}>
+                  {repos.map((repo, index) => (
+                    <Row
+                      key={repo.node_id}
+                      onClick={() => setSelectedRepo(index)}
+                      isSelected={index === selectedRepo}
+                    >
                       <td>
                         <div>
                           <b>{repo.full_name}</b>
                         </div>
                         <p>{repo.description}</p>
                       </td>
-                    </tr>
+                    </Row>
                   ))}
                 </table>
               </>
             )}
-            {step === STEPS[2] && <p>Step 3</p>}
+            {step === STEPS[2] && (
+              <>
+                {typeof selectedRepo !== 'number' && (
+                  <Redirect to={`/projects/add/github/2`} />
+                )}
+                {typeof selectedRepo === 'number' && (
+                  <>
+                    <h2>
+                      Add {repos[selectedRepo].name}
+                      to your tasks ?
+                    </h2>
+                    <Card>
+                      <h3>{repos[selectedRepo].full_name} </h3>
+                      <div> {repos[selectedRepo].description} </div>
+                    </Card>
+                    <p>
+                      Open GitHub issues will show in your 'Backlog' column.When
+                      you move a an issue to your 'Done' column, we will be
+                      automatically closed.Vice verca if it is closed it is
+                      automatically in the 'Done' column.
+                    </p>
+                    <div>
+                      <Button onClick={() => 'onClickGoBack'}>
+                        Back to Selection{' '}
+                      </Button>
+                      <Button onClick={() => 'onClickAdd'}>
+                        Add <b> {` ${repos[selectedRepo].name} `} </b> to task
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </Card>
         </Content>
       </PrivatePage>
@@ -142,4 +185,12 @@ const Steps = styled(Horizontal)`
 
 const Step = styled.div<StepProps>`
   font-weight: ${p => (p.isActive ? 600 : 'normal')};
+`;
+
+type RowProps = {
+  isSelected: boolean;
+};
+const Row = styled.tr<RowProps>`
+  background-color: ${p =>
+    p.isSelected ? 'var(--bg-color-secondary)' : 'var(--bg-color)'};
 `;
