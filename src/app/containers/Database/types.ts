@@ -2,7 +2,9 @@
 export interface DatabaseState {
   authUser: AuthUser;
   board: Board;
+  isAddingProject: boolean;
   tasks: TaskMap;
+  error: any;
 }
 
 export interface AuthUser {

@@ -1,9 +1,10 @@
+import produce from 'immer';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { eventChannel } from 'redux-saga';
 import { all, call, put, take, takeLatest, select } from 'redux-saga/effects';
 
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
-import { selectUserProfile } from './selectors';
+import { selectUserProfile, selectUid } from './selectors';
 import { actions } from './slice';
 import { Board, TaskMap, TaskState, Task } from './types';
 import { closeIssue, openIssue, syncGithub } from './connectors/github';
@@ -11,6 +12,44 @@ import { closeIssue, openIssue, syncGithub } from './connectors/github';
 //////////////////
 // Worker Sagas //
 //////////////////
+
+export function* addGithubProject(action) {
+  const { activeBoard, repo } = action.payload;
+  const now = new Date().toISOString();
+  const projectId = `github-${repo.owner.login}-${repo.name}`;
+  const uid = yield select(selectUid);
+  console.log({ now, projectId, uid });
+
+  const newProject = {
+    created: now,
+    fullname: repo.full_name,
+    id: projectId,
+    name: repo.name,
+    owner: repo.owner.login,
+    type: 'github',
+    user: uid,
+  };
+  const projectsRef = db.collection('projects').doc(projectId);
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(activeBoard);
+
+  try {
+    yield call([projectsRef, projectsRef.set], newProject);
+    const boardSnapshot = yield call([boardRef, boardRef.get]);
+    const board = boardSnapshot.data();
+    const changedBoard = produce(board, draftBoard => {
+      draftBoard.projects.push(projectId);
+    });
+    yield call([boardRef, boardRef.set], changedBoard);
+  } catch (error) {
+    console.error(error);
+    yield put(actions.addGithubProjectError({ error }));
+  }
+  yield put(actions.addGithubProjectSuccess());
+}
 
 export function* getBoard(action) {
   console.log({ action });
@@ -195,6 +234,7 @@ function* updateTask(action) {
 ///////////////////
 
 function* databaseWatcherSaga() {
+  yield takeLatest(actions.addGithubProject.type, addGithubProject);
   yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
   yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
   yield takeLatest(actions.syncBoardFromProviders, syncBoardFromProviders);

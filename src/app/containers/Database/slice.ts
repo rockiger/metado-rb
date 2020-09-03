@@ -13,13 +13,31 @@ export const initialState: ContainerState = {
     showBacklog: true,
     title: '',
   },
+  isAddingProject: false,
   tasks: {},
+  error: null,
 };
 
 const databaseSlice = createSlice({
   name: 'database',
   initialState,
   reducers: {
+    addGithubProject(
+      state,
+      action: PayloadAction<{
+        activeBoard: string;
+        repo: { [x: string]: any };
+      }>,
+    ) {
+      state.isAddingProject = true;
+    },
+    addGithubProjectError(state, action: PayloadAction<{ error: any }>) {
+      state.isAddingProject = false;
+      state.error = action.payload.error;
+    },
+    addGithubProjectSuccess(state) {
+      state.isAddingProject = false;
+    },
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;
