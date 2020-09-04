@@ -23,7 +23,10 @@ import {
   Spacer,
   Button,
 } from 'app/components/UiComponents';
-import { selectUserProfile } from 'app/containers/Database/selectors';
+import {
+  selectUserProfile,
+  selectBoard,
+} from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
@@ -47,7 +50,7 @@ export function AddGithubRepo(props: Props) {
   // DONE look for github key of user
   // TODO if github token is not present, let the user create one.
   // DONE get repos
-  //  TODO filter projects that are allready part of board
+  //  DONE filter projects that are allready part of board
   // DONE Add repo/project to board
   //  DONE Handler
   //  TODO Check if project allready in database
@@ -60,6 +63,8 @@ export function AddGithubRepo(props: Props) {
   const { step } = useParams();
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
   const { repos, status } = useSelector(selectAddGithubRepo);
+  // WARNING projects is not always filled, only when we are comming from board
+  const { projects } = useSelector(selectBoard);
   const [selectedRepo, setSelectedRepo] = useState<number>(-1);
   const [repo, setRepo] = useState(repos[selectedRepo]);
 
@@ -127,7 +132,7 @@ export function AddGithubRepo(props: Props) {
                 </p>
                 {status === 'fetching' && <p>Loading...</p>}
                 <table>
-                  {repos.map((repo, index) => (
+                  {repos.filter(addedProjectsFilter).map((repo, index) => (
                     <Row
                       key={repo.node_id}
                       onClick={() => setSelectedRepo(index)}
@@ -179,6 +184,11 @@ export function AddGithubRepo(props: Props) {
       </PrivatePage>
     </>
   );
+
+  function addedProjectsFilter(repo) {
+    console.log(`github-${repo.owner.login}-${repo.name}`, projects);
+    return !projects.includes(`github-${repo.owner.login}-${repo.name}`);
+  }
 
   function onClickGoBack() {
     setSelectedRepo(-1);
