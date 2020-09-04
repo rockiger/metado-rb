@@ -106,9 +106,11 @@ export function BoardPage(props: Props) {
       <PageHeader>
         <PageTitle>{board.title}</PageTitle>
         <Spacer />
-        <Button as={Link} to={`/projects/add/github`}>
-          Add GitHub Project
-        </Button>
+        {board.projects.length < 9 && (
+          <Button as={Link} to={`/projects/add/github`}>
+            Add GitHub Project
+          </Button>
+        )}
       </PageHeader>
       <BoardContent>
         <DragDropContext

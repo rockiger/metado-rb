@@ -13,7 +13,7 @@ export const initialState: ContainerState = {
     showBacklog: true,
     title: '',
   },
-  isAddingProject: false,
+  addingProject: 'idle',
   tasks: {},
   error: null,
 };
@@ -29,14 +29,14 @@ const databaseSlice = createSlice({
         repo: { [x: string]: any };
       }>,
     ) {
-      state.isAddingProject = true;
+      state.addingProject = 'fetching';
     },
     addGithubProjectError(state, action: PayloadAction<{ error: any }>) {
-      state.isAddingProject = false;
+      state.addingProject = 'error';
       state.error = action.payload.error;
     },
     addGithubProjectSuccess(state) {
-      state.isAddingProject = false;
+      state.addingProject = 'success';
     },
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
     setBoard(state, action: PayloadAction<{ board: Board }>) {
