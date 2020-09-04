@@ -1,13 +1,24 @@
 import produce from 'immer';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { eventChannel } from 'redux-saga';
-import { all, call, put, take, takeLatest, select } from 'redux-saga/effects';
+import {
+  all,
+  call as effCall, // For workaround to overload problem, see below
+  put,
+  take,
+  takeLatest,
+  select,
+} from 'redux-saga/effects';
 
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
 import { selectUserProfile, selectUid } from './selectors';
 import { actions } from './slice';
 import { Board, TaskMap, TaskState, Task } from './types';
 import { closeIssue, openIssue, syncGithub } from './connectors/github';
+
+// Workaround for overload problem with call to firestore
+// https://stackoverflow.com/a/58814026
+const call: any = effCall;
 
 //////////////////
 // Worker Sagas //
@@ -37,7 +48,10 @@ export function* addGithubProject(action) {
     .doc(activeBoard);
 
   try {
-    yield call([projectsRef, projectsRef.set], newProject);
+    yield call(
+      [projectsRef, projectsRef.set],
+      ...[newProject, { merge: true }],
+    );
     const boardSnapshot = yield call([boardRef, boardRef.get]);
     const board = boardSnapshot.data();
     const changedBoard = produce(board, draftBoard => {
