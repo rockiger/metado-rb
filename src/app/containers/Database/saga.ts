@@ -54,6 +54,7 @@ export function* addGithubProject(action) {
     );
     const boardSnapshot = yield call([boardRef, boardRef.get]);
     const board = boardSnapshot.data();
+    //! Check if board has less than 10 projects, otherwise abort.
     const changedBoard = produce(board, draftBoard => {
       draftBoard.projects.push(projectId);
     });

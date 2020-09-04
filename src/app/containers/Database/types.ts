@@ -2,7 +2,7 @@
 export interface DatabaseState {
   authUser: AuthUser;
   board: Board;
-  isAddingProject: boolean;
+  addingProject: 'idle' | 'fetching' | 'error' | 'success';
   tasks: TaskMap;
   error: any;
 }
