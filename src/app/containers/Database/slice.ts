@@ -66,6 +66,9 @@ const databaseSlice = createSlice({
       action: PayloadAction<{ uid: string; projectIds: string[] }>,
     ) {},
     closeTasksChannel() {},
+    resetAddProject(state) {
+      state.addingProject = 'idle';
+    },
     syncUser(state, action: PayloadAction<{ [key: string]: any }>) {
       setLocalAuthUser(action.payload);
       state.authUser = action.payload;

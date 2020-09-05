@@ -63,10 +63,10 @@ export function* addGithubProject(action) {
       yield call([boardRef, boardRef.set], changedBoard);
       yield put(actions.addGithubProjectSuccess());
     } else {
-      console.error('Board allready has maximum of 10 projects');
+      console.error('Board already has maximum of 10 projects.');
       yield put(
         actions.addGithubProjectError({
-          error: 'Board allready has maximum of 10 projects',
+          error: 'Board already has maximum of 10 projects.',
         }),
       );
     }
