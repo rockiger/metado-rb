@@ -54,6 +54,8 @@ export function AddGithubRepo(props: Props) {
   //  DONE Check if project allready in database, then only add project to board
   // DONE Think about state machine
   // DONE Step 4 with Confirmation or directly redirecting to board
+  // TODO Testing with saga testplan
+  // TODO Styling
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
   const dispatch = useDispatch();
