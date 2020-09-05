@@ -54,11 +54,22 @@ export function* addGithubProject(action) {
     );
     const boardSnapshot = yield call([boardRef, boardRef.get]);
     const board = boardSnapshot.data();
-    //! Check if board has less than 10 projects, otherwise abort.
-    const changedBoard = produce(board, draftBoard => {
-      draftBoard.projects.push(projectId);
-    });
-    yield call([boardRef, boardRef.set], changedBoard);
+    // Check if board has less than 10 projects, otherwise abort, because there
+    // are only searches for 10 projects possible with firestore.
+    // See syncBoardFromProviders
+    if (board && board.projects && board.projects.length < 10) {
+      const changedBoard = produce(board, draftBoard => {
+        draftBoard.projects.push(projectId);
+      });
+      yield call([boardRef, boardRef.set], changedBoard);
+    } else {
+      console.error('Board allready has maximum of 10 projects');
+      yield put(
+        actions.addGithubProjectError({
+          error: 'Board allready has maximum of 10 projects',
+        }),
+      );
+    }
   } catch (error) {
     console.error(error);
     yield put(actions.addGithubProjectError({ error }));
@@ -185,6 +196,9 @@ function* syncBoardFromProviders(
       let updatedTasks: any[] = [];
       const updatedTasksRef = db
         .collection('tasks')
+        // projectIds can't be longer then 10, otherwise firestore
+        // throws an erro. If more projects are needed. This call needs
+        // to be rewritten.
         .where('project', 'in', projectIds)
         .where('user', '==', uid);
       const updatedTaskQuery = yield call([
