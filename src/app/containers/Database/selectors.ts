@@ -34,3 +34,5 @@ export const selectUserProfile = createSelector(
   [selectDomain],
   state => state.authUser.profile,
 );
+
+export const selectError = createSelector([selectDomain], state => state.error);

@@ -26,6 +26,7 @@ import {
 import {
   selectAddingProject,
   selectBoard,
+  selectError,
   selectUserProfile,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
@@ -54,7 +55,7 @@ export function AddGithubRepo(props: Props) {
   //  DONE Check if project allready in database, then only add project to board
   // DONE Think about state machine
   // DONE Step 4 with Confirmation or directly redirecting to board
-  // TODO Testing with saga testplan
+  // DONE Testing with saga testplan
   // TODO Styling
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
@@ -65,9 +66,22 @@ export function AddGithubRepo(props: Props) {
   const addingProject = useSelector(selectAddingProject);
   // WARNING projects is not always filled, only when we are comming from board
   const { projects } = useSelector(selectBoard);
+  const error = useSelector(selectError);
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
   const [selectedRepo, setSelectedRepo] = useState<number>(-1);
   const [repo, setRepo] = useState(repos[selectedRepo]);
+  const [view, setView] = useState(0);
+  const [settingProject, setSettingProject] = useState<
+    'idle' | 'setting' | 'finished'
+  >('idle');
+
+  useEffect(() => {
+    dispatch(databaseActions.resetAddProject());
+    return () => {
+      dispatch(databaseActions.resetAddProject());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (githubToken && repos.length === 0)
@@ -79,13 +93,41 @@ export function AddGithubRepo(props: Props) {
     setRepo(repos[selectedRepo]);
   }, [repos, selectedRepo]);
 
+  useEffect(() => {
+    switch (view) {
+      case 0:
+        if (githubToken) {
+          setView(1);
+        }
+        break;
+      case 1:
+        if (selectedRepo !== -1) {
+          setView(2);
+        }
+        break;
+      case 2:
+        if (selectedRepo === -1) {
+          setView(1);
+        } else if (addingProject === 'error' || addingProject === 'success') {
+          setView(3);
+        }
+        break;
+
+      case 3:
+        break;
+
+      default:
+        break;
+    }
+  }, [addingProject, githubToken, selectedRepo, settingProject, view]);
+
   console.log({ activeBoard, githubToken, step, steps: STEPS });
 
   if (!STEPS.includes(step)) {
     return <Redirect to={`/projects/add/github/${STEPS[0]}`} />;
   }
 
-  if (step === STEPS[0] && githubToken) {
+  if (view === 1 && step === STEPS[0] && githubToken) {
     return <Redirect to={`/projects/add/github/${STEPS[1]}`} />;
   }
 
@@ -102,15 +144,18 @@ export function AddGithubRepo(props: Props) {
         </PageHeader>
         <Content>
           <Steps>
-            <Step isActive={step === STEPS[0]}>Login with GitHub</Step>
+            <Step isActive={view === 0}>Login with GitHub</Step>
             <Spacer />
-            <Step isActive={step === STEPS[1]}>Select repository</Step>
+            <Step isActive={view === 1}>Select repository</Step>
             <Spacer />
-            <Step isActive={step === STEPS[2]}>Add to board</Step>
+            <Step isActive={view === 2}>Add to board</Step>
           </Steps>
           <Card>
-            {step === STEPS[0] && (
+            {view === 0 && (
               <>
+                {step !== 0 && (
+                  <Redirect to={`/projects/add/github/${STEPS[0]}`} />
+                )}
                 <Button
                   as={A}
                   href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo&redirect_uri=${REDIRECT_URI}`}
@@ -123,10 +168,13 @@ export function AddGithubRepo(props: Props) {
                 </p>
               </>
             )}
-            {step === STEPS[1] && (
+            {view === 1 && (
               <>
                 {selectedRepo !== -1 && (
                   <Redirect to={`/projects/add/github/${STEPS[2]}`} />
+                )}
+                {step !== 1 && (
+                  <Redirect to={`/projects/add/github/${STEPS[1]}`} />
                 )}
                 <p>
                   Please select the repository from which you want to add the
@@ -151,13 +199,10 @@ export function AddGithubRepo(props: Props) {
                 </table>
               </>
             )}
-            {step === STEPS[2] && (
+            {view === 2 && (
               <>
-                {selectedRepo === -1 && (
-                  <Redirect to={`/projects/add/github/${STEPS[1]}`} />
-                )}
-                {(addingProject === 'error' || addingProject === 'success') && (
-                  <Redirect to={`/projects/add/github/${STEPS[3]}`} />
+                {step !== 2 && (
+                  <Redirect to={`/projects/add/github/${STEPS[2]}`} />
                 )}
                 {selectedRepo !== -1 && repo && (
                   <>
@@ -184,15 +229,15 @@ export function AddGithubRepo(props: Props) {
                 )}
               </>
             )}
-            {step === STEPS[3] && (
+            {view === 3 && (
               <>
-                {((addingProject !== 'error' && addingProject !== 'success') ||
-                  !repo) && (
-                  <Redirect to={`/projects/add/github/${STEPS[0]}`} />
+                {step !== 3 && (
+                  <Redirect to={`/projects/add/github/${STEPS[3]}`} />
                 )}
                 {addingProject === 'error' && (
                   <>
                     <h2>We couldn't add {repo && repo.name} to your tasks.</h2>
+                    <p>{error}</p>
                     <Button as={RouterLink} to={`/projects/add/github`}>
                       Start over
                     </Button>{' '}
@@ -226,6 +271,7 @@ export function AddGithubRepo(props: Props) {
   }
 
   function onClickAdd(repo: { [x: string]: any }) {
+    setSettingProject('setting');
     dispatch(databaseActions.addGithubProject({ activeBoard, repo }));
   }
 }
