@@ -18,7 +18,7 @@ import { closeIssue, openIssue, syncGithub } from './connectors/github';
 
 // Workaround for overload problem with call to firestore
 // https://stackoverflow.com/a/58814026
-const call: any = effCall;
+export const call: any = effCall;
 
 //////////////////
 // Worker Sagas //
@@ -29,7 +29,6 @@ export function* addGithubProject(action) {
   const now = new Date().toISOString();
   const projectId = `github-${repo.owner.login}-${repo.name}`;
   const uid = yield select(selectUid);
-  console.log({ now, projectId, uid });
 
   const newProject = {
     created: now,
@@ -62,6 +61,7 @@ export function* addGithubProject(action) {
         draftBoard.projects.push(projectId);
       });
       yield call([boardRef, boardRef.set], changedBoard);
+      yield put(actions.addGithubProjectSuccess());
     } else {
       console.error('Board allready has maximum of 10 projects');
       yield put(
@@ -74,7 +74,6 @@ export function* addGithubProject(action) {
     console.error(error);
     yield put(actions.addGithubProjectError({ error }));
   }
-  yield put(actions.addGithubProjectSuccess());
 }
 
 export function* getBoard(action) {
@@ -313,7 +312,6 @@ export function correctPositionsInBoard(board: Board, tasks: Task[]): Board {
       task,
     );
     if (needsUpdate) {
-      console.log('needsUpdate');
       updatedBoard = { ...updatedBoard, columns };
     }
   }
@@ -330,13 +328,11 @@ export function correctPositionsInBoardHelper(board: Board, task: Task) {
         return column;
       } else {
         needsUpdate = true;
-        console.log('Add: ', task.id, ' to ', column.title);
         return { ...column, taskIds: [...column.taskIds, task.id] };
       }
     } else {
       if (column.taskIds.indexOf(task.id) !== -1) {
         needsUpdate = true;
-        console.log('Remove: ', task.id, ' from ', column.title);
         return {
           ...column,
           taskIds: [
