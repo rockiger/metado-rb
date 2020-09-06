@@ -24,6 +24,13 @@ import {
   Button,
 } from 'app/components/UiComponents';
 import {
+  Content as StepContent,
+  Description,
+  Step,
+  Steps,
+  Title,
+} from 'app/components/UiComponents/Step';
+import {
   selectAddingProject,
   selectBoard,
   selectError,
@@ -143,13 +150,32 @@ export function AddGithubRepo(props: Props) {
           <PageTitle>Add Github Project</PageTitle>
         </PageHeader>
         <Content>
-          <Steps>
-            <Step isActive={view === 0}>Login with GitHub</Step>
-            <Spacer />
-            <Step isActive={view === 1}>Select repository</Step>
-            <Spacer />
-            <Step isActive={view === 2}>Add to board</Step>
-          </Steps>
+          <StepsWrapper>
+            <Steps>
+              <Step isActive={view === 0} isCompleted={0 < view}>
+                <StepContent>
+                  <Title>Generate API-Token</Title>
+                  <Description>
+                    Get an API-token to authenticate with GitHub.
+                  </Description>
+                </StepContent>
+              </Step>
+              <Step isActive={view === 1} isCompleted={1 < view}>
+                <StepContent>
+                  <Title>Select repository</Title>
+                  <Description>
+                    Choose the repo you want to add your board.
+                  </Description>
+                </StepContent>
+              </Step>
+              <Step isActive={view === 2} isCompleted={2 < view}>
+                <StepContent>
+                  <Title>Add to board</Title>
+                  <Description>Verify the repo details</Description>
+                </StepContent>
+              </Step>
+            </Steps>
+          </StepsWrapper>
           <Card>
             {view === 0 && (
               <>
@@ -276,16 +302,10 @@ export function AddGithubRepo(props: Props) {
   }
 }
 
-const Steps = styled(Horizontal)`
+const StepsWrapper = styled.div`
   display: flex;
-  padding: 2rem 0;
-`;
-
-type StepProps = {
-  isActive: boolean;
-};
-const Step = styled.div<StepProps>`
-  font-weight: ${p => (p.isActive ? 600 : 'normal')};
+  justify-content: center;
+  padding-bottom: 1.6rem;
 `;
 
 type RowProps = {
