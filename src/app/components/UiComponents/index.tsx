@@ -2,6 +2,8 @@ import { Button as ReaButton } from 'reakit/Button';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
 
+export * from './Step';
+
 export const Horizontal = styled.div`
   align-items: center;
   display: flex;

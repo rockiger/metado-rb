@@ -4,6 +4,8 @@ export const GlobalStyle = createGlobalStyle`
   :root {
     --bg-color: hsl(0, 0%, 100%);
     --bg-color-secondary: hsl(240, 14%, 96%); /* secondary */
+    --border-color-default: rgba(34,36,38,.15);
+    --border-radius-default: 4px;
     --color-primary: hsl(221, 100%, 64%);
     --color-secondary: hsl(348, 95%, 68%)
     --color-tertiary: hsl(36, 99%, 65%)
@@ -12,11 +14,14 @@ export const GlobalStyle = createGlobalStyle`
     --color-darkGrey: hsl(216, 4%, 26%); /* tertiary */
     --color-error: hsl(0, 64%, 53%);
     --color-success: hsl(113, 81%, 41%);
+    --font-size: 1.6rem;
     --grid-maxWidth: 120rem;
     --grid-gutter: 2rem;
-    --font-size: 1.6rem;
-    --text-color: hsl(207, 10%, 42%);
-    --link-color: hsl(221, 100%, 54%);
+    --horizontal-padding: 4.2rem;
+    --color-link: hsl(221, 100%, 54%);
+    --color-text: hsl(207, 10%, 42%);
+    --transition-default: background-color .1s ease,opacity .1s ease,color .1s ease,box-shadow .1s ease,-webkit-box-shadow .1s ease;
+}
   }
 
   /* Base
@@ -39,7 +44,7 @@ export const GlobalStyle = createGlobalStyle`
   
   /* Default body styles */
   body {
-    color: var(--text-color);
+    color: var(--color-text);
     font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     font-size: 1.6em;  /* Currently ems cause chrome bug misinterpreting rems on body element */
     font-weight: 300;
@@ -64,7 +69,7 @@ p {
 }
 
 a {
-	color: var(--link-color);
+	color: var(--color-link);
 	text-decoration: none;
 }
 
