@@ -19,11 +19,9 @@ import {
   Card,
   Container,
   Content,
-  Horizontal,
   PageHeader,
   PageTitle,
   PrivatePage,
-  Spacer,
 } from 'app/components/UiComponents';
 import {
   Content as StepContent,
@@ -63,17 +61,6 @@ const STEPS = ['0', '1', '2', '3'];
 interface Props {}
 
 export function AddGithubRepo(props: Props) {
-  // DONE look for github key of user
-  // DONE if github token is not present, let the user create one.
-  // DONE get repos
-  //  DONE filter projects that are allready part of board
-  // DONE Add repo/project to board
-  //  DONE Handler
-  //  DONE Check if project allready in database, then only add project to board
-  // DONE Think about state machine
-  // DONE Step 4 with Confirmation or directly redirecting to board
-  // DONE Testing with saga testplan
-  // Done Styling
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
   const dispatch = useDispatch();
@@ -359,14 +346,6 @@ const View = styled.div`
 const View1 = styled(View)`
   max-width: 60rem;
   text-align: center;
-`;
-
-type RowProps = {
-  isSelected: boolean;
-};
-const Row = styled.tr<RowProps>`
-  background-color: ${p =>
-    p.isSelected ? 'var(--bg-color-secondary)' : 'var(--bg-color)'};
 `;
 
 const GithubIcon = styled(Github)`
