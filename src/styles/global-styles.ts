@@ -6,21 +6,22 @@ export const GlobalStyle = createGlobalStyle`
     --bg-color-secondary: hsl(240, 14%, 96%); /* secondary */
     --border-color-default: rgba(34,36,38,.15);
     --border-radius-default: 4px;
-    --color-primary: hsl(221, 100%, 64%);
-    --color-secondary: hsl(348, 95%, 68%)
-    --color-tertiary: hsl(36, 99%, 65%)
-    --color-lightGrey: hsl(218, 14%, 85%); /* quinary */
-    --color-grey: hsl(231, 5%, 48%); /* quaternary */
     --color-darkGrey: hsl(216, 4%, 26%); /* tertiary */
     --color-error: hsl(0, 64%, 53%);
-    --color-success: hsl(113, 81%, 41%);
+    --color-grey: hsl(231, 5%, 48%); /* quaternary */
+    --color-lightGrey: hsl(218, 14%, 85%); /* quinary */
+    --color-link: hsl(221, 100%, 54%);
+    --color-primary: hsl(221, 100%, 64%);
+    --color-secondary: hsl(348, 95%, 68%)
     --font-size: 1.6rem;
+    --color-success: hsl(113, 81%, 41%);
+    --color-tertiary: hsl(36, 99%, 65%)
     --grid-maxWidth: 120rem;
     --grid-gutter: 2rem;
     --horizontal-padding: 4.2rem;
-    --color-link: hsl(221, 100%, 54%);
     --color-text: hsl(207, 10%, 42%);
     --transition-default: background-color .1s ease,opacity .1s ease,color .1s ease,box-shadow .1s ease,-webkit-box-shadow .1s ease;
+    --vertical-padding: 0;
 }
   }
 
@@ -141,7 +142,7 @@ input[type='submit'] {
 	background-color: var(--color-primary);
 	border: 0.1rem solid var(--color-primary);
 	border-radius: .4rem;
-	color: --bg-color;
+	color: var(--bg-color);
 	cursor: pointer;
 	display: inline-block;
 	font-size: 1.1rem;
@@ -167,7 +168,7 @@ input[type='submit'] {
   input[type='submit']:hover {
 	background-color: var(--bg-color-secondary);
 	border-color: var(--bg-color-secondary);
-	color: --bg-color;
+	color: var(--color-primary);
 	outline: 0;
 }
 
@@ -213,7 +214,7 @@ input[type='submit'] {
     input[type='submit'].button-outline:hover {
 	background-color: transparent;
 	border-color: var(--bg-color-secondary);
-	color: var(--bg-color-secondary);
+	color: var(--color-text);
 }
 
 .button.button-outline[disabled]:focus, .button.button-outline[disabled]:hover,
