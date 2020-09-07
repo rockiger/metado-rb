@@ -14,14 +14,16 @@ import { Github } from 'styled-icons/boxicons-logos';
 import { Navbar } from 'app/components/Navbar';
 import {
   A,
+  Button,
+  ButtonOutlined,
   Card,
+  Container,
   Content,
   Horizontal,
   PageHeader,
   PageTitle,
   PrivatePage,
   Spacer,
-  Button,
 } from 'app/components/UiComponents';
 import {
   Content as StepContent,
@@ -30,6 +32,14 @@ import {
   Steps,
   Title,
 } from 'app/components/UiComponents/Step';
+import {
+  List,
+  ListDescription,
+  ListHeader,
+  ListItem,
+  ListContent,
+  ListIcon,
+} from 'app/components/UiComponents/List';
 import {
   selectAddingProject,
   selectBoard,
@@ -63,7 +73,7 @@ export function AddGithubRepo(props: Props) {
   // DONE Think about state machine
   // DONE Step 4 with Confirmation or directly redirecting to board
   // DONE Testing with saga testplan
-  // TODO Styling
+  // Done Styling
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
   const dispatch = useDispatch();
@@ -146,144 +156,176 @@ export function AddGithubRepo(props: Props) {
       </Helmet>
       <PrivatePage>
         <Navbar />
-        <PageHeader>
-          <PageTitle>Add Github Project</PageTitle>
-        </PageHeader>
-        <Content>
-          <StepsWrapper>
-            <Steps>
-              <Step isActive={view === 0} isCompleted={0 < view}>
-                <StepContent>
-                  <Title>Generate API-Token</Title>
-                  <Description>
-                    Get an API-token to authenticate with GitHub.
-                  </Description>
-                </StepContent>
-              </Step>
-              <Step isActive={view === 1} isCompleted={1 < view}>
-                <StepContent>
-                  <Title>Select repository</Title>
-                  <Description>
-                    Choose the repo you want to add your board.
-                  </Description>
-                </StepContent>
-              </Step>
-              <Step isActive={view === 2} isCompleted={2 < view}>
-                <StepContent>
-                  <Title>Add to board</Title>
-                  <Description>Verify the repo details</Description>
-                </StepContent>
-              </Step>
-            </Steps>
-          </StepsWrapper>
-          <Card>
-            {view === 0 && (
-              <>
-                {step !== 0 && (
-                  <Redirect to={`/projects/add/github/${STEPS[0]}`} />
-                )}
-                <Button
-                  as={A}
-                  href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo&redirect_uri=${REDIRECT_URI}`}
-                >
-                  <Github size="1.5rem" /> GitHub - Login
-                </Button>
-                <p>
-                  We need you to login to GitHub and authorize Metado to access
-                  your repositorys.
-                </p>
-              </>
-            )}
-            {view === 1 && (
-              <>
-                {selectedRepo !== -1 && (
-                  <Redirect to={`/projects/add/github/${STEPS[2]}`} />
-                )}
-                {step !== 1 && (
-                  <Redirect to={`/projects/add/github/${STEPS[1]}`} />
-                )}
-                <p>
-                  Please select the repository from which you want to add the
-                  issues to your tasks.
-                </p>
-                {status === 'fetching' && <p>Loading...</p>}
-                <table>
-                  {repos.filter(addedProjectsFilter).map((repo, index) => (
-                    <Row
-                      key={repo.node_id}
-                      onClick={() => setSelectedRepo(index)}
-                      isSelected={index === selectedRepo}
-                    >
-                      <td>
-                        <div>
-                          <b>{repo.full_name}</b>
-                        </div>
-                        <p>{repo.description}</p>
-                      </td>
-                    </Row>
-                  ))}
-                </table>
-              </>
-            )}
-            {view === 2 && (
-              <>
-                {step !== 2 && (
-                  <Redirect to={`/projects/add/github/${STEPS[2]}`} />
-                )}
-                {selectedRepo !== -1 && repo && (
-                  <>
-                    <h2>Add {repo.name} to your tasks?</h2>
-                    <Card>
-                      <h3>{repo.full_name} </h3>
-                      <div> {repo.description} </div>
-                    </Card>
-                    <p>
-                      Open GitHub issues will show in your 'Backlog' column.
-                      When you move a an issue to your 'Done' column, we will be
-                      automatically closed.Vice verca if it is closed it is
-                      automatically in the 'Done' column.
-                    </p>
-                    <div>
-                      <Button onClick={onClickGoBack}>
-                        Back to Selection{' '}
+        <Container>
+          <PageHeader>
+            <PageTitle>Add Github Project</PageTitle>
+          </PageHeader>
+          <Content>
+            <StepsWrapper>
+              <Steps>
+                <Step isActive={view === 0} isCompleted={0 < view}>
+                  <StepContent>
+                    <Title>Generate API-Token</Title>
+                    <Description>
+                      Get an API-token to authenticate with GitHub.
+                    </Description>
+                  </StepContent>
+                </Step>
+                <Step isActive={view === 1} isCompleted={1 < view}>
+                  <StepContent>
+                    <Title>Select repository</Title>
+                    <Description>
+                      Choose the repo you want to add your board.
+                    </Description>
+                  </StepContent>
+                </Step>
+                <Step isActive={view === 2} isCompleted={2 < view}>
+                  <StepContent>
+                    <Title>Add to board</Title>
+                    <Description>Verify the repo details</Description>
+                  </StepContent>
+                </Step>
+              </Steps>
+            </StepsWrapper>
+            <Card>
+              {view === 0 && (
+                <>
+                  {step !== 0 && (
+                    <Redirect to={`/projects/add/github/${STEPS[0]}`} />
+                  )}
+                  <View>
+                    <View1>
+                      <p>
+                        We need you to login to GitHub and authorize Metado to
+                        access your repositorys. This will allow us, to fetch
+                        your issues.
+                      </p>
+                      <Button
+                        as={A}
+                        href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo&redirect_uri=${REDIRECT_URI}`}
+                      >
+                        <Github size="1.5rem" /> GitHub - Login
                       </Button>
-                      <Button onClick={() => onClickAdd(repo)}>
-                        Add <b> {` ${repo.name} `} </b> to task
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-            {view === 3 && (
-              <>
-                {step !== 3 && (
-                  <Redirect to={`/projects/add/github/${STEPS[3]}`} />
-                )}
-                {addingProject === 'error' && (
-                  <>
-                    <h2>We couldn't add {repo && repo.name} to your tasks.</h2>
-                    <p>{error}</p>
-                    <Button as={RouterLink} to={`/projects/add/github`}>
-                      Start over
-                    </Button>{' '}
-                    <Button as={RouterLink} to={`/b`}>
-                      Go to board
-                    </Button>
-                  </>
-                )}
-                {addingProject === 'success' && (
-                  <>
-                    <h2>We added {repo && repo.name} to your tasks.</h2>
-                    <Button as={RouterLink} to={`/b`}>
-                      Go to board
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-          </Card>
-        </Content>
+                    </View1>
+                  </View>
+                </>
+              )}
+              {view === 1 && (
+                <>
+                  {selectedRepo !== -1 && (
+                    <Redirect to={`/projects/add/github/${STEPS[2]}`} />
+                  )}
+                  {step !== 1 && (
+                    <Redirect to={`/projects/add/github/${STEPS[1]}`} />
+                  )}
+                  <p>
+                    Please select the repository from which you want to add the
+                    issues to your tasks.
+                  </p>
+                  {status === 'fetching' && <p>Loading...</p>}
+                  <List>
+                    {repos.filter(addedProjectsFilter).map((repo, index) => (
+                      <ListItem
+                        key={repo.node_id}
+                        onClick={() => setSelectedRepo(index)}
+                        isSelected={index === selectedRepo}
+                      >
+                        <ListIcon>
+                          <GithubIcon />
+                        </ListIcon>
+                        <ListContent>
+                          <ListHeader as="div">{repo.full_name}</ListHeader>
+                          <ListDescription>{repo.description}</ListDescription>
+                        </ListContent>
+                      </ListItem>
+                    ))}
+                  </List>
+                </>
+              )}
+              {view === 2 && (
+                <>
+                  {step !== 2 && (
+                    <Redirect to={`/projects/add/github/${STEPS[2]}`} />
+                  )}
+                  {selectedRepo !== -1 && repo && (
+                    <>
+                      <View>
+                        <View1>
+                          <h4>Add {repo.name} to your tasks?</h4>
+                          <Card>
+                            <h5>
+                              <b>{repo.full_name}</b>
+                            </h5>
+                            <div> {repo.description} </div>
+                          </Card>
+                          <p></p>
+                          <p>
+                            Open GitHub issues will show in your 'Backlog'
+                            column. When you move an issue to your 'Done'
+                            column, it will be automatically closed.
+                          </p>
+                          <p>
+                            Vice verca if an issue is already closed it will
+                            show in the 'Done' column. If you move it to any
+                            other column it will automatically re-open again.
+                          </p>
+                          <div>
+                            <ButtonOutlined onClick={onClickGoBack}>
+                              Back to Selection
+                            </ButtonOutlined>{' '}
+                            <Button onClick={() => onClickAdd(repo)}>
+                              Add <b> {` ${repo.name} `} </b> to task
+                            </Button>
+                          </div>
+                        </View1>
+                      </View>
+                    </>
+                  )}
+                </>
+              )}
+              {view === 3 && (
+                <>
+                  {step !== 3 && (
+                    <Redirect to={`/projects/add/github/${STEPS[3]}`} />
+                  )}
+                  <View>
+                    <View1>
+                      {addingProject === 'error' && (
+                        <>
+                          <h4>
+                            We couldn't add {repo && repo.name} to your tasks.
+                          </h4>
+                          <p>{error}</p>
+                          <div>
+                            <ButtonOutlined
+                              as={RouterLink}
+                              to={`/projects/add/github`}
+                            >
+                              Start over
+                            </ButtonOutlined>{' '}
+                            <Button as={RouterLink} to={`/b`}>
+                              Go to board
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                      {addingProject === 'success' && (
+                        <>
+                          <h4>We added {repo && repo.name} to your tasks.</h4>
+                          <div>
+                            <Button as={RouterLink} to={`/b`}>
+                              Go to board
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </View1>
+                  </View>
+                </>
+              )}
+            </Card>
+          </Content>
+        </Container>
       </PrivatePage>
     </>
   );
@@ -308,10 +350,25 @@ const StepsWrapper = styled.div`
   padding-bottom: 1.6rem;
 `;
 
+const View = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+`;
+
+const View1 = styled(View)`
+  max-width: 60rem;
+  text-align: center;
+`;
+
 type RowProps = {
   isSelected: boolean;
 };
 const Row = styled.tr<RowProps>`
   background-color: ${p =>
     p.isSelected ? 'var(--bg-color-secondary)' : 'var(--bg-color)'};
+`;
+
+const GithubIcon = styled(Github)`
+  color: black;
 `;
