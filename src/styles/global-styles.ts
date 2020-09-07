@@ -4,8 +4,9 @@ export const GlobalStyle = createGlobalStyle`
   :root {
     --bg-color: hsl(0, 0%, 100%);
     --bg-color-secondary: hsl(240, 14%, 96%); /* secondary */
-    --border-color-default: rgba(34,36,38,.15);
-    --border-radius-default: 4px;
+    --border-color: rgba(34,36,38,.15);
+    --border-radius: 4px;
+    --box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
     --color-darkGrey: hsl(216, 4%, 26%); /* tertiary */
     --color-error: hsl(0, 64%, 53%);
     --color-grey: hsl(231, 5%, 48%); /* quaternary */
@@ -20,7 +21,7 @@ export const GlobalStyle = createGlobalStyle`
     --grid-gutter: 2rem;
     --horizontal-padding: 4.2rem;
     --color-text: hsl(207, 10%, 42%);
-    --transition-default: background-color .1s ease,opacity .1s ease,color .1s ease,box-shadow .1s ease,-webkit-box-shadow .1s ease;
+    --transition: background-color .1s ease,opacity .1s ease,color .1s ease,box-shadow .1s ease,-webkit-box-shadow .1s ease;
     --vertical-padding: 0;
 }
   }

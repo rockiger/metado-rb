@@ -25,6 +25,7 @@ import media from 'styled-media-query';
 import { Navbar } from 'app/components/Navbar';
 import {
   Horizontal,
+  Label,
   PageHeader,
   PageTitle,
   PrivatePage,
@@ -119,7 +120,7 @@ export function BoardPage(props: Props) {
           {board.columns.map((col, index) => (
             <Column key={col.title}>
               <ColumnTitle>
-                <ColumnIcon size="1rem" /> {col.title}
+                <ColumnIcon size="2rem" /> {col.title}
               </ColumnTitle>
               <Droppable droppableId={`${index}`}>
                 {provided => (
@@ -145,10 +146,10 @@ export function BoardPage(props: Props) {
                                     <CardTitle>{task.title}</CardTitle>
                                     <CardFooter>
                                       <Spacer />
-                                      <GithubBadge>
-                                        <GithubLogo size="1.25rem" />
+                                      <Label>
+                                        <GithubLogo size="1.5rem" />
                                         {task.project.split('-')[2]}
-                                      </GithubBadge>
+                                      </Label>
                                     </CardFooter>
                                   </Card>
                                 </div>
@@ -278,23 +279,23 @@ export const BoardContent = styled(Horizontal)`
 
 const Column = styled.div`
   background-color: white;
-  min-height: 10rem;
-  padding: 1rem;
+  min-height: 16rem;
+  padding: 1.6rem;
   width: 25%;
 `;
 
 const ColumnTitle = styled.h2`
   align-items: center;
   display: flex;
-  font-size: 1.2rem;
+  font-size: 2rem;
   font-weight: 400;
   margin: 0;
-  padding: 1rem 0 2rem;
+  padding: 1.6rem 0 3.2rem;
 `;
 
 const ColumnIcon = styled(RadioCircle)`
   color: ${p => p.theme.palette.grey[600]};
-  margin-right: 0.25rem;
+  margin-right: 0.3rem;
 `;
 
 const Cards = styled.div`
@@ -305,13 +306,13 @@ const Card = styled.div`
   background-color: white;
   border: 1px solid ${p => p.theme.palette.grey[300]};
   border-radius: 4px;
-  margin-bottom: 1rem;
-  padding: 1rem;
+  margin-bottom: 1.6rem;
+  padding: 1.6rem;
   &:hover {
     box-shadow: ${p => p.theme.shadows[3]};
   }
   &:last-child {
-    margin-bottom: 1rem;
+    margin-bottom: 1.6rem;
   }
 `;
 
@@ -322,15 +323,6 @@ const CardFooter = styled.div`
   padding-top: 0.5rem;
 `;
 
-const GithubBadge = styled.div`
-  background-color: black;
-  border-radius: 2px;
-  color: white;
-  display: flex;
-  align-items: center;
-  padding: 0 0.25rem;
-`;
-
 const GithubLogo = styled(Github)`
-  padding-right: 0.1rem;
+  padding-right: 0.2rem;
 `;

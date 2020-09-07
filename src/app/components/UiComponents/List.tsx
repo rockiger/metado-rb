@@ -21,14 +21,14 @@ type ListItemProps = {
 };
 export const ListItem = styled.div<ListItemProps>`
   cursor: pointer;
-  border-top: 1px solid var(--border-color-default);
+  border-top: 1px solid var(--border-color);
   display: list-item;
   line-height: 3.6rem;
   list-style-type: none;
   list-style-position: outside;
   padding: 0.8rem;
   table-layout: fixed;
-  transition: var(--transition-default);
+  transition: var(--transition);
 
   &:first-child {
     border-top: none;
