@@ -74,23 +74,23 @@ const Left = styled.div`
   }
 
   .firebaseui-idp-button {
-    height: 3.5rem;
-    max-width: 16rem;
+    height: 5.6rem;
+    max-width: 25rem;
   }
 
   .firebaseui-idp-icon {
-    height: 1.5rem;
-    width: 1.5rem;
+    height: 2.4rem;
+    width: 2.4rem;
   }
 
   .firebaseui-idp-text {
     font-family: ${p => p.theme.fontFamily};
-    font-size: 1.2rem;
+    font-size: 1.8rem;
   }
 `;
 
 const LogoContainer = styled.div`
-  max-width: 16rem;
+  max-width: 25rem;
   margin: 0 auto;
   padding-bottom: 16vh;
 `;
@@ -110,13 +110,13 @@ const Right = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 0 8rem;
+    padding: 0 12.8rem;
     width: 66%;
   `}
 `;
 
 const H1 = styled.h1`
   color: white;
-  font-size: 4rem;
+  font-size: 6.4rem;
   padding-bottom: 20vh;
 `;

@@ -16,7 +16,7 @@ export const PrivatePage = styled.div`
 `;
 
 export const PageHeader = styled(Horizontal)`
-  padding: 2rem 2rem 0;
+  padding: 3.2rem 3.2rem 0;
 `;
 
 export const PageTitle = styled.h1`
@@ -59,3 +59,18 @@ export const ButtonOutlined = styled(ReaButton).attrs(p => ({
 }))``;
 
 export const A = styled.a``;
+
+export const Label = styled.div`
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+
+  background-color: black;
+  padding: 0.7rem 1rem;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+`;

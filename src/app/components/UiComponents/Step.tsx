@@ -22,8 +22,8 @@ export const Steps = styled.div`
   align-items: stretch;
   margin: 1.4rem 0;
   line-height: 1rem;
-  border-radius: var(--border-radius-default);
-  border: 1px solid var(--border-color-default);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
 
   &:first-child {
     margin-top: 0;
@@ -53,8 +53,8 @@ export const Step = styled.div<StepProps>`
   padding: 1.6rem 2.8rem;
   background: ${p =>
     p.isActive ? 'var(--bg-color-secondary)' : 'var(--bg-color)'};
-  border-right: 1px solid var(--border-color-default);
-  transition: var(--transition-default);
+  border-right: 1px solid var(--border-color);
+  transition: var(--transition);
 
   &:after {
     display: block;
@@ -69,10 +69,10 @@ export const Step = styled.div<StepProps>`
     height: 1rem;
 
     border-style: solid;
-    border-color: var(--border-color-default);
+    border-color: var(--border-color);
     border-width: 0 1px 1px 0;
 
-    transition: var(--transition-default);
+    transition: var(--transition);
     transform: translateY(-50%) translateX(50%) rotate(-45deg);
   }
 
@@ -93,12 +93,12 @@ export const Step = styled.div<StepProps>`
 
   /* First Step */
   &:first-child {
-    border-radius: var(--border-radius-default) 0 0 var(--border-radius-default);
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
   }
 
   /* Last Step */
   &:last-child {
-    border-radius: 0 var(--border-radius-default) var(--border-radius-default) 0;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
     border-right: none;
     margin-right: 0;
 
@@ -109,7 +109,7 @@ export const Step = styled.div<StepProps>`
 
   /* Only Step */
   &:only-child {
-    border-radius: var(--border-radius-default);
+    border-radius: var(--border-radius);
   }
 `;
 

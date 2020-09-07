@@ -19,9 +19,9 @@ export function Navbar() {
 
 export const NavbarWrapper = styled(Toolbar)`
   background-color: white;
-  box-shadow: ${p => p.theme.shadows[3]};
+  box-shadow: var(--box-shadow);
   display: flex;
-  height: 6.4rem;
+  height: 6rem;
   justify-content: center;
   padding: 1.6rem 3.2rem;
 `;
@@ -32,5 +32,5 @@ export const LogoLink = styled(ToolbarItem)`
 `;
 
 export const Logo = styled.img`
-  height: 2rem;
+  height: 1.8rem;
 `;

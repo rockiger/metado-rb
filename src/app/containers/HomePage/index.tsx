@@ -27,6 +27,6 @@ const Navbar = styled(Composite)`
   align-items: center;
   display: flex;
   justify-content: space-evenly;
-  height: 5rem;
+  height: 6rem;
   box-shadow: ${p => p.theme.shadows[4]};
 `;
