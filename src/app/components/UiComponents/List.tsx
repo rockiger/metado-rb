@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clickable } from 'reakit/Clickable';
 import styled from 'styled-components/macro';
 
