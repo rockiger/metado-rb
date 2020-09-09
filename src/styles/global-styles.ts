@@ -47,7 +47,7 @@ export const GlobalStyle = createGlobalStyle`
   /* Default body styles */
   body {
     color: var(--color-text);
-    font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-family: 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     font-size: 1.6em;  /* Currently ems cause chrome bug misinterpreting rems on body element */
     font-weight: 300;
     height: 100%;
