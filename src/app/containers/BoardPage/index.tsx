@@ -5,12 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from 'react-beautiful-dnd';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
@@ -18,14 +13,11 @@ import { Button } from 'reakit/Button';
 import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
-import { RadioCircle } from 'styled-icons/boxicons-regular';
-import { Github } from 'styled-icons/boxicons-logos';
 import media from 'styled-media-query';
 
 import { Navbar } from 'app/components/Navbar';
 import {
   Horizontal,
-  Label,
   PageHeader,
   PageTitle,
   PrivatePage,
@@ -40,8 +32,9 @@ import {
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
 import { Board as BoardType, TaskMap } from 'app/containers/Database/types';
-
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
+
+import { BoardColumn } from './BoardColumn';
 import { reducer, sliceKey } from './slice';
 import { boardPageSaga } from './saga';
 
@@ -117,53 +110,7 @@ export function BoardPage(props: Props) {
         <DragDropContext
           onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
         >
-          {board.columns.map((col, index) => (
-            <Column key={col.title}>
-              <ColumnTitle>
-                <ColumnIcon size="2rem" /> {col.title}
-              </ColumnTitle>
-              <Droppable droppableId={`${index}`}>
-                {provided => (
-                  <Cards
-                    className="list-content"
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    <div ref={provided.innerRef} {...provided.droppableProps}>
-                      {!_.isEmpty(tasks) &&
-                        col.taskIds.map((id, index) => {
-                          const task = tasks[id];
-                          return (
-                            <Draggable draggableId={id} key={id} index={index}>
-                              {provided => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  onClick={() => 'onClick(task)'}
-                                >
-                                  <Card key={id}>
-                                    <CardTitle>{task.title}</CardTitle>
-                                    <CardFooter>
-                                      <Spacer />
-                                      <Label>
-                                        <GithubLogo size="1.5rem" />
-                                        {task.project.split('-')[2]}
-                                      </Label>
-                                    </CardFooter>
-                                  </Card>
-                                </div>
-                              )}
-                            </Draggable>
-                          );
-                        })}
-                      {provided.placeholder}
-                    </div>
-                  </Cards>
-                )}
-              </Droppable>
-            </Column>
-          ))}
+          {board.columns.map((col, index) => BoardColumn(col, index, tasks))}
         </DragDropContext>
       </BoardContent>
     </PrivatePage>
@@ -275,54 +222,4 @@ export const BoardContent = styled(Horizontal)`
   width: 100% ${media.greaterThan('medium')`
     padding: 2rem 4rem;
   `};
-`;
-
-const Column = styled.div`
-  background-color: white;
-  min-height: 16rem;
-  padding: 1.6rem;
-  width: 25%;
-`;
-
-const ColumnTitle = styled.h2`
-  align-items: center;
-  display: flex;
-  font-size: 2rem;
-  font-weight: 400;
-  margin: 0;
-  padding: 1.6rem 0 3.2rem;
-`;
-
-const ColumnIcon = styled(RadioCircle)`
-  color: ${p => p.theme.palette.grey[600]};
-  margin-right: 0.3rem;
-`;
-
-const Cards = styled.div`
-  min-height: 10rem;
-`;
-
-const Card = styled.div`
-  background-color: white;
-  border: 1px solid ${p => p.theme.palette.grey[300]};
-  border-radius: 4px;
-  margin-bottom: 1.6rem;
-  padding: 1.6rem;
-  &:hover {
-    box-shadow: ${p => p.theme.shadows[3]};
-  }
-  &:last-child {
-    margin-bottom: 1.6rem;
-  }
-`;
-
-const CardTitle = styled.div``;
-
-const CardFooter = styled.div`
-  display: flex;
-  padding-top: 0.5rem;
-`;
-
-const GithubLogo = styled(Github)`
-  padding-right: 0.2rem;
 `;
