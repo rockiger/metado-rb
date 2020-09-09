@@ -118,5 +118,7 @@ const Right = styled.div`
 const H1 = styled.h1`
   color: white;
   font-size: 6.4rem;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
   padding-bottom: 20vh;
 `;
