@@ -5,8 +5,15 @@ import styled from 'styled-components/macro';
 import { RadioCircle } from 'styled-icons/boxicons-regular';
 import { Github } from 'styled-icons/boxicons-logos';
 
-import { Label, Spacer } from 'app/components/UiComponents';
+import {
+  Card,
+  CardFooter,
+  CardTitle,
+  Label,
+  Spacer,
+} from 'app/components/UiComponents';
 import { Column as ColumnType, TaskMap } from 'app/containers/Database/types';
+import { AddCard } from './AddCard';
 
 export function BoardColumn(
   col: ColumnType,
@@ -20,7 +27,7 @@ export function BoardColumn(
       </ColumnTitle>
       <Droppable droppableId={`${index}`}>
         {provided => (
-          <Cards
+          <Tasks
             className="list-content"
             {...provided.droppableProps}
             ref={provided.innerRef}
@@ -38,7 +45,7 @@ export function BoardColumn(
                           {...provided.dragHandleProps}
                           onClick={() => 'onClick(task)'}
                         >
-                          <Card key={id}>
+                          <Task key={id}>
                             <CardTitle>{task.title}</CardTitle>
                             <CardFooter>
                               <Spacer />
@@ -47,7 +54,7 @@ export function BoardColumn(
                                 {task.project.split('-')[2]}
                               </Label>
                             </CardFooter>
-                          </Card>
+                          </Task>
                         </div>
                       )}
                     </Draggable>
@@ -55,9 +62,10 @@ export function BoardColumn(
                 })}
               {provided.placeholder}
             </div>
-          </Cards>
+          </Tasks>
         )}
       </Droppable>
+      <AddCard />
     </Column>
   );
 }
@@ -83,29 +91,17 @@ const ColumnIcon = styled(RadioCircle)`
   margin-right: 0.3rem;
 `;
 
-const Cards = styled.div`
+const Tasks = styled.div`
   min-height: 10rem;
 `;
 
-const Card = styled.div`
-  background-color: white;
-  border: 1px solid ${p => p.theme.palette.grey[300]};
-  border-radius: 4px;
-  margin-bottom: 1.6rem;
-  padding: 1.6rem;
+const Task = styled(Card)`
   &:hover {
     box-shadow: ${p => p.theme.shadows[3]};
   }
   &:last-child {
     margin-bottom: 1.6rem;
   }
-`;
-
-const CardTitle = styled.div``;
-
-const CardFooter = styled.div`
-  display: flex;
-  padding-top: 0.5rem;
 `;
 
 const GithubLogo = styled(Github)`

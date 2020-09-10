@@ -4,9 +4,26 @@ import media from 'styled-media-query';
 
 export * from './Step';
 
-export const Horizontal = styled.div`
+export const Card = styled.div`
+  background-color: white;
+  border: 1px solid ${p => p.theme.palette.grey[300]};
+  border-radius: 4px;
+  margin-bottom: 1.6rem;
+  padding: 1.6rem;
+`;
+
+export const CardTitle = styled.div``;
+
+export const CardFooter = styled.div`
+  display: flex;
+  padding-top: 0.5rem;
+`;
+
+type HorizontalProps = { align?: 'left' | 'center' | 'right' };
+export const Horizontal = styled.div<HorizontalProps>`
   align-items: center;
   display: flex;
+  justify-content: ${p => p.align};
   width: 100%;
 `;
 
@@ -15,8 +32,11 @@ export const PrivatePage = styled.div`
   min-height: 100vh;
 `;
 
-export const PageHeader = styled(Horizontal)`
+export const PageHeader = styled.header`
+  align-items: center;
+  display: flex;
   padding: 3.2rem 3.2rem 0;
+  width: 100%;
 `;
 
 export const PageTitle = styled.h1`
@@ -46,16 +66,12 @@ export const Spacer = styled.div`
   flex-grow: 1;
 `;
 
-export const Card = styled.div`
-  background-color: white;
-  border: 1px solid ${p => p.theme.palette.grey[300]};
-  border-radius: 4px;
-  padding: 1rem;
-`;
-
 export const Button = styled(ReaButton).attrs(p => ({ className: 'button' }))``;
 export const ButtonOutlined = styled(ReaButton).attrs(p => ({
   className: 'button button-outline',
+}))``;
+export const ButtonClear = styled(ReaButton).attrs(p => ({
+  className: 'button button-clear',
 }))``;
 
 export const A = styled.a``;
