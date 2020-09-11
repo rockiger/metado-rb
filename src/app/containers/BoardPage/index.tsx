@@ -37,6 +37,7 @@ import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { BoardColumn } from './BoardColumn';
 import { reducer, sliceKey } from './slice';
 import { boardPageSaga } from './saga';
+import { AddCard } from './AddTask';
 
 interface Props {}
 
@@ -105,6 +106,7 @@ export function BoardPage(props: Props) {
             Add GitHub Project
           </Button>
         )}
+        <AddCard />
       </PageHeader>
       <BoardContent>
         <DragDropContext

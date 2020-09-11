@@ -4,6 +4,7 @@ export const GlobalStyle = createGlobalStyle`
   :root {
     --bg-color: hsl(0, 0%, 100%);
     --bg-color-secondary: hsl(240, 14%, 96%); /* secondary */
+    --border: 1px solid var(--border-color);
     --border-color: rgba(34,36,38,.15);
     --border-radius: 4px;
     --box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.2);
@@ -14,15 +15,17 @@ export const GlobalStyle = createGlobalStyle`
     --color-link: hsl(221, 100%, 54%);
     --color-primary: hsl(221, 100%, 64%);
     --color-secondary: hsl(348, 95%, 68%)
-    --font-size: 1.6rem;
     --color-success: hsl(113, 81%, 41%);
-    --color-tertiary: hsl(36, 99%, 65%)
+    --color-tertiary: hsl(36, 99%, 65%);
+    --font-family: 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    --font-size: 1.6rem;
     --grid-maxWidth: 120rem;
     --grid-gutter: 2rem;
-    --horizontal-padding: 4.2rem;
+    --padding-horizontal: 4.2rem;
+    --padding-dialog: 1.8rem 2.2rem;
+    --padding-vertical: 0;
     --color-text: hsl(207, 10%, 42%);
     --transition: background-color .1s ease,opacity .1s ease,color .1s ease,box-shadow .1s ease,-webkit-box-shadow .1s ease;
-    --vertical-padding: 0;
 }
   }
 
@@ -47,7 +50,7 @@ export const GlobalStyle = createGlobalStyle`
   /* Default body styles */
   body {
     color: var(--color-text);
-    font-family: 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    font-family: var(--font-family);
     font-size: 1.6em;  /* Currently ems cause chrome bug misinterpreting rems on body element */
     font-weight: 300;
     height: 100%;
@@ -250,9 +253,9 @@ input[type='submit'] {
     input[type='reset'].button-clear:hover,
     input[type='submit'].button-clear:focus,
     input[type='submit'].button-clear:hover {
-	background-color: transparent;
+	background-color: var(--bg-color-secondary);
 	border-color: transparent;
-	color: var(--bg-color-secondary);
+	color: var(--color-darkGrey);
 }
 
 .button.button-clear[disabled]:focus, .button.button-clear[disabled]:hover,
@@ -291,7 +294,7 @@ pre > code {
 
 hr {
 	border: 0;
-	border-top: 0.1rem solid var(--color-darkGrey);
+	border-top: 0.1rem solid var(--border-color);
 	margin: 3.0rem 0;
 }
 
@@ -313,10 +316,11 @@ textarea,
 select {
 	-webkit-appearance: none;
 	background-color: transparent;
-	border: 0.1rem solid var(--color-grey);
+	border: 0.1rem solid var(--border-color);
 	border-radius: .4rem;
 	box-shadow: none;
 	box-sizing: inherit;
+  font-family: var(--font-family);
 	height: 3.8rem;
 	padding: .6rem 1.0rem .7rem;
 	width: 100%;
