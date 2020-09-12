@@ -13,7 +13,6 @@ import {
   Spacer,
 } from 'app/components/UiComponents';
 import { Column as ColumnType, TaskMap } from 'app/containers/Database/types';
-import { AddCard } from './AddTask';
 
 export function BoardColumn(
   col: ColumnType,
@@ -65,7 +64,6 @@ export function BoardColumn(
           </Tasks>
         )}
       </Droppable>
-      {/*<AddCard />*/}
     </Column>
   );
 }

@@ -17,15 +17,20 @@ import {
   Button,
   ButtonClear,
   Horizontal,
-  Card,
   ButtonOutlined,
 } from 'app/components/UiComponents';
+import { ProjectMap } from 'app/containers/Database/types';
 
-interface Props {}
+interface Props {
+  projects: ProjectMap;
+}
 
-export function AddCard(props: Props) {
+export function AddCard({ projects }: Props) {
   const node = useRef<HTMLDivElement>(null);
+  const [description, setDescription] = useState<string>('');
   const [isClosed, setIsClosed] = useState<boolean>(true);
+  const [selectValue, setSelectValue] = useState<string>('');
+  const [title, setTitle] = useState<string>('');
   const dialog = useDialogState({ visible: true });
   const ref = React.useRef<HTMLButtonElement>(null);
 
@@ -47,6 +52,7 @@ export function AddCard(props: Props) {
     };
   }, [isClosed]);
 
+  console.log(Boolean(selectValue && title));
   return (
     <div ref={node}>
       <Horizontal align="center">
@@ -62,32 +68,43 @@ export function AddCard(props: Props) {
           hideOnClickOutside
           preventBodyScroll={false}
         >
-          <form action="#" name="addtask">
+          <form action="#" name="addtask" onSubmit={onSubmit}>
             <DialogHeader>
               <h5>Add Task</h5>
             </DialogHeader>
             <DialogContent>
               <FormField>
                 <Label form="addtask" htmlFor="project">
-                  Project
+                  Project*
                 </Label>
-                <Select name="project" required unselected value="">
-                  <option value="" disabled selected>
+                <Select
+                  name="project"
+                  onChange={onChangeSelect}
+                  required
+                  unselected
+                  value={selectValue}
+                >
+                  <option value="" disabled>
                     Select your project
                   </option>
-                  <option value={1}>{1}</option>
-                  <option value={2}>{2}</option>
+                  {Object.values(projects).map(project => (
+                    <option key={project.id} value={project.id}>
+                      {project.fullname}
+                    </option>
+                  ))}
                 </Select>
               </FormField>
               <hr />
               <FormField>
                 <Label form="addtask" htmlFor="title">
-                  Title
+                  Title*
                 </Label>
                 <input
                   name="title"
+                  onChange={ev => setTitle(ev.target.value)}
                   placeholder="Concisely summarize the task."
                   required
+                  value={title}
                 />
               </FormField>
               <FormField>
@@ -96,14 +113,23 @@ export function AddCard(props: Props) {
                 </Label>
                 <Textarea
                   name="description"
+                  onChange={ev => setDescription(ev.target.value)}
                   placeholder="Describe the task in detail. Styling with Markdown is
                   supported."
+                  value={description}
                 ></Textarea>
               </FormField>
             </DialogContent>
             <DialogFooter>
-              <ButtonOutlined type="reset">Cancel</ButtonOutlined>{' '}
-              <Button type="submit">Add Task</Button>
+              <ButtonOutlined onClick={onClickCancel} type="reset">
+                Cancel
+              </ButtonOutlined>{' '}
+              <Button
+                disabled={Boolean(selectValue && title) ? false : true}
+                type="submit"
+              >
+                Add Task
+              </Button>
             </DialogFooter>
           </form>
         </Dialog>
@@ -111,8 +137,8 @@ export function AddCard(props: Props) {
     </div>
   );
 
-  function onClickAdd() {
-    setIsClosed(false);
+  function onChangeSelect(ev) {
+    setSelectValue(ev.target.value);
   }
 
   function onClickOutside(e) {
@@ -126,6 +152,19 @@ export function AddCard(props: Props) {
     // outside click
     console.log('clicking anywhere');
     setIsClosed(true);
+  }
+
+  function onClickCancel(ev) {
+    dialog.toggle();
+  }
+
+  function onSubmit(ev) {
+    ev.preventDefault();
+    console.log('onSubmit');
+    // add task to github
+    dialog.hide();
+    setDescription('');
+    setTitle('');
   }
 }
 
