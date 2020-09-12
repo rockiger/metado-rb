@@ -13,7 +13,7 @@ import {
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
 import { selectUserProfile, selectUid } from './selectors';
 import { actions } from './slice';
-import { Board, TaskMap, TaskState, Task } from './types';
+import { Board, TaskMap, ProjectMap, TaskState, Task } from './types';
 import { closeIssue, openIssue, syncGithub } from './connectors/github';
 
 // Workaround for overload problem with call to firestore
@@ -90,8 +90,23 @@ export function* getBoard(action) {
   yield put(actions.setBoard({ board }));
 }
 
+export function* getProjects(action) {
+  const { uid } = action.payload;
+
+  const projectsRef = db.collection('projects').where('user', '==', uid);
+  const projectsSnapshot = yield call([projectsRef, projectsRef.get]);
+  let projects: ProjectMap = {};
+  projectsSnapshot.forEach(doc => {
+    const data = doc.data();
+    projects[doc.id] = {
+      ...data,
+      created: convertTimestamp(data.created),
+    };
+  });
+  yield put(actions.setProjects({ projects: projects }));
+}
+
 export function* getTasks(action) {
-  console.log({ action });
   const { uid, projectIds } = action.payload;
 
   const tasksRef = db
@@ -263,6 +278,7 @@ function* updateTask(action) {
 
 function* databaseWatcherSaga() {
   yield takeLatest(actions.addGithubProject.type, addGithubProject);
+  yield takeLatest(actions.getProjects.type, getProjects);
   yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
   yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
   yield takeLatest(actions.syncBoardFromProviders, syncBoardFromProviders);
