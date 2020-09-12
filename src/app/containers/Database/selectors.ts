@@ -23,6 +23,11 @@ export const selectIsAuthenticated = createSelector(
   state => !_.isEmpty(state.authUser),
 );
 
+export const selectProjects = createSelector(
+  [selectDomain],
+  state => state.projects,
+);
+
 export const selectTasks = createSelector([selectDomain], state => state.tasks);
 
 export const selectUid = createSelector(

@@ -29,9 +29,14 @@ import {
   selectBoard,
   selectTasks,
   selectUid,
+  selectProjects,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
-import { Board as BoardType, TaskMap } from 'app/containers/Database/types';
+import {
+  Board as BoardType,
+  ProjectMap,
+  TaskMap,
+} from 'app/containers/Database/types';
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 
 import { BoardColumn } from './BoardColumn';
@@ -48,6 +53,7 @@ export function BoardPage(props: Props) {
   const { ownerId, boardId } = useParams();
   const activeBoard = useSelector(selectActiveBoard);
   const board = useSelector(selectBoard);
+  const projects = useSelector(selectProjects);
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
   const [isBoardUpdated, setIsBoardUpdated] = useState(false);
@@ -87,6 +93,13 @@ export function BoardPage(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, isBoardUpdated, tasks, uid]);
 
+  useEffect(() => {
+    if (uid) {
+      dispatch(databaseActions.getProjects({ uid }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid]);
+
   if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
   }
@@ -106,7 +119,7 @@ export function BoardPage(props: Props) {
             Add GitHub Project
           </Button>
         )}
-        <AddCard />
+        <AddCard projects={reduceProjects(board.projects, projects)} />
       </PageHeader>
       <BoardContent>
         <DragDropContext
@@ -225,3 +238,15 @@ export const BoardContent = styled(Horizontal)`
     padding: 2rem 4rem;
   `};
 `;
+
+function reduceProjects(
+  projectIds: string[],
+  projects: ProjectMap,
+): ProjectMap {
+  return Object.keys(projects)
+    .filter(key => projectIds.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = projects[key];
+      return obj;
+    }, {});
+}
