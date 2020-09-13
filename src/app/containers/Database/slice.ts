@@ -46,6 +46,15 @@ const databaseSlice = createSlice({
     addGithubProjectSuccess(state) {
       state.addingProject = 'success';
     },
+    addTask(
+      state,
+      action: PayloadAction<{
+        board: Board;
+        owner: string;
+        projects: ProjectMap;
+        taskData: { description: string; projectId: string; title: string };
+      }>,
+    ) {},
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;

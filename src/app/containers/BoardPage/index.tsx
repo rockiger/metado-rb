@@ -119,7 +119,10 @@ export function BoardPage(props: Props) {
             Add GitHub Project
           </Button>
         )}
-        <AddCard projects={reduceProjects(board.projects, projects)} />
+        <AddCard
+          addTaskOnSubmit={_.partial(addTaskToBoard, board, ownerId, projects)}
+          projects={reduceProjects(board.projects, projects)}
+        />
       </PageHeader>
       <BoardContent>
         <DragDropContext
@@ -140,6 +143,10 @@ export function BoardPage(props: Props) {
     console.log({ result });
     const dragResult = onDragEndResult(result, board, ownerId, tasks);
     dragResult.forEach(el => dispatch(el));
+  }
+
+  function addTaskToBoard(board, owner, projects, taskData) {
+    dispatch(databaseActions.addTask({ board, owner, projects, taskData }));
   }
 }
 
@@ -227,7 +234,6 @@ export function onDragEndResult(
     databaseActions.updateTask({ oldTask, task: newTask }),
   ];
 }
-
 export const BoardContent = styled(Horizontal)`
   align-items: flex-start;
   gap: 1.5rem;
