@@ -22,16 +22,21 @@ import {
 import { ProjectMap } from 'app/containers/Database/types';
 
 interface Props {
+  addTaskOnSubmit: (newTask: {
+    description: string;
+    projectId: string;
+    title: string;
+  }) => any;
   projects: ProjectMap;
 }
 
-export function AddCard({ projects }: Props) {
+export function AddCard({ addTaskOnSubmit, projects }: Props) {
   const node = useRef<HTMLDivElement>(null);
   const [description, setDescription] = useState<string>('');
   const [isClosed, setIsClosed] = useState<boolean>(true);
-  const [selectValue, setSelectValue] = useState<string>('');
+  const [projectId, setProjectId] = useState<string>('');
   const [title, setTitle] = useState<string>('');
-  const dialog = useDialogState({ visible: true });
+  const dialog = useDialogState();
   const ref = React.useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -52,7 +57,6 @@ export function AddCard({ projects }: Props) {
     };
   }, [isClosed]);
 
-  console.log(Boolean(selectValue && title));
   return (
     <div ref={node}>
       <Horizontal align="center">
@@ -82,7 +86,7 @@ export function AddCard({ projects }: Props) {
                   onChange={onChangeSelect}
                   required
                   unselected
-                  value={selectValue}
+                  value={projectId}
                 >
                   <option value="" disabled>
                     Select your project
@@ -125,7 +129,7 @@ export function AddCard({ projects }: Props) {
                 Cancel
               </ButtonOutlined>{' '}
               <Button
-                disabled={Boolean(selectValue && title) ? false : true}
+                disabled={Boolean(projectId && title) ? false : true}
                 type="submit"
               >
                 Add Task
@@ -138,7 +142,7 @@ export function AddCard({ projects }: Props) {
   );
 
   function onChangeSelect(ev) {
-    setSelectValue(ev.target.value);
+    setProjectId(ev.target.value);
   }
 
   function onClickOutside(e) {
@@ -161,7 +165,7 @@ export function AddCard({ projects }: Props) {
   function onSubmit(ev) {
     ev.preventDefault();
     console.log('onSubmit');
-    // add task to github
+    addTaskOnSubmit({ description, projectId, title });
     dialog.hide();
     setDescription('');
     setTitle('');
