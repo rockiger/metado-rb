@@ -1,9 +1,17 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from 'utils/@reduxjs/toolkit';
-import { AuthUser, Board, ContainerState, Task, TaskMap } from './types';
+import {
+  AuthUser,
+  Board,
+  ContainerState,
+  Task,
+  TaskMap,
+  ProjectMap,
+} from './types';
 
 // The initial state of the Database container
 export const initialState: ContainerState = {
+  addingProject: 'idle',
   authUser: getLocalAuthUser(),
   board: {
     columns: [],
@@ -13,7 +21,7 @@ export const initialState: ContainerState = {
     showBacklog: true,
     title: '',
   },
-  addingProject: 'idle',
+  projects: {},
   tasks: {},
   error: null,
 };
@@ -38,12 +46,27 @@ const databaseSlice = createSlice({
     addGithubProjectSuccess(state) {
       state.addingProject = 'success';
     },
+    addTask(
+      state,
+      action: PayloadAction<{
+        board: Board;
+        owner: string;
+        projects: ProjectMap;
+        taskData: { description: string; projectId: string; title: string };
+      }>,
+    ) {},
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;
     },
     updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
       state.board = action.payload.board;
+    },
+    getProjects(state, action: PayloadAction<{ uid: string }>) {
+      console.log('getProjects');
+    },
+    setProjects(state, action: PayloadAction<{ projects: ProjectMap }>) {
+      state.projects = action.payload.projects;
     },
     getTasks(
       state,

@@ -3,6 +3,7 @@ export interface DatabaseState {
   authUser: AuthUser;
   board: Board;
   addingProject: 'idle' | 'fetching' | 'error' | 'success';
+  projects: ProjectMap;
   tasks: TaskMap;
   error: any;
 }

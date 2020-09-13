@@ -1,4 +1,4 @@
-import { Task, TaskMap, TaskState } from '../types';
+import { Task, TaskMap, TaskState, Project } from '../types';
 import produce from 'immer';
 
 export { createOrUpdateTask, syncGithub, closeIssue, openIssue };
@@ -135,6 +135,26 @@ async function closeIssue(githubToken, taskId) {
   );
 
   console.log(response);
+}
+
+export async function createIssue(githubToken, project: Project, issueData) {
+  const { name: repo, owner } = project;
+  const { title, descritpion: body } = issueData;
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/issues`,
+    {
+      body: JSON.stringify({
+        title,
+        body,
+      }),
+      headers: {
+        Authorization: `token ${githubToken}`,
+      },
+      method: 'POST',
+    },
+  );
+  const data = await response.json();
+  return { status: response.status, data };
 }
 
 async function openIssue(githubToken, taskId) {

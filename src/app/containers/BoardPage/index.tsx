@@ -5,12 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from 'react-beautiful-dnd';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
@@ -18,14 +13,11 @@ import { Button } from 'reakit/Button';
 import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
-import { RadioCircle } from 'styled-icons/boxicons-regular';
-import { Github } from 'styled-icons/boxicons-logos';
 import media from 'styled-media-query';
 
 import { Navbar } from 'app/components/Navbar';
 import {
   Horizontal,
-  Label,
   PageHeader,
   PageTitle,
   PrivatePage,
@@ -37,13 +29,20 @@ import {
   selectBoard,
   selectTasks,
   selectUid,
+  selectProjects,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
-import { Board as BoardType, TaskMap } from 'app/containers/Database/types';
-
+import {
+  Board as BoardType,
+  ProjectMap,
+  TaskMap,
+} from 'app/containers/Database/types';
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
+
+import { BoardColumn } from './BoardColumn';
 import { reducer, sliceKey } from './slice';
 import { boardPageSaga } from './saga';
+import { AddCard } from './AddTask';
 
 interface Props {}
 
@@ -54,6 +53,7 @@ export function BoardPage(props: Props) {
   const { ownerId, boardId } = useParams();
   const activeBoard = useSelector(selectActiveBoard);
   const board = useSelector(selectBoard);
+  const projects = useSelector(selectProjects);
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
   const [isBoardUpdated, setIsBoardUpdated] = useState(false);
@@ -93,6 +93,13 @@ export function BoardPage(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, isBoardUpdated, tasks, uid]);
 
+  useEffect(() => {
+    if (uid) {
+      dispatch(databaseActions.getProjects({ uid }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid]);
+
   if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
   }
@@ -112,58 +119,16 @@ export function BoardPage(props: Props) {
             Add GitHub Project
           </Button>
         )}
+        <AddCard
+          addTaskOnSubmit={_.partial(addTaskToBoard, board, ownerId, projects)}
+          projects={reduceProjects(board.projects, projects)}
+        />
       </PageHeader>
       <BoardContent>
         <DragDropContext
           onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
         >
-          {board.columns.map((col, index) => (
-            <Column key={col.title}>
-              <ColumnTitle>
-                <ColumnIcon size="2rem" /> {col.title}
-              </ColumnTitle>
-              <Droppable droppableId={`${index}`}>
-                {provided => (
-                  <Cards
-                    className="list-content"
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    <div ref={provided.innerRef} {...provided.droppableProps}>
-                      {!_.isEmpty(tasks) &&
-                        col.taskIds.map((id, index) => {
-                          const task = tasks[id];
-                          return (
-                            <Draggable draggableId={id} key={id} index={index}>
-                              {provided => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  onClick={() => 'onClick(task)'}
-                                >
-                                  <Card key={id}>
-                                    <CardTitle>{task.title}</CardTitle>
-                                    <CardFooter>
-                                      <Spacer />
-                                      <Label>
-                                        <GithubLogo size="1.5rem" />
-                                        {task.project.split('-')[2]}
-                                      </Label>
-                                    </CardFooter>
-                                  </Card>
-                                </div>
-                              )}
-                            </Draggable>
-                          );
-                        })}
-                      {provided.placeholder}
-                    </div>
-                  </Cards>
-                )}
-              </Droppable>
-            </Column>
-          ))}
+          {board.columns.map((col, index) => BoardColumn(col, index, tasks))}
         </DragDropContext>
       </BoardContent>
     </PrivatePage>
@@ -178,6 +143,10 @@ export function BoardPage(props: Props) {
     console.log({ result });
     const dragResult = onDragEndResult(result, board, ownerId, tasks);
     dragResult.forEach(el => dispatch(el));
+  }
+
+  function addTaskToBoard(board, owner, projects, taskData) {
+    dispatch(databaseActions.addTask({ board, owner, projects, taskData }));
   }
 }
 
@@ -265,7 +234,6 @@ export function onDragEndResult(
     databaseActions.updateTask({ oldTask, task: newTask }),
   ];
 }
-
 export const BoardContent = styled(Horizontal)`
   align-items: flex-start;
   gap: 1.5rem;
@@ -277,52 +245,14 @@ export const BoardContent = styled(Horizontal)`
   `};
 `;
 
-const Column = styled.div`
-  background-color: white;
-  min-height: 16rem;
-  padding: 1.6rem;
-  width: 25%;
-`;
-
-const ColumnTitle = styled.h2`
-  align-items: center;
-  display: flex;
-  font-size: 2rem;
-  font-weight: 400;
-  margin: 0;
-  padding: 1.6rem 0 3.2rem;
-`;
-
-const ColumnIcon = styled(RadioCircle)`
-  color: ${p => p.theme.palette.grey[600]};
-  margin-right: 0.3rem;
-`;
-
-const Cards = styled.div`
-  min-height: 10rem;
-`;
-
-const Card = styled.div`
-  background-color: white;
-  border: 1px solid ${p => p.theme.palette.grey[300]};
-  border-radius: 4px;
-  margin-bottom: 1.6rem;
-  padding: 1.6rem;
-  &:hover {
-    box-shadow: ${p => p.theme.shadows[3]};
-  }
-  &:last-child {
-    margin-bottom: 1.6rem;
-  }
-`;
-
-const CardTitle = styled.div``;
-
-const CardFooter = styled.div`
-  display: flex;
-  padding-top: 0.5rem;
-`;
-
-const GithubLogo = styled(Github)`
-  padding-right: 0.2rem;
-`;
+function reduceProjects(
+  projectIds: string[],
+  projects: ProjectMap,
+): ProjectMap {
+  return Object.keys(projects)
+    .filter(key => projectIds.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = projects[key];
+      return obj;
+    }, {});
+}

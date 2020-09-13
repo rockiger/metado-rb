@@ -13,8 +13,13 @@ import {
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
 import { selectUserProfile, selectUid } from './selectors';
 import { actions } from './slice';
-import { Board, TaskMap, TaskState, Task } from './types';
-import { closeIssue, openIssue, syncGithub } from './connectors/github';
+import { Board, TaskMap, ProjectMap, TaskState, Task } from './types';
+import {
+  closeIssue,
+  createIssue,
+  openIssue,
+  syncGithub,
+} from './connectors/github';
 
 // Workaround for overload problem with call to firestore
 // https://stackoverflow.com/a/58814026
@@ -23,6 +28,64 @@ export const call: any = effCall;
 //////////////////
 // Worker Sagas //
 //////////////////
+
+export function* addTask(action) {
+  const { board, projects, taskData } = action.payload;
+  const project = projects[taskData.projectId];
+  const profile = yield select(selectUserProfile);
+
+  // Create task in github and get result
+  try {
+    const createResult = yield call(
+      createIssue,
+      profile.githubToken,
+      project,
+      taskData,
+    );
+    if (createResult.status === 201) {
+      const newTaskId = `${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
+
+      // Create task in firesotere-
+      const newTask: Task = {
+        created: new Date().toISOString(),
+        edited: new Date().toISOString(),
+        finished: '',
+        id: newTaskId,
+        description: taskData.description,
+        project: project.id,
+        status: TaskState.Backlog,
+        title: taskData.title,
+        user: project.user,
+      };
+      const taskRef = db.collection('tasks').doc(newTaskId);
+      yield call([taskRef, taskRef.set], newTask);
+
+      // Add Task to column, needs to be after task creation,
+      // otherwise we get a type error
+      const column = board.columns[0];
+      const newTaskIds = produce(column.taskIds, draftTaskIds => {
+        draftTaskIds.push(newTaskId);
+      });
+      const newColumn = produce(column, draftColumn => {
+        draftColumn.taskIds = newTaskIds;
+      });
+
+      const newColumns = produce(board.columns, draftColumns => {
+        draftColumns[0] = newColumn;
+      });
+
+      const newBoard = produce(board, draftBoard => {
+        draftBoard.columns = newColumns;
+      });
+
+      yield call(updateBoard, {
+        payload: { board: newBoard, uid: project.user },
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 export function* addGithubProject(action) {
   const { activeBoard, repo } = action.payload;
@@ -90,8 +153,23 @@ export function* getBoard(action) {
   yield put(actions.setBoard({ board }));
 }
 
+export function* getProjects(action) {
+  const { uid } = action.payload;
+
+  const projectsRef = db.collection('projects').where('user', '==', uid);
+  const projectsSnapshot = yield call([projectsRef, projectsRef.get]);
+  let projects: ProjectMap = {};
+  projectsSnapshot.forEach(doc => {
+    const data = doc.data();
+    projects[doc.id] = {
+      ...data,
+      created: convertTimestamp(data.created),
+    };
+  });
+  yield put(actions.setProjects({ projects: projects }));
+}
+
 export function* getTasks(action) {
-  console.log({ action });
   const { uid, projectIds } = action.payload;
 
   const tasksRef = db
@@ -131,7 +209,6 @@ function* openBoardChannel(action) {
 
   while (true) {
     const snapshot = yield take(channel);
-    console.log(snapshot.data());
     yield put(actions.setBoard({ board: snapshot.data() }));
   }
 }
@@ -263,6 +340,8 @@ function* updateTask(action) {
 
 function* databaseWatcherSaga() {
   yield takeLatest(actions.addGithubProject.type, addGithubProject);
+  yield takeLatest(actions.addTask.type, addTask);
+  yield takeLatest(actions.getProjects.type, getProjects);
   yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
   yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
   yield takeLatest(actions.syncBoardFromProviders, syncBoardFromProviders);
@@ -278,7 +357,6 @@ function* syncUserSaga() {
       const profileRef = db.collection('users').doc(user.uid);
       const profileSnapshot = yield call([profileRef, profileRef.get]);
       const profile = profileSnapshot.data();
-      console.log(profile);
       yield put(actions.syncUser({ ...user.toJSON(), profile }));
     } else yield put(actions.syncUserError(error));
   }
