@@ -12,13 +12,25 @@ import {
   Label,
   Spacer,
 } from 'app/components/UiComponents';
-import { Column as ColumnType, TaskMap } from 'app/containers/Database/types';
+import {
+  Column as ColumnType,
+  Task as TaskType,
+  TaskMap,
+} from 'app/containers/Database/types';
 
-export function BoardColumn(
-  col: ColumnType,
-  index: number,
-  tasks: TaskMap,
-): JSX.Element {
+interface Props {
+  col: ColumnType;
+  handleClickTask: (task: TaskType) => void;
+  index: number;
+  tasks: TaskMap;
+}
+
+export function BoardColumn({
+  col,
+  handleClickTask,
+  index,
+  tasks,
+}: Props): JSX.Element {
   return (
     <Column key={col.title}>
       <ColumnTitle>
@@ -44,7 +56,7 @@ export function BoardColumn(
                           {...provided.dragHandleProps}
                           onClick={() => 'onClick(task)'}
                         >
-                          <Task key={id}>
+                          <Task key={id} onClick={() => handleClickTask(task)}>
                             <CardTitle>{task.title}</CardTitle>
                             <CardFooter>
                               <Spacer />

@@ -75,7 +75,14 @@ const databaseSlice = createSlice({
     setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
       state.tasks = action.payload.tasks;
     },
-    updateTask(state, action: PayloadAction<{ oldTask: Task; task: Task }>) {
+    updateTask(
+      state,
+      action: PayloadAction<{
+        oldTask: Task;
+        projects: ProjectMap;
+        task: Task;
+      }>,
+    ) {
       const { task } = action.payload;
       state.tasks[task.id] = task;
     },

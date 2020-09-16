@@ -1,5 +1,6 @@
 import { Task, TaskMap, TaskState, Project } from '../types';
 import produce from 'immer';
+import * as _ from 'lodash';
 
 export { createOrUpdateTask, syncGithub, closeIssue, openIssue };
 
@@ -139,7 +140,7 @@ async function closeIssue(githubToken, taskId) {
 
 export async function createIssue(githubToken, project: Project, issueData) {
   const { name: repo, owner } = project;
-  const { title, descritpion: body } = issueData;
+  const { title, description: body } = issueData;
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/issues`,
     {
@@ -165,6 +166,32 @@ async function openIssue(githubToken, taskId) {
     {
       body: JSON.stringify({
         state: 'open',
+      }),
+      headers: {
+        Authorization: `token ${githubToken}`,
+      },
+      method: 'PATCH',
+    },
+  );
+
+  console.log(response);
+}
+
+export async function updateIssue(
+  githubToken: string,
+  issueData: Task,
+  project: Project,
+) {
+  const { name: repo, owner } = project;
+  const issueNumber = _.last(issueData.id.split('-'));
+  const { title, description: body } = issueData;
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`,
+    {
+      body: JSON.stringify({
+        title,
+        body,
       }),
       headers: {
         Authorization: `token ${githubToken}`,

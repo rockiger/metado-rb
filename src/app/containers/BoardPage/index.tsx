@@ -4,12 +4,13 @@
  *
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
 import { Button } from 'reakit/Button';
+import { useDialogState } from 'reakit/Dialog';
 import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
@@ -35,6 +36,7 @@ import { actions as databaseActions } from 'app/containers/Database/slice';
 import {
   Board as BoardType,
   ProjectMap,
+  Task,
   TaskMap,
 } from 'app/containers/Database/types';
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
@@ -43,6 +45,7 @@ import { BoardColumn } from './BoardColumn';
 import { reducer, sliceKey } from './slice';
 import { boardPageSaga } from './saga';
 import { AddCard } from './AddTask';
+import { EditTask } from './EditTask';
 
 interface Props {}
 
@@ -57,6 +60,9 @@ export function BoardPage(props: Props) {
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
   const [isBoardUpdated, setIsBoardUpdated] = useState(false);
+  const editDialogState = useDialogState();
+  const [editTaskState, setEditTaskState] = useState<Task | null>(null);
+  const editDialogFinalFocusRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (boardId && board.id !== boardId && ownerId && ownerId === uid) {
@@ -124,15 +130,35 @@ export function BoardPage(props: Props) {
           projects={reduceProjects(board.projects, projects)}
         />
       </PageHeader>
-      <BoardContent>
+      <BoardContent ref={editDialogFinalFocusRef}>
         <DragDropContext
           onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
         >
-          {board.columns.map((col, index) => BoardColumn(col, index, tasks))}
+          {board.columns.map((col, index) => (
+            <BoardColumn
+              col={col}
+              index={index}
+              key={index}
+              tasks={tasks}
+              handleClickTask={handleClickTask}
+            />
+          ))}
         </DragDropContext>
       </BoardContent>
+      <EditTask
+        dialogState={editDialogState}
+        finalFocusRef={editDialogFinalFocusRef}
+        handleEditTask={handleEditTask}
+        task={editTaskState}
+      />
     </PrivatePage>
   );
+
+  function handleClickTask(task: Task) {
+    console.log('handelClickTask', { task });
+    setEditTaskState(task);
+    editDialogState.show();
+  }
 
   function onDragEnd(
     result: DropResult,
@@ -141,12 +167,17 @@ export function BoardPage(props: Props) {
     tasks: TaskMap,
   ) {
     console.log({ result });
-    const dragResult = onDragEndResult(result, board, ownerId, tasks);
+    const dragResult = onDragEndResult(result, board, ownerId, projects, tasks);
     dragResult.forEach(el => dispatch(el));
   }
 
   function addTaskToBoard(board, owner, projects, taskData) {
     dispatch(databaseActions.addTask({ board, owner, projects, taskData }));
+  }
+
+  function handleEditTask(oldTask, task) {
+    console.log('handleEditTask', { task });
+    dispatch(databaseActions.updateTask({ oldTask, task, projects }));
   }
 }
 
@@ -163,6 +194,7 @@ export function onDragEndResult(
   result: DropResult,
   board: BoardType,
   ownerId: string,
+  projects: ProjectMap,
   tasks: TaskMap,
 ) {
   const { destination, source, draggableId } = result;
@@ -231,10 +263,10 @@ export function onDragEndResult(
 
   return [
     databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
-    databaseActions.updateTask({ oldTask, task: newTask }),
+    databaseActions.updateTask({ oldTask, task: newTask, projects }),
   ];
 }
-export const BoardContent = styled(Horizontal)`
+export const BoardContent = styled(Horizontal)<{ ref: any }>`
   align-items: flex-start;
   gap: 1.5rem;
   justify-content: space-evenly;
