@@ -19,6 +19,7 @@ import {
   createIssue,
   openIssue,
   syncGithub,
+  updateIssue,
 } from './connectors/github';
 
 // Workaround for overload problem with call to firestore
@@ -316,8 +317,9 @@ function* updateBoard(action) {
 
 function* updateTask(action) {
   console.log('updateTask', { action });
-  const { oldTask, task } = action.payload;
+  const { oldTask, projects, task } = action.payload;
   const profile = yield select(selectUserProfile);
+  const project = projects[oldTask.project];
   const taskRef = db.collection('tasks').doc(task.id);
   try {
     yield call([taskRef, taskRef.set], task);
@@ -327,6 +329,12 @@ function* updateTask(action) {
       }
       if (oldTask.status !== TaskState.Done && task.status === TaskState.Done) {
         yield call(closeIssue, profile.githubToken, task.id);
+      }
+      if (
+        oldTask.title !== task.title ||
+        oldTask.description !== task.description
+      ) {
+        yield call(updateIssue, profile.githubToken, task, project);
       }
     }
   } catch (error) {
