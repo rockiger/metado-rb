@@ -119,8 +119,13 @@ async function fetchIssuesFromGithubRepo(repoFullname, githubToken) {
   return externalTasks;
 }
 
-async function closeIssue(githubToken, taskId) {
-  const [, owner, repo, issueNumber] = taskId.split('-');
+async function closeIssue(
+  githubToken: string,
+  issueData: Task,
+  project: Project,
+) {
+  const { name: repo, owner } = project;
+  const issueNumber = _.last(issueData.id.split('-'));
 
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`,
@@ -158,8 +163,13 @@ export async function createIssue(githubToken, project: Project, issueData) {
   return { status: response.status, data };
 }
 
-async function openIssue(githubToken, taskId) {
-  const [, owner, repo, issueNumber] = taskId.split('-');
+async function openIssue(
+  githubToken: string,
+  issueData: Task,
+  project: Project,
+) {
+  const { name: repo, owner } = project;
+  const issueNumber = _.last(issueData.id.split('-'));
 
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`,

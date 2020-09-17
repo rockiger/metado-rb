@@ -139,6 +139,7 @@ export function BoardPage(props: Props) {
               col={col}
               index={index}
               key={index}
+              projects={projects}
               tasks={tasks}
               handleClickTask={handleClickTask}
             />
