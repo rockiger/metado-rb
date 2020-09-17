@@ -14,6 +14,7 @@ import {
 } from 'app/components/UiComponents';
 import {
   Column as ColumnType,
+  ProjectMap,
   Task as TaskType,
   TaskMap,
 } from 'app/containers/Database/types';
@@ -22,6 +23,7 @@ interface Props {
   col: ColumnType;
   handleClickTask: (task: TaskType) => void;
   index: number;
+  projects: ProjectMap;
   tasks: TaskMap;
 }
 
@@ -29,6 +31,7 @@ export function BoardColumn({
   col,
   handleClickTask,
   index,
+  projects,
   tasks,
 }: Props): JSX.Element {
   return (
@@ -47,6 +50,7 @@ export function BoardColumn({
               {!_.isEmpty(tasks) &&
                 col.taskIds.map((id, index) => {
                   const task = tasks[id];
+                  const project = projects[task.project];
                   return (
                     <Draggable draggableId={id} key={id} index={index}>
                       {provided => (
@@ -62,7 +66,7 @@ export function BoardColumn({
                               <Spacer />
                               <Label>
                                 <GithubLogo size="1.5rem" />
-                                {task.project.split('-')[2]}
+                                {project.name}
                               </Label>
                             </CardFooter>
                           </Task>

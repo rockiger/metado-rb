@@ -325,10 +325,10 @@ function* updateTask(action) {
     yield call([taskRef, taskRef.set], task);
     if (task.id.startsWith('github') && profile.githubToken) {
       if (oldTask.status === TaskState.Done && task.status !== TaskState.Done) {
-        yield call(openIssue, profile.githubToken, task.id);
+        yield call(openIssue, profile.githubToken, task, project);
       }
       if (oldTask.status !== TaskState.Done && task.status === TaskState.Done) {
-        yield call(closeIssue, profile.githubToken, task.id);
+        yield call(closeIssue, profile.githubToken, task, project);
       }
       if (
         oldTask.title !== task.title ||
