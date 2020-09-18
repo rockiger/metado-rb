@@ -1,7 +1,7 @@
 /* --- STATE --- */
 export interface AddGithubRepoState {
   repos: any[];
-  status: 'idle' | 'fetching' | 'error' | 'success';
+  status: 'init' | 'fetching' | 'error' | 'success';
 }
 
 export type ContainerState = AddGithubRepoState;
