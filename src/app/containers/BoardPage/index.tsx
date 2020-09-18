@@ -53,7 +53,10 @@ export function BoardPage(props: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: boardPageSaga });
   const dispatch = useDispatch();
-  const { ownerId, boardId } = useParams();
+  const { ownerId, boardId } = useParams<{
+    ownerId: string;
+    boardId: string;
+  }>();
   const activeBoard = useSelector(selectActiveBoard);
   const board = useSelector(selectBoard);
   const projects = useSelector(selectProjects);
@@ -65,18 +68,18 @@ export function BoardPage(props: Props) {
   const editDialogFinalFocusRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (boardId && board.id !== boardId && ownerId && ownerId === uid) {
+    if (boardId && board?.id !== boardId && ownerId && ownerId === uid) {
       dispatch(databaseActions.openBoardChannel({ uid: ownerId, boardId }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, boardId, ownerId, uid]);
 
   useEffect(() => {
-    if (board.id && _.isEmpty(tasks)) {
+    if (board?.id && _.isEmpty(tasks)) {
       dispatch(
         databaseActions.openTasksChannel({
           uid: ownerId,
-          projectIds: board.projects,
+          projectIds: board?.projects,
         }),
       );
     }
@@ -92,7 +95,7 @@ export function BoardPage(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (!isBoardUpdated && board.id && !_.isEmpty(tasks) && uid) {
+    if (!isBoardUpdated && board?.id && !_.isEmpty(tasks) && uid) {
       dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
       setIsBoardUpdated(true);
     }
@@ -106,7 +109,11 @@ export function BoardPage(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
 
-  if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
+  console.log({ activeBoard });
+  if (
+    (uid !== ownerId || ownerId === undefined || boardId === undefined) &&
+    activeBoard
+  ) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
   }
 
@@ -118,41 +125,55 @@ export function BoardPage(props: Props) {
       </Helmet>
       <Navbar />
       <PageHeader>
-        <PageTitle>{board.title}</PageTitle>
+        <PageTitle>{board?.title}</PageTitle>
         <Spacer />
-        {board.projects.length < 10 && (
+        {board?.projects?.length < 10 && (
           <Button as={Link} to={`/projects/add/github`}>
             Add GitHub Project
           </Button>
         )}
-        <AddCard
-          addTaskOnSubmit={_.partial(addTaskToBoard, board, ownerId, projects)}
-          projects={reduceProjects(board.projects, projects)}
-        />
+        {board && (
+          <AddCard
+            addTaskOnSubmit={_.partial(
+              addTaskToBoard,
+              board,
+              ownerId,
+              projects,
+            )}
+            projects={reduceProjects(board.projects, projects)}
+          />
+        )}
       </PageHeader>
+
       <BoardContent ref={editDialogFinalFocusRef}>
-        <DragDropContext
-          onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
-        >
-          {board.columns.map((col, index) => (
-            <BoardColumn
-              col={col}
-              index={index}
-              key={index}
-              projects={projects}
-              tasks={tasks}
-              handleClickTask={handleClickTask}
+        {board && (
+          <>
+            <DragDropContext
+              onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
+            >
+              {board.columns.map((col, index) => (
+                <BoardColumn
+                  col={col}
+                  index={index}
+                  key={index}
+                  projects={projects}
+                  tasks={tasks}
+                  handleClickTask={handleClickTask}
+                />
+              ))}
+            </DragDropContext>
+            <EditTask
+              dialogState={editDialogState}
+              finalFocusRef={editDialogFinalFocusRef}
+              handleCancelEdit={() => setEditTaskState(null)}
+              handleEditTask={handleEditTask}
+              task={editTaskState}
             />
-          ))}
-        </DragDropContext>
+          </>
+        )}
+        {!board && !activeBoard && <div>Preparing your boards</div>}
+        {!board && activeBoard && <div>Couldn't find board</div>}
       </BoardContent>
-      <EditTask
-        dialogState={editDialogState}
-        finalFocusRef={editDialogFinalFocusRef}
-        handleCancelEdit={() => setEditTaskState(null)}
-        handleEditTask={handleEditTask}
-        task={editTaskState}
-      />
     </PrivatePage>
   );
 
