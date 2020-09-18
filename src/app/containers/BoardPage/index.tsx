@@ -149,6 +149,7 @@ export function BoardPage(props: Props) {
       <EditTask
         dialogState={editDialogState}
         finalFocusRef={editDialogFinalFocusRef}
+        handleCancelEdit={() => setEditTaskState(null)}
         handleEditTask={handleEditTask}
         task={editTaskState}
       />

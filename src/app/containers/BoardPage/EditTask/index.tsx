@@ -17,6 +17,7 @@ import { Task } from 'app/containers/Database/types';
 interface Props {
   dialogState: DialogStateReturn;
   finalFocusRef: any;
+  handleCancelEdit: () => void;
   handleEditTask: (oldTask: Task, task: Task) => void;
   task: Task | null;
 }
@@ -24,6 +25,7 @@ interface Props {
 export function EditTask({
   dialogState,
   finalFocusRef,
+  handleCancelEdit,
   handleEditTask,
   task,
 }: Props) {
@@ -92,6 +94,7 @@ export function EditTask({
   function onClickCancel() {
     setDescription('');
     setTitle('');
+    handleCancelEdit();
     dialogState.hide();
   }
 
