@@ -11,7 +11,7 @@ import {
 
 // The initial state of the Database container
 export const initialState: ContainerState = {
-  addingProject: 'idle',
+  addingProjectStatus: 'init',
   authUser: getLocalAuthUser(),
   board: {
     columns: [],
@@ -25,7 +25,6 @@ export const initialState: ContainerState = {
   tasks: {},
   error: null,
 };
-
 const databaseSlice = createSlice({
   name: 'database',
   initialState,
@@ -37,14 +36,14 @@ const databaseSlice = createSlice({
         repo: { [x: string]: any };
       }>,
     ) {
-      state.addingProject = 'fetching';
+      state.addingProjectStatus = 'fetching';
     },
     addGithubProjectError(state, action: PayloadAction<{ error: any }>) {
-      state.addingProject = 'error';
+      state.addingProjectStatus = 'error';
       state.error = action.payload.error;
     },
     addGithubProjectSuccess(state) {
-      state.addingProject = 'success';
+      state.addingProjectStatus = 'success';
     },
     addTask(
       state,
@@ -101,7 +100,7 @@ const databaseSlice = createSlice({
     ) {},
     closeTasksChannel() {},
     resetAddProject(state) {
-      state.addingProject = 'idle';
+      state.addingProjectStatus = 'init';
     },
     syncUser(state, action: PayloadAction<{ [key: string]: any }>) {
       setLocalAuthUser(action.payload);

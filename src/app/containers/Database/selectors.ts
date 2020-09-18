@@ -8,7 +8,7 @@ const selectDomain = (state: RootState) => state.database || initialState;
 
 export const selectAddingProject = createSelector(
   [selectDomain],
-  state => state.addingProject,
+  state => state.addingProjectStatus,
 );
 
 export const selectActiveBoard = createSelector(
