@@ -342,6 +342,16 @@ function* updateTask(action) {
   }
 }
 
+function* updateUserCredentials(action) {
+  const { uid, username, email } = action.payload;
+  const userRef = db.collection('users').doc(uid);
+  try {
+    yield call([userRef, userRef.set], { email, username }, { merge: true });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 ///////////////////
 // Watcher Sagas //
 ///////////////////
@@ -355,6 +365,7 @@ function* databaseWatcherSaga() {
   yield takeLatest(actions.syncBoardFromProviders, syncBoardFromProviders);
   yield takeLatest(actions.updateBoard.type, updateBoard);
   yield takeLatest(actions.updateTask.type, updateTask);
+  yield takeLatest(actions.updateUserCredentials.type, updateUserCredentials);
 }
 
 function* syncUserSaga() {

@@ -86,6 +86,10 @@ const databaseSlice = createSlice({
       const { task } = action.payload;
       state.tasks[task.id] = task;
     },
+    updateUserCredentials(
+      state,
+      action: PayloadAction<{ email: string; uid: string; username: string }>,
+    ) {},
     openBoardChannel(
       state,
       action: PayloadAction<{ uid: string; boardId: string }>,
