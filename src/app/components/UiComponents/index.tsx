@@ -19,8 +19,8 @@ export const CardFooter = styled.div`
   padding-top: 0.5rem;
 `;
 
-type HorizontalProps = { align?: 'left' | 'center' | 'right' };
-export const Horizontal = styled.div<HorizontalProps>`
+type RowProps = { align?: 'left' | 'center' | 'right' };
+export const Row = styled.div<RowProps>`
   align-items: center;
   display: flex;
   justify-content: ${p => p.align};
@@ -89,4 +89,13 @@ export const Label = styled.div`
 
   border-radius: var(--border-radius);
   transition: var(--transition);
+`;
+
+type ColumnProps = { align?: 'left' | 'center' | 'right' };
+export const Column = styled.div<ColumnProps>`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: ${p => p.align};
+  width: 100%;
 `;

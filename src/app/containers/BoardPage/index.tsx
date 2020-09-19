@@ -9,7 +9,6 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
-import { Button } from 'reakit/Button';
 import { useDialogState } from 'reakit/Dialog';
 import produce from 'immer';
 import * as _ from 'lodash';
@@ -18,10 +17,13 @@ import media from 'styled-media-query';
 
 import { Navbar } from 'app/components/Navbar';
 import {
-  Horizontal,
+  Button,
+  Card,
+  Column,
   PageHeader,
   PageTitle,
   PrivatePage,
+  Row,
   Spacer,
 } from 'app/components/UiComponents';
 
@@ -115,6 +117,7 @@ export function BoardPage(props: Props) {
       }
     };
     createAndUpdateBoard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId, activeBoard, uid]);
 
   //! if projectStatus==='success' and _.isEmpty(projects) show, add some projects
@@ -162,31 +165,34 @@ export function BoardPage(props: Props) {
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
       <Navbar />
-      {boardStatus === 'success' && board?.id && (
-        <PageHeader>
-          <PageTitle>{board?.title}</PageTitle>
-          <Spacer />
-          {board?.projects?.length < 10 && (
-            <Button as={Link} to={`/projects/add/github`}>
-              Add GitHub Project
-            </Button>
-          )}
-          {board && (
-            <AddCard
-              addTaskOnSubmit={_.partial(
-                addTaskToBoard,
-                board,
-                ownerId,
-                projects,
-              )}
-              projects={reduceProjects(board.projects, projects)}
-            />
-          )}
-        </PageHeader>
-      )}
+
+      <PageHeader>
+        <PageTitle>{board?.title}</PageTitle>
+        <Spacer />
+        {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
+          <>
+            {board?.projects?.length < 10 && (
+              <Button as={Link} to={`/projects/add/github`}>
+                Add GitHub Project
+              </Button>
+            )}
+            {board && (
+              <AddCard
+                addTaskOnSubmit={_.partial(
+                  addTaskToBoard,
+                  board,
+                  ownerId,
+                  projects,
+                )}
+                projects={reduceProjects(board.projects, projects)}
+              />
+            )}
+          </>
+        )}
+      </PageHeader>
 
       <BoardContent ref={editDialogFinalFocusRef}>
-        {boardStatus === 'success' && board?.id && (
+        {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
           <>
             <DragDropContext
               onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
@@ -211,13 +217,28 @@ export function BoardPage(props: Props) {
             />
           </>
         )}
-        {!boardId && !activeBoard && <div>Preparing your board...</div>}
+        {!activeBoard && !boardId && !board?.id && (
+          <div>Preparing your board...</div>
+        )}
         {((boardStatus === 'success' && !board.id && boardId) ||
           (ownerId && ownerId !== uid)) && (
           <>
             <div>Couldn't find board</div>
             <p>Go to last used board...</p>
           </>
+        )}
+        {board.id && _.isEmpty(board.projects) && (
+          <Card>
+            <Column align="center">
+              <h2>
+                It seems your board doesn't have any project attached. Go and
+                add one.
+              </h2>
+              <Button as={Link} to={`/projects/add/github`}>
+                Add GitHub Project
+              </Button>
+            </Column>
+          </Card>
         )}
       </BoardContent>
     </PrivatePage>
@@ -335,7 +356,7 @@ export function onDragEndResult(
     databaseActions.updateTask({ oldTask, task: newTask, projects }),
   ];
 }
-export const BoardContent = styled(Horizontal)<{ ref: any }>`
+export const BoardContent = styled(Row)<{ ref: any }>`
   align-items: flex-start;
   gap: 1.5rem;
   justify-content: space-evenly;

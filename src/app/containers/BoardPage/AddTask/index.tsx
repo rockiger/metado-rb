@@ -9,7 +9,7 @@ import { useDialogState, DialogDisclosure } from 'reakit/Dialog';
 import {
   Button,
   ButtonClear,
-  Horizontal,
+  Row,
   ButtonOutlined,
 } from 'app/components/UiComponents';
 import { ProjectMap } from 'app/containers/Database/types';
@@ -63,11 +63,11 @@ export function AddCard({ addTaskOnSubmit, projects }: Props) {
 
   return (
     <div ref={node}>
-      <Horizontal align="center">
+      <Row align="center">
         <DialogDisclosure as={ButtonClear} {...dialog}>
           <b>+ Add Card</b>
         </DialogDisclosure>
-      </Horizontal>
+      </Row>
       <DialogBackdrop {...dialog}>
         <Dialog
           {...dialog}

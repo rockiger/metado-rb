@@ -126,7 +126,9 @@ const databaseSlice = createSlice({
     updateActiveBoard(
       state,
       action: PayloadAction<{ boardId: string; uid: string }>,
-    ) {},
+    ) {
+      state.authUser.profile.activeBoard = action.payload.boardId;
+    },
   },
 });
 
