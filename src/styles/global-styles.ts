@@ -170,8 +170,8 @@ input[type='submit'] {
   input[type='reset']:hover,
   input[type='submit']:focus,
   input[type='submit']:hover {
-	background-color: var(--bg-color-secondary);
-	border-color: var(--bg-color-secondary);
+	background-color: var(--color-lightGrey);
+	border-color: var(--color-lightGrey);
 	color: var(--color-primary);
 	outline: 0;
 }
@@ -217,7 +217,7 @@ input[type='submit'] {
     input[type='submit'].button-outline:focus,
     input[type='submit'].button-outline:hover {
 	background-color: transparent;
-	border-color: var(--bg-color-secondary);
+	border-color: var(--color-lightGrey);
 	color: var(--color-text);
 }
 
@@ -253,7 +253,7 @@ input[type='submit'] {
     input[type='reset'].button-clear:hover,
     input[type='submit'].button-clear:focus,
     input[type='submit'].button-clear:hover {
-	background-color: var(--bg-color-secondary);
+	background-color: var(--color-lightGrey);
 	border-color: transparent;
 	color: var(--color-darkGrey);
 }
