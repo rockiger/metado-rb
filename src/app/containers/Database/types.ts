@@ -2,6 +2,7 @@
 export interface DatabaseState {
   authUser: AuthUser;
   board: Board;
+  boardStatus: LoadingStatus;
   addingProjectStatus: LoadingStatus;
   projects: ProjectMap;
   tasks: TaskMap;

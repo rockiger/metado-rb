@@ -300,6 +300,18 @@ function* syncBoardFromProviders(
   }
 }
 
+function* updateActiveBoard(
+  action: PayloadAction<{ boardId: string; uid: string }>,
+) {
+  const { boardId, uid } = action.payload;
+  const userRef = db.collection('users').doc(uid);
+  try {
+    yield call([userRef, userRef.update], { activeBoard: boardId });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function* updateBoard(action) {
   console.log('updateBoard', { action });
   const { board, uid } = action.payload;
@@ -363,6 +375,7 @@ function* databaseWatcherSaga() {
   yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
   yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
   yield takeLatest(actions.syncBoardFromProviders, syncBoardFromProviders);
+  yield takeLatest(actions.updateActiveBoard.type, updateActiveBoard);
   yield takeLatest(actions.updateBoard.type, updateBoard);
   yield takeLatest(actions.updateTask.type, updateTask);
   yield takeLatest(actions.updateUserCredentials.type, updateUserCredentials);
