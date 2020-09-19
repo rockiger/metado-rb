@@ -9,18 +9,20 @@ import {
   ProjectMap,
 } from './types';
 
+const initialBoard: Board = {
+  columns: [],
+  id: '',
+  isDeleted: false,
+  projects: [],
+  showBacklog: true,
+  title: '',
+};
 // The initial state of the Database container
 export const initialState: ContainerState = {
   addingProjectStatus: 'init',
   authUser: getLocalAuthUser(),
-  board: {
-    columns: [],
-    id: '',
-    isDeleted: false,
-    projects: [],
-    showBacklog: true,
-    title: '',
-  },
+  board: initialBoard,
+  boardStatus: 'init',
   projects: {},
   tasks: {},
   error: null,
@@ -57,6 +59,7 @@ const databaseSlice = createSlice({
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;
+      state.boardStatus = 'success';
     },
     updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
       state.board = action.payload.board;
@@ -92,8 +95,12 @@ const databaseSlice = createSlice({
     openBoardChannel(
       state,
       action: PayloadAction<{ uid: string; boardId: string }>,
-    ) {},
-    closeBoardChannel() {},
+    ) {
+      state.boardStatus = 'fetching';
+    },
+    closeBoardChannel(state) {
+      state.boardStatus = 'init';
+    },
     openTasksChannel(
       state,
       action: PayloadAction<{ uid: string; projectIds: string[] }>,
@@ -116,6 +123,10 @@ const databaseSlice = createSlice({
     ) {
       console.log('syncBoardFromProviders');
     },
+    updateActiveBoard(
+      state,
+      action: PayloadAction<{ boardId: string; uid: string }>,
+    ) {},
   },
 });
 

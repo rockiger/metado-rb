@@ -16,7 +16,10 @@ export const selectActiveBoard = createSelector(
   state => state.authUser.profile.activeBoard,
 );
 
-export const selectBoard = createSelector([selectDomain], state => state.board);
+export const selectBoard = createSelector([selectDomain], state => ({
+  board: state.board,
+  boardStatus: state.boardStatus,
+}));
 
 export const selectIsAuthenticated = createSelector(
   [selectDomain],

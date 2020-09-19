@@ -58,7 +58,7 @@ export function BoardPage(props: Props) {
     boardId: string;
   }>();
   const activeBoard = useSelector(selectActiveBoard);
-  const board = useSelector(selectBoard);
+  const { board, boardStatus } = useSelector(selectBoard);
   const projects = useSelector(selectProjects);
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
@@ -75,7 +75,7 @@ export function BoardPage(props: Props) {
   }, [board, boardId, ownerId, uid]);
 
   useEffect(() => {
-    if (board?.id && _.isEmpty(tasks)) {
+    if (!_.isEmpty(board?.projects) && _.isEmpty(tasks)) {
       dispatch(
         databaseActions.openTasksChannel({
           uid: ownerId,
@@ -87,6 +87,39 @@ export function BoardPage(props: Props) {
   }, [board, ownerId, tasks]);
 
   useEffect(() => {
+    const createAndUpdateBoard = async () => {
+      console.log({ boardId, activeBoard, uid });
+      if (!boardId && !activeBoard && uid) {
+        console.log('create Board');
+        await dispatch(
+          databaseActions.updateBoard({
+            board: {
+              columns: [
+                { taskIds: [], title: 'Backlog' },
+                { taskIds: [], title: 'Todo' },
+                { taskIds: [], title: 'Doing' },
+                { taskIds: [], title: 'Done' },
+              ],
+              id: 'main-board',
+              isDeleted: false,
+              projects: [],
+              showBacklog: true,
+              title: 'Main Board',
+            },
+            uid,
+          }),
+        );
+        await dispatch(
+          databaseActions.updateActiveBoard({ boardId: 'main-board', uid }),
+        );
+      }
+    };
+    createAndUpdateBoard();
+  }, [boardId, activeBoard, uid]);
+
+  //! if projectStatus==='success' and _.isEmpty(projects) show, add some projects
+
+  useEffect(() => {
     return () => {
       dispatch(databaseActions.closeBoardChannel());
       dispatch(databaseActions.closeTasksChannel());
@@ -95,7 +128,12 @@ export function BoardPage(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (!isBoardUpdated && board?.id && !_.isEmpty(tasks) && uid) {
+    if (
+      !isBoardUpdated &&
+      !_.isEmpty(board?.projects) &&
+      !_.isEmpty(tasks) &&
+      uid
+    ) {
       dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
       setIsBoardUpdated(true);
     }
@@ -109,7 +147,7 @@ export function BoardPage(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
 
-  console.log({ activeBoard });
+  console.log({ activeBoard, boardId, board });
   if (
     (uid !== ownerId || ownerId === undefined || boardId === undefined) &&
     activeBoard
@@ -124,29 +162,31 @@ export function BoardPage(props: Props) {
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
       <Navbar />
-      <PageHeader>
-        <PageTitle>{board?.title}</PageTitle>
-        <Spacer />
-        {board?.projects?.length < 10 && (
-          <Button as={Link} to={`/projects/add/github`}>
-            Add GitHub Project
-          </Button>
-        )}
-        {board && (
-          <AddCard
-            addTaskOnSubmit={_.partial(
-              addTaskToBoard,
-              board,
-              ownerId,
-              projects,
-            )}
-            projects={reduceProjects(board.projects, projects)}
-          />
-        )}
-      </PageHeader>
+      {boardStatus === 'success' && board?.id && (
+        <PageHeader>
+          <PageTitle>{board?.title}</PageTitle>
+          <Spacer />
+          {board?.projects?.length < 10 && (
+            <Button as={Link} to={`/projects/add/github`}>
+              Add GitHub Project
+            </Button>
+          )}
+          {board && (
+            <AddCard
+              addTaskOnSubmit={_.partial(
+                addTaskToBoard,
+                board,
+                ownerId,
+                projects,
+              )}
+              projects={reduceProjects(board.projects, projects)}
+            />
+          )}
+        </PageHeader>
+      )}
 
       <BoardContent ref={editDialogFinalFocusRef}>
-        {board && (
+        {boardStatus === 'success' && board?.id && (
           <>
             <DragDropContext
               onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
@@ -171,8 +211,14 @@ export function BoardPage(props: Props) {
             />
           </>
         )}
-        {!board && !activeBoard && <div>Preparing your boards</div>}
-        {!board && activeBoard && <div>Couldn't find board</div>}
+        {!boardId && !activeBoard && <div>Preparing your board...</div>}
+        {((boardStatus === 'success' && !board.id && boardId) ||
+          (ownerId && ownerId !== uid)) && (
+          <>
+            <div>Couldn't find board</div>
+            <p>Go to last used board...</p>
+          </>
+        )}
       </BoardContent>
     </PrivatePage>
   );

@@ -69,7 +69,9 @@ export function AddGithubRepo(props: Props) {
   const { repos, status } = useSelector(selectAddGithubRepo);
   const addingProjectStatus = useSelector(selectAddingProject);
   // WARNING projects is not always filled, only when we are comming from board
-  const { projects } = useSelector(selectBoard);
+  const {
+    board: { projects },
+  } = useSelector(selectBoard);
   const error = useSelector(selectError);
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
   const [selectedRepo, setSelectedRepo] = useState<number>(-1);
