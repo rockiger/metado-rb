@@ -9,23 +9,24 @@ import {
   ProjectMap,
 } from './types';
 
+const initialBoard: Board = {
+  columns: [],
+  id: '',
+  isDeleted: false,
+  projects: [],
+  showBacklog: true,
+  title: '',
+};
 // The initial state of the Database container
 export const initialState: ContainerState = {
-  addingProject: 'idle',
+  addingProjectStatus: 'init',
   authUser: getLocalAuthUser(),
-  board: {
-    columns: [],
-    id: '',
-    isDeleted: false,
-    projects: [],
-    showBacklog: true,
-    title: '',
-  },
+  board: initialBoard,
+  boardStatus: 'init',
   projects: {},
   tasks: {},
   error: null,
 };
-
 const databaseSlice = createSlice({
   name: 'database',
   initialState,
@@ -37,14 +38,14 @@ const databaseSlice = createSlice({
         repo: { [x: string]: any };
       }>,
     ) {
-      state.addingProject = 'fetching';
+      state.addingProjectStatus = 'fetching';
     },
     addGithubProjectError(state, action: PayloadAction<{ error: any }>) {
-      state.addingProject = 'error';
+      state.addingProjectStatus = 'error';
       state.error = action.payload.error;
     },
     addGithubProjectSuccess(state) {
-      state.addingProject = 'success';
+      state.addingProjectStatus = 'success';
     },
     addTask(
       state,
@@ -58,6 +59,7 @@ const databaseSlice = createSlice({
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;
+      state.boardStatus = 'success';
     },
     updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
       state.board = action.payload.board;
@@ -86,18 +88,26 @@ const databaseSlice = createSlice({
       const { task } = action.payload;
       state.tasks[task.id] = task;
     },
+    updateUserCredentials(
+      state,
+      action: PayloadAction<{ email: string; uid: string; username: string }>,
+    ) {},
     openBoardChannel(
       state,
       action: PayloadAction<{ uid: string; boardId: string }>,
-    ) {},
-    closeBoardChannel() {},
+    ) {
+      state.boardStatus = 'fetching';
+    },
+    closeBoardChannel(state) {
+      state.boardStatus = 'init';
+    },
     openTasksChannel(
       state,
       action: PayloadAction<{ uid: string; projectIds: string[] }>,
     ) {},
     closeTasksChannel() {},
     resetAddProject(state) {
-      state.addingProject = 'idle';
+      state.addingProjectStatus = 'init';
     },
     syncUser(state, action: PayloadAction<{ [key: string]: any }>) {
       setLocalAuthUser(action.payload);
@@ -112,6 +122,12 @@ const databaseSlice = createSlice({
       action: PayloadAction<{ board: Board; tasks: TaskMap; uid: string }>,
     ) {
       console.log('syncBoardFromProviders');
+    },
+    updateActiveBoard(
+      state,
+      action: PayloadAction<{ boardId: string; uid: string }>,
+    ) {
+      state.authUser.profile.activeBoard = action.payload.boardId;
     },
   },
 });

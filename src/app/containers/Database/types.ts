@@ -2,7 +2,8 @@
 export interface DatabaseState {
   authUser: AuthUser;
   board: Board;
-  addingProject: 'idle' | 'fetching' | 'error' | 'success';
+  boardStatus: LoadingStatus;
+  addingProjectStatus: LoadingStatus;
   projects: ProjectMap;
   tasks: TaskMap;
   error: any;
@@ -25,6 +26,8 @@ export interface Column {
   taskIds: string[];
   title: string;
 }
+
+export type LoadingStatus = 'init' | 'fetching' | 'error' | 'success';
 
 export interface Project {
   created: string;

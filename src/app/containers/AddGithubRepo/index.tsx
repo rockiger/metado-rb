@@ -67,17 +67,19 @@ export function AddGithubRepo(props: Props) {
 
   const { step } = useParams();
   const { repos, status } = useSelector(selectAddGithubRepo);
-  const addingProject = useSelector(selectAddingProject);
+  const addingProjectStatus = useSelector(selectAddingProject);
   // WARNING projects is not always filled, only when we are comming from board
-  const { projects } = useSelector(selectBoard);
+  const {
+    board: { projects },
+  } = useSelector(selectBoard);
   const error = useSelector(selectError);
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
   const [selectedRepo, setSelectedRepo] = useState<number>(-1);
   const [repo, setRepo] = useState(repos[selectedRepo]);
   const [view, setView] = useState(0);
   const [settingProject, setSettingProject] = useState<
-    'idle' | 'setting' | 'finished'
-  >('idle');
+    'init' | 'setting' | 'finished'
+  >('init');
 
   useEffect(() => {
     dispatch(databaseActions.resetAddProject());
@@ -112,7 +114,10 @@ export function AddGithubRepo(props: Props) {
       case 2:
         if (selectedRepo === -1) {
           setView(1);
-        } else if (addingProject === 'error' || addingProject === 'success') {
+        } else if (
+          addingProjectStatus === 'error' ||
+          addingProjectStatus === 'success'
+        ) {
           setView(3);
         }
         break;
@@ -123,7 +128,7 @@ export function AddGithubRepo(props: Props) {
       default:
         break;
     }
-  }, [addingProject, githubToken, selectedRepo, settingProject, view]);
+  }, [addingProjectStatus, githubToken, selectedRepo, settingProject, view]);
 
   console.log({ activeBoard, githubToken, step, steps: STEPS });
 
@@ -277,7 +282,7 @@ export function AddGithubRepo(props: Props) {
                   )}
                   <View>
                     <View1>
-                      {addingProject === 'error' && (
+                      {addingProjectStatus === 'error' && (
                         <>
                           <h4>
                             We couldn't add {repo && repo.name} to your tasks.
@@ -296,7 +301,7 @@ export function AddGithubRepo(props: Props) {
                           </div>
                         </>
                       )}
-                      {addingProject === 'success' && (
+                      {addingProjectStatus === 'success' && (
                         <>
                           <h4>We added {repo && repo.name} to your tasks.</h4>
                           <div>

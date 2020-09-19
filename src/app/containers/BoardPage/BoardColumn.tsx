@@ -58,7 +58,6 @@ export function BoardColumn({
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          onClick={() => 'onClick(task)'}
                         >
                           <Task key={id} onClick={() => handleClickTask(task)}>
                             <CardTitle>{task.title}</CardTitle>
