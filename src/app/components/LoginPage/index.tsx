@@ -3,7 +3,8 @@
  * LoginPage
  *
  */
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { Link, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -13,6 +14,7 @@ import media from 'styled-media-query';
 
 import { firebaseAuth } from 'app/containers/Database/firebase';
 import { selectIsAuthenticated } from 'app/containers/Database/selectors';
+import { actions as databaseActions } from 'app/containers/Database/slice';
 
 interface Props {
   location: any;
@@ -22,6 +24,27 @@ export function LoginPage({ location }: Props) {
   const from = location && location.state && location.state.from;
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const signInSuccessUrl = from || '/b';
+  const dispatch = useDispatch();
+
+  const signInSuccessCallback = useCallback(
+    authResult => {
+      const { uid, displayName, email } = authResult.user;
+      console.log({ uid, displayName, email });
+      /*Object.keys(authResult.user).forEach(k =>
+      console.log(k, ':', authResult.user[k]),
+    ); */
+      dispatch(
+        databaseActions.updateUserCredentials({
+          email,
+          uid,
+          username: displayName,
+        }),
+      );
+      return true;
+    },
+    [dispatch],
+  );
+
   const uiConfig = {
     signInFlow: 'redirect',
     signInSuccessUrl,
@@ -30,6 +53,9 @@ export function LoginPage({ location }: Props) {
       firebase.auth.GithubAuthProvider.PROVIDER_ID,
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     ],
+    callbacks: {
+      signInSuccessWithAuthResult: signInSuccessCallback,
+    },
   };
 
   if (isAuthenticated) {

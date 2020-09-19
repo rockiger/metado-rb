@@ -5,7 +5,7 @@ import { ContainerState } from './types';
 // The initial state of the AddGithubRepo container
 export const initialState: ContainerState = {
   repos: [],
-  status: 'idle',
+  status: 'init',
 };
 
 const addGithubRepoSlice = createSlice({

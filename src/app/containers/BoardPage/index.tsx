@@ -9,7 +9,6 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
-import { Button } from 'reakit/Button';
 import { useDialogState } from 'reakit/Dialog';
 import produce from 'immer';
 import * as _ from 'lodash';
@@ -18,10 +17,13 @@ import media from 'styled-media-query';
 
 import { Navbar } from 'app/components/Navbar';
 import {
-  Horizontal,
+  Button,
+  Card,
+  Column,
   PageHeader,
   PageTitle,
   PrivatePage,
+  Row,
   Spacer,
 } from 'app/components/UiComponents';
 
@@ -53,9 +55,12 @@ export function BoardPage(props: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
   useInjectSaga({ key: sliceKey, saga: boardPageSaga });
   const dispatch = useDispatch();
-  const { ownerId, boardId } = useParams();
+  const { ownerId, boardId } = useParams<{
+    ownerId: string;
+    boardId: string;
+  }>();
   const activeBoard = useSelector(selectActiveBoard);
-  const board = useSelector(selectBoard);
+  const { board, boardStatus } = useSelector(selectBoard);
   const projects = useSelector(selectProjects);
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
@@ -65,23 +70,57 @@ export function BoardPage(props: Props) {
   const editDialogFinalFocusRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (boardId && board.id !== boardId && ownerId && ownerId === uid) {
+    if (boardId && board?.id !== boardId && ownerId && ownerId === uid) {
       dispatch(databaseActions.openBoardChannel({ uid: ownerId, boardId }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, boardId, ownerId, uid]);
 
   useEffect(() => {
-    if (board.id && _.isEmpty(tasks)) {
+    if (!_.isEmpty(board?.projects) && _.isEmpty(tasks)) {
       dispatch(
         databaseActions.openTasksChannel({
           uid: ownerId,
-          projectIds: board.projects,
+          projectIds: board?.projects,
         }),
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, ownerId, tasks]);
+
+  useEffect(() => {
+    const createAndUpdateBoard = async () => {
+      console.log({ boardId, activeBoard, uid });
+      if (!boardId && !activeBoard && uid) {
+        console.log('create Board');
+        await dispatch(
+          databaseActions.updateBoard({
+            board: {
+              columns: [
+                { taskIds: [], title: 'Backlog' },
+                { taskIds: [], title: 'Todo' },
+                { taskIds: [], title: 'Doing' },
+                { taskIds: [], title: 'Done' },
+              ],
+              id: 'main-board',
+              isDeleted: false,
+              projects: [],
+              showBacklog: true,
+              title: 'Main Board',
+            },
+            uid,
+          }),
+        );
+        await dispatch(
+          databaseActions.updateActiveBoard({ boardId: 'main-board', uid }),
+        );
+      }
+    };
+    createAndUpdateBoard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boardId, activeBoard, uid]);
+
+  //! if projectStatus==='success' and _.isEmpty(projects) show, add some projects
 
   useEffect(() => {
     return () => {
@@ -92,7 +131,12 @@ export function BoardPage(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (!isBoardUpdated && board.id && !_.isEmpty(tasks) && uid) {
+    if (
+      !isBoardUpdated &&
+      !_.isEmpty(board?.projects) &&
+      !_.isEmpty(tasks) &&
+      uid
+    ) {
       dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
       setIsBoardUpdated(true);
     }
@@ -106,7 +150,11 @@ export function BoardPage(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
 
-  if (uid !== ownerId || ownerId === undefined || boardId === undefined) {
+  console.log({ activeBoard, boardId, board });
+  if (
+    (uid !== ownerId || ownerId === undefined || boardId === undefined) &&
+    activeBoard
+  ) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
   }
 
@@ -117,41 +165,82 @@ export function BoardPage(props: Props) {
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
       <Navbar />
+
       <PageHeader>
-        <PageTitle>{board.title}</PageTitle>
+        <PageTitle>{board?.title}</PageTitle>
         <Spacer />
-        {board.projects.length < 10 && (
-          <Button as={Link} to={`/projects/add/github`}>
-            Add GitHub Project
-          </Button>
+        {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
+          <>
+            {board?.projects?.length < 10 && (
+              <Button as={Link} to={`/projects/add/github`}>
+                Add GitHub Project
+              </Button>
+            )}
+            {board && (
+              <AddCard
+                addTaskOnSubmit={_.partial(
+                  addTaskToBoard,
+                  board,
+                  ownerId,
+                  projects,
+                )}
+                projects={reduceProjects(board.projects, projects)}
+              />
+            )}
+          </>
         )}
-        <AddCard
-          addTaskOnSubmit={_.partial(addTaskToBoard, board, ownerId, projects)}
-          projects={reduceProjects(board.projects, projects)}
-        />
       </PageHeader>
+
       <BoardContent ref={editDialogFinalFocusRef}>
-        <DragDropContext
-          onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
-        >
-          {board.columns.map((col, index) => (
-            <BoardColumn
-              col={col}
-              index={index}
-              key={index}
-              projects={projects}
-              tasks={tasks}
-              handleClickTask={handleClickTask}
+        {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
+          <>
+            <DragDropContext
+              onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
+            >
+              {board.columns.map((col, index) => (
+                <BoardColumn
+                  col={col}
+                  index={index}
+                  key={index}
+                  projects={projects}
+                  tasks={tasks}
+                  handleClickTask={handleClickTask}
+                />
+              ))}
+            </DragDropContext>
+            <EditTask
+              dialogState={editDialogState}
+              finalFocusRef={editDialogFinalFocusRef}
+              handleCancelEdit={() => setEditTaskState(null)}
+              handleEditTask={handleEditTask}
+              task={editTaskState}
             />
-          ))}
-        </DragDropContext>
+          </>
+        )}
+        {!activeBoard && !boardId && !board?.id && (
+          <div>Preparing your board...</div>
+        )}
+        {((boardStatus === 'success' && !board.id && boardId) ||
+          (ownerId && ownerId !== uid)) && (
+          <>
+            <div>Couldn't find board</div>
+            <p>Go to last used board...</p>
+          </>
+        )}
+        {board.id && _.isEmpty(board.projects) && (
+          <Card>
+            <Column align="center">
+              <h2>
+                It seems your board doesn't have any project attached. Go and
+                add one.
+              </h2>
+              <Button as={Link} to={`/projects/add/github`}>
+                Add GitHub Project
+              </Button>
+            </Column>
+          </Card>
+        )}
       </BoardContent>
-      <EditTask
-        dialogState={editDialogState}
-        finalFocusRef={editDialogFinalFocusRef}
-        handleEditTask={handleEditTask}
-        task={editTaskState}
-      />
     </PrivatePage>
   );
 
@@ -267,7 +356,7 @@ export function onDragEndResult(
     databaseActions.updateTask({ oldTask, task: newTask, projects }),
   ];
 }
-export const BoardContent = styled(Horizontal)<{ ref: any }>`
+export const BoardContent = styled(Row)<{ ref: any }>`
   align-items: flex-start;
   gap: 1.5rem;
   justify-content: space-evenly;
