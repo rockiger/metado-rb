@@ -230,10 +230,17 @@ export function BoardPage(props: Props) {
         {board.id && _.isEmpty(board.projects) && (
           <Card>
             <Column align="center">
-              <h2>
+              <h5>
                 It seems your board doesn't have any project attached. Go and
                 add one.
-              </h2>
+              </h5>
+              <p>
+                <img
+                  src="/images/empty.svg"
+                  alt="empty box"
+                  style={{ width: '40rem' }}
+                />
+              </p>
               <Button as={Link} to={`/projects/add/github`}>
                 Add GitHub Project
               </Button>
