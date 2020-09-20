@@ -9,7 +9,7 @@ export const Card = styled.div`
   border: 1px solid ${p => p.theme.palette.grey[300]};
   border-radius: 4px;
   margin-bottom: 1.6rem;
-  padding: 1.6rem;
+  padding: 4.8rem;
 `;
 
 export const CardTitle = styled.div``;

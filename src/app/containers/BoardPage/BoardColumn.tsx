@@ -109,6 +109,7 @@ const Tasks = styled.div`
 `;
 
 const Task = styled(Card)`
+  padding: 1.6rem;
   &:hover {
     box-shadow: ${p => p.theme.shadows[3]};
   }
