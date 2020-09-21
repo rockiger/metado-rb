@@ -191,6 +191,15 @@ export function* getTasks(action) {
   yield put(actions.setTasks({ tasks }));
 }
 
+function* logout() {
+  try {
+    yield call(rsf.auth.signOut);
+    yield put(actions.logoutSuccess());
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function* openBoardChannel(action) {
   const { uid, boardId } = action.payload;
 
@@ -372,6 +381,7 @@ function* databaseWatcherSaga() {
   yield takeLatest(actions.addGithubProject.type, addGithubProject);
   yield takeLatest(actions.addTask.type, addTask);
   yield takeLatest(actions.getProjects.type, getProjects);
+  yield takeLatest(actions.logout.type, logout);
   yield takeLatest(actions.openBoardChannel.type, openBoardChannel);
   yield takeLatest(actions.openTasksChannel.type, openTasksChannel);
   yield takeLatest(actions.syncBoardFromProviders, syncBoardFromProviders);

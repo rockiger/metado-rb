@@ -56,26 +56,33 @@ const databaseSlice = createSlice({
         taskData: { description: string; projectId: string; title: string };
       }>,
     ) {},
+    closeBoardChannel(state) {
+      state.boardStatus = 'init';
+    },
     getBoard(state, action: PayloadAction<{ uid: string; boardId: string }>) {},
-    setBoard(state, action: PayloadAction<{ board: Board }>) {
-      state.board = action.payload.board;
-      state.boardStatus = 'success';
-    },
-    updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
-      state.board = action.payload.board;
-    },
     getProjects(state, action: PayloadAction<{ uid: string }>) {
       console.log('getProjects');
-    },
-    setProjects(state, action: PayloadAction<{ projects: ProjectMap }>) {
-      state.projects = action.payload.projects;
     },
     getTasks(
       state,
       action: PayloadAction<{ uid: string; projectIds: string[] }>,
     ) {},
+    logout(state) {},
+    logoutSuccess(state) {
+      state.authUser = {};
+    },
+    setBoard(state, action: PayloadAction<{ board: Board }>) {
+      state.board = action.payload.board;
+      state.boardStatus = 'success';
+    },
+    setProjects(state, action: PayloadAction<{ projects: ProjectMap }>) {
+      state.projects = action.payload.projects;
+    },
     setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
       state.tasks = action.payload.tasks;
+    },
+    updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
+      state.board = action.payload.board;
     },
     updateTask(
       state,
@@ -97,9 +104,6 @@ const databaseSlice = createSlice({
       action: PayloadAction<{ uid: string; boardId: string }>,
     ) {
       state.boardStatus = 'fetching';
-    },
-    closeBoardChannel(state) {
-      state.boardStatus = 'init';
     },
     openTasksChannel(
       state,
