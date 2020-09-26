@@ -113,6 +113,12 @@ export const Step = styled.div<StepProps>`
   }
 `;
 
+export const StepsWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1.6rem;
+`;
+
 export const Content = styled.div`
   display: block;
   flex: 0 1 auto;
