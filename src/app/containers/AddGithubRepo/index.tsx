@@ -157,7 +157,7 @@ export function AddGithubRepo(props: Props) {
               <Steps>
                 <Step isActive={view === 0} isCompleted={0 < view}>
                   <StepContent>
-                    <Title>Generate API-Token</Title>
+                    <Title>Login to GitHub</Title>
                     <Description>
                       Get an API-token to authenticate with GitHub.
                     </Description>
