@@ -28,6 +28,7 @@ import {
   Description,
   Step,
   Steps,
+  StepsWrapper,
   Title,
 } from 'app/components/UiComponents/Step';
 import {
@@ -335,12 +336,6 @@ export function AddGithubRepo(props: Props) {
     dispatch(databaseActions.addGithubProject({ activeBoard, repo }));
   }
 }
-
-const StepsWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  padding-bottom: 1.6rem;
-`;
 
 const View = styled.div`
   align-items: center;

@@ -26,6 +26,7 @@ import {
   Description,
   Step,
   Steps,
+  StepsWrapper,
   Title,
 } from 'app/components/UiComponents/Step';
 import { Navbar } from 'app/components/Navbar';
