@@ -316,9 +316,14 @@ export function AddGoogleTasklist(props: Props) {
     GoogleTasksService.signIn();
   }
 
-  function onClickAdd(tasklist: { [x: string]: any }) {
+  function onClickAdd(taskList: { [x: string]: any }) {
     setSettingProject('fetching');
-    // dispatch(databaseActions.addGithubProject({ activeBoard, tasklist }));
+    dispatch(
+      databaseActions.addGoogleTasksProject({
+        activeBoard,
+        taskList: { ...taskList, ownerId: GoogleTasksService.getUserId() },
+      }),
+    );
   }
 
   function onClickGoBack() {

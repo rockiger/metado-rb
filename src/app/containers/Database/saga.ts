@@ -140,6 +140,57 @@ export function* addGithubProject(action) {
   }
 }
 
+export function* addGoogleTasksProject(action) {
+  const { activeBoard, taskList } = action.payload;
+  const now = new Date().toISOString();
+  const projectId = `googletasks-${taskList.ownerId}-${taskList.id}`;
+  const uid = yield select(selectUid);
+
+  const newProject = {
+    created: now,
+    id: projectId,
+    name: taskList.title,
+    owner: taskList.ownerId,
+    type: 'googletasks',
+    user: uid,
+  };
+  const projectsRef = db.collection('projects').doc(projectId);
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(activeBoard);
+
+  try {
+    yield call(
+      [projectsRef, projectsRef.set],
+      ...[newProject, { merge: true }],
+    );
+    const boardSnapshot = yield call([boardRef, boardRef.get]);
+    const board = boardSnapshot.data();
+    // Check if board has less than 10 projects, otherwise abort, because there
+    // are only searches for 10 projects possible with firestore.
+    // See syncBoardFromProviders
+    if (board && board.projects && board.projects.length < 10) {
+      const changedBoard = produce(board, draftBoard => {
+        draftBoard.projects.push(projectId);
+      });
+      yield call([boardRef, boardRef.set], changedBoard);
+      yield put(actions.addGoogleTasksProjectSuccess());
+    } else {
+      console.error('Board already has maximum of 10 projects.');
+      yield put(
+        actions.addGoogleTasksProjectError({
+          error: 'Board already has maximum of 10 projects.',
+        }),
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    yield put(actions.addGoogleTasksProjectError({ error }));
+  }
+}
+
 export function* getBoard(action) {
   console.log({ action });
   const { uid, boardId } = action.payload;
@@ -379,6 +430,7 @@ function* updateUserCredentials(action) {
 
 function* databaseWatcherSaga() {
   yield takeLatest(actions.addGithubProject.type, addGithubProject);
+  yield takeLatest(actions.addGoogleTasksProject.type, addGoogleTasksProject);
   yield takeLatest(actions.addTask.type, addTask);
   yield takeLatest(actions.getProjects.type, getProjects);
   yield takeLatest(actions.logout.type, logout);

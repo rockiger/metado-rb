@@ -23,9 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
-import moment from 'moment';
-import { Moment } from 'moment';
-
 export class GoogleTasksService {
   private readonly clientId: string =
     '814923041781-2m58okiddrggddj4kf9ro7ra4lhvq071.apps.googleusercontent.com';
@@ -178,7 +175,7 @@ export class GoogleTasksService {
         ({
           id: item.id,
           title: item.title,
-          updatedAt: moment(item.updated),
+          updatedAt: item.updated,
         } as TaskList),
     );
   }
@@ -210,11 +207,11 @@ export class GoogleTasksService {
             id: item.id,
             title: item.title ? item.title : '',
             notes: item.notes ? item.notes : '',
-            dueAt: item.due ? moment(item.due) : undefined,
+            dueAt: item.due ? item.due : undefined,
             parent: item.parent,
             completed: item.status === 'completed',
-            completedAt: item.completed ? moment(item.completed) : undefined,
-            updatedAt: moment(item.updated),
+            completedAt: item.completed ? item.completed : undefined,
+            updatedAt: item.updated,
             listId: taskListId,
             status: item.status,
             isDirty: false,
@@ -275,7 +272,7 @@ export class GoogleTasksService {
       id: task.id,
       title: task.title ? task.title : '',
       notes: task.notes ? task.notes : '',
-      due: task.dueAt ? task.dueAt.format() : null,
+      due: task.dueAt || null,
       status: task.completed ? 'completed' : 'needsAction',
       parent: task.parent,
     });
@@ -293,7 +290,7 @@ export class GoogleTasksService {
       id: `dasdasdasdas${task.id}`,
       title: task.title,
       notes: task.notes,
-      due: task.dueAt ? task.dueAt.format() : null,
+      due: task.dueAt || null,
       status: task.completed ? 'completed' : 'needsAction',
     });
   }
@@ -324,10 +321,10 @@ export class GoogleTasksService {
   /**
    * Get the id oft the current authenticated user
    */
-  getUserId(): string | null {
+  getUserId(): string {
     return this.auth
       ? this.auth.currentUser.get().getBasicProfile().getId()
-      : null;
+      : '';
   }
 
   /****************************************
@@ -341,7 +338,7 @@ export default r;
 export type TaskList = {
   id: string;
   title: string;
-  updatedAt: Moment;
+  updatedAt: string;
 };
 
 export type Task = {
@@ -349,10 +346,10 @@ export type Task = {
   title: string;
   notes?: string;
   completed: boolean;
-  completedAt?: Moment;
-  dueAt?: Moment;
+  completedAt?: string;
+  dueAt?: string;
   parent: string;
-  updatedAt: Moment;
+  updatedAt: string;
   status: string;
   listId: string;
   subtasks: Task[];
