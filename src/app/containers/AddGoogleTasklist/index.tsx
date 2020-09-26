@@ -14,7 +14,11 @@ import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
 import { selectAddGoogleTasklist } from './selectors';
 import { addGoogleTasklistSaga } from './saga';
+
+import { View, ContainedView } from 'app/components/AddToBoardComponents';
 import {
+  Button,
+  Card,
   Content,
   Container,
   PageHeader,
@@ -32,6 +36,9 @@ import {
 import { Navbar } from 'app/components/Navbar';
 import GoogleTasksService, { TaskList } from 'utils/GoogleTasksService';
 
+import logo from './google-tasks-logo.png';
+
+const BASE_URL = '/projects/add/googletasks/';
 const STEPS = ['0', '1', '2', '3'];
 
 interface Props {}
@@ -88,7 +95,7 @@ export function AddGoogleTasklist(props: Props) {
     switch (view) {
       case 0:
         if (isSignedIn) {
-          setView(1);
+          //setView(1);
         }
         break;
       /* case 1:
@@ -118,7 +125,7 @@ export function AddGoogleTasklist(props: Props) {
   console.log({ googleErroed, googleLoaded, isSignedIn });
 
   if (!STEPS.includes(step)) {
-    return <Redirect to={`/projects/add/googletasks/${STEPS[0]}`} />;
+    return <Redirect to={`${BASE_URL}${STEPS[0]}`} />;
   }
 
   return (
@@ -138,47 +145,85 @@ export function AddGoogleTasklist(props: Props) {
               <Steps>
                 <Step isActive={view === 0} isCompleted={0 < view}>
                   <StepContent>
-                    <Title>Generate API-Token</Title>
+                    <Title>Login to Google Tasks</Title>
                     <Description>
-                      Get an API-token to authenticate with GitHub.
+                      Give Metado permissen to edit your tasks.
                     </Description>
                   </StepContent>
                 </Step>
                 <Step isActive={view === 1} isCompleted={1 < view}>
                   <StepContent>
-                    <Title>Select repository</Title>
+                    <Title>Select task list</Title>
                     <Description>
-                      Choose the repo you want to add your board.
+                      Choose the list you want to add your board.
                     </Description>
                   </StepContent>
                 </Step>
                 <Step isActive={view === 2} isCompleted={2 < view}>
                   <StepContent>
                     <Title>Add to board</Title>
-                    <Description>Verify the repo details</Description>
+                    <Description>Verify the task list details.</Description>
                   </StepContent>
                 </Step>
               </Steps>
             </StepsWrapper>
-            {view === 1 && (
-              <div>
-                {taskLists.map((taskList: TaskList) => (
-                  <p
-                    key={taskList.id}
-                  >{`${taskList.id} | ${taskList.title}`}</p>
-                ))}
-              </div>
-            )}
+            <Card>
+              {view === 0 && (
+                <>
+                  {step !== 0 && <Redirect to={`${BASE_URL}${STEPS[0]}`} />}
+                  <View>
+                    <ContainedView>
+                      <p>
+                        We need you to login to your Google account and
+                        authorize Metado to read, write your tasks. This will
+                        allow us, to get your tasks and sync them with your
+                        board.
+                      </p>
+                      <Button onClick={signIn}>
+                        <LogoWrapper>
+                          <LogoImg src={logo} alt="Google Task Logo" />
+                        </LogoWrapper>{' '}
+                        Google Tasks - Login
+                      </Button>
+                    </ContainedView>
+                  </View>
+                </>
+              )}
+              {view === 1 && (
+                <div>
+                  {taskLists.map((taskList: TaskList) => (
+                    <p
+                      key={taskList.id}
+                    >{`${taskList.id} | ${taskList.title}`}</p>
+                  ))}
+                </div>
+              )}
+            </Card>
           </Content>
         </Container>
       </PrivatePage>
-      <Div>AddGoogleTasklist</Div>
     </>
   );
 
   function updateSigninStatus(signedIn: boolean) {
     setIsSignedIn(signedIn);
   }
+
+  function signIn() {
+    GoogleTasksService.signIn();
+  }
 }
 
-const Div = styled.div``;
+const LogoImg = styled.img`
+  width: 2.4rem;
+`;
+
+const LogoWrapper = styled.span`
+  background-color: white;
+  border-radius: 100%;
+  display: inline-block;
+  height: 2.4rem;
+  line-height: 1;
+  margin-top: -2px;
+  vertical-align: middle;
+`;
