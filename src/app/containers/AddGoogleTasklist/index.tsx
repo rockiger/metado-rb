@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSelector, useDispatch } from 'react-redux';
-import { Redirect, useParams } from 'react-router-dom';
+import { Link as RouterLink, Redirect, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 
 import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
@@ -29,7 +29,6 @@ import {
 } from 'app/components/UiComponents';
 import {
   List,
-  ListDescription,
   ListHeader,
   ListItem,
   ListContent,
@@ -73,18 +72,19 @@ export function AddGoogleTasklist(props: Props) {
   const addGoogleTasklist = useSelector(selectAddGoogleTasklist);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const dispatch = useDispatch();
+
+  //@ts-expect-error
+  const { step } = useParams();
+  const { activeBoard } = useSelector(selectUserProfile);
+  const addingProjectStatus = useSelector(selectAddingProject);
   // WARNING projects is not always filled, only when we are comming from board
   const {
     board: { projects },
   } = useSelector(selectBoard);
-
-  //@ts-expect-error
-  const { step } = useParams();
-
-  const { activeBoard } = useSelector(selectUserProfile);
-  const [googleLoaded, setGoogleLoaded] = React.useState(false);
-  const [isSignedIn, setIsSignedIn] = React.useState(false);
-  const [googleErroed, setGoogleErroed] = React.useState<string | undefined>(
+  const error = useSelector(selectError);
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [googleErroed, setGoogleErroed] = useState<string | undefined>(
     undefined,
   );
   const [selectedEl, setSelectedEl] = useState<number>(-1);
@@ -136,8 +136,8 @@ export function AddGoogleTasklist(props: Props) {
           setView(2);
         }
         break;
-      /* case 2:
-        if (selectedRepo === -1) {
+      case 2:
+        if (selectedEl === -1) {
           setView(1);
         } else if (
           addingProjectStatus === 'error' ||
@@ -148,12 +148,12 @@ export function AddGoogleTasklist(props: Props) {
         break;
 
       case 3:
-        break; */
+        break;
 
       default:
         break;
     }
-  }, [isSignedIn, selectedEl, view]);
+  }, [addingProjectStatus, isSignedIn, selectedEl, settingProject, view]);
 
   console.log({ googleErroed, googleLoaded, isSignedIn });
 
@@ -297,6 +297,52 @@ export function AddGoogleTasklist(props: Props) {
                       </View>
                     </>
                   )}
+                </>
+              )}
+              {view === 3 && (
+                <>
+                  {step !== 3 && <Redirect to={`${BASE_ROUTE}${STEPS[3]}`} />}
+                  <View>
+                    <ContainedView>
+                      {addingProjectStatus === 'error' && (
+                        <>
+                          <h4>
+                            We couldn't add{' '}
+                            {taskLists[selectedEl] &&
+                              taskLists[selectedEl].title}{' '}
+                            to your tasks.
+                          </h4>
+                          <p>{error}</p>
+                          <div>
+                            <ButtonOutlined
+                              as={RouterLink}
+                              to={`/projects/add/github`}
+                            >
+                              Start over
+                            </ButtonOutlined>{' '}
+                            <Button as={RouterLink} to={`/b`}>
+                              Go to board
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                      {addingProjectStatus === 'success' && (
+                        <>
+                          <h4>
+                            We added{' '}
+                            {taskLists[selectedEl] &&
+                              taskLists[selectedEl].title}{' '}
+                            to your tasks.
+                          </h4>
+                          <div>
+                            <Button as={RouterLink} to={`/b`}>
+                              Go to board
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </ContainedView>
+                  </View>
                 </>
               )}
             </Card>
