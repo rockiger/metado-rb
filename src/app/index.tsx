@@ -12,8 +12,8 @@ import { Switch, Route, BrowserRouter } from 'react-router-dom';
 
 import { GlobalStyle } from 'styles/global-styles';
 
-import { AddGithubRepo } from './containers/AddGithubRepo';
-import { AddGoogleTasklist } from './containers/AddGoogleTasklist';
+import { AddGithubRepo } from './containers/AddGithubRepo/Loadable';
+import { AddGoogleTasklist } from './containers/AddGoogleTasklist/Loadable';
 import { BoardPage } from './containers/BoardPage/Loadable';
 import { LoginPage } from './components/LoginPage/Loadable';
 import { HomePage } from './containers/HomePage/Loadable';
