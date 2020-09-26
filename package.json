@@ -30,6 +30,7 @@
     "i18next-browser-languagedetector": "4.0.2",
     "jest-styled-components": "7.0.2",
     "lint-staged": "10.0.8",
+    "moment": "2.29.0",
     "node-plop": "0.25.0",
     "plop": "2.6.0",
     "prettier": "2.0.1",
@@ -63,7 +64,7 @@
     "typescript": "3.8.2"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
