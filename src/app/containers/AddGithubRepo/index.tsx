@@ -11,6 +11,7 @@ import { Link as RouterLink, Redirect, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { Github } from 'styled-icons/boxicons-logos';
 
+import { View, ContainedView } from 'app/components/AddToBoardComponents';
 import { Navbar } from 'app/components/Navbar';
 import {
   A,
@@ -175,7 +176,7 @@ export function AddGithubRepo(props: Props) {
                 <Step isActive={view === 2} isCompleted={2 < view}>
                   <StepContent>
                     <Title>Add to board</Title>
-                    <Description>Verify the repo details</Description>
+                    <Description>Verify the repo details.</Description>
                   </StepContent>
                 </Step>
               </Steps>
@@ -187,7 +188,7 @@ export function AddGithubRepo(props: Props) {
                     <Redirect to={`/projects/add/github/${STEPS[0]}`} />
                   )}
                   <View>
-                    <View1>
+                    <ContainedView>
                       <p>
                         We need you to login to GitHub and authorize Metado to
                         access your repositorys. This will allow us, to fetch
@@ -199,7 +200,7 @@ export function AddGithubRepo(props: Props) {
                       >
                         <Github size="1.5rem" /> GitHub - Login
                       </Button>
-                    </View1>
+                    </ContainedView>
                   </View>
                 </>
               )}
@@ -243,7 +244,7 @@ export function AddGithubRepo(props: Props) {
                   {selectedRepo !== -1 && repo && (
                     <>
                       <View>
-                        <View1>
+                        <ContainedView>
                           <h4>Add {repo.name} to your tasks?</h4>
                           <Card>
                             <h5>
@@ -270,7 +271,7 @@ export function AddGithubRepo(props: Props) {
                               Add <b> {` ${repo.name} `} </b> to task
                             </Button>
                           </div>
-                        </View1>
+                        </ContainedView>
                       </View>
                     </>
                   )}
@@ -282,7 +283,7 @@ export function AddGithubRepo(props: Props) {
                     <Redirect to={`/projects/add/github/${STEPS[3]}`} />
                   )}
                   <View>
-                    <View1>
+                    <ContainedView>
                       {addingProjectStatus === 'error' && (
                         <>
                           <h4>
@@ -312,7 +313,7 @@ export function AddGithubRepo(props: Props) {
                           </div>
                         </>
                       )}
-                    </View1>
+                    </ContainedView>
                   </View>
                 </>
               )}
@@ -336,17 +337,6 @@ export function AddGithubRepo(props: Props) {
     dispatch(databaseActions.addGithubProject({ activeBoard, repo }));
   }
 }
-
-const View = styled.div`
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-`;
-
-const View1 = styled(View)`
-  max-width: 60rem;
-  text-align: center;
-`;
 
 const GithubIcon = styled(Github)`
   color: black;
