@@ -45,6 +45,7 @@ export const ListItem = styled.div<ListItemProps>`
 export const ListContent = styled.div`
   display: table-cell;
   line-height: 1.6rem;
+  vertical-align: middle;
 `;
 
 export const ListHeader = styled(Clickable)`

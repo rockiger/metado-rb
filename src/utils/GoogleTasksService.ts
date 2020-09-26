@@ -133,6 +133,7 @@ export class GoogleTasksService {
    *
    */
   isSignedIn() {
+    console.log(this.auth.currentUser.get().getBasicProfile());
     if (!this.auth) return false;
     return this.auth.isSignedIn.get();
   }
@@ -315,6 +316,23 @@ export class GoogleTasksService {
    */
   // eslint-disable-next-line class-methods-use-this
   reset() {}
+
+  /****************************************
+   * BEGIN Copyright (c) 2019 Marco Laspe *
+   ****************************************/
+
+  /**
+   * Get the id oft the current authenticated user
+   */
+  getUserId(): string | null {
+    return this.auth
+      ? this.auth.currentUser.get().getBasicProfile().getId()
+      : null;
+  }
+
+  /****************************************
+   * END Copyright (c) 2019 Marco Laspe   *
+   ****************************************/
 }
 
 const r = new GoogleTasksService();
@@ -351,3 +369,11 @@ export interface OAuthKeys {
     redirect_uris: string[];
   };
 }
+
+/****************************************
+ * BEGIN Copyright (c) 2019 Marco Laspe *
+ ****************************************/
+
+/****************************************
+ * END Copyright (c) 2019 Marco Laspe   *
+ ****************************************/
