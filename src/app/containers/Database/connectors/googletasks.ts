@@ -20,22 +20,32 @@ export async function sync(
   GoogleTasksService.load(() => {})
     .catch(error => {
       console.error('Error loading google services:', error);
-      GoogleTasksService.signIn();
     })
     .then(async () => {
-      const externalTasks = await GoogleTasksService.listTasks(taskListId);
-      for (const externalTask of externalTasks) {
-        const newOrUpdatedTask = createOrUpdateTask(
-          externalTask,
-          internalTasks,
-          projectId,
-          uid,
-        );
-        if (!!newOrUpdatedTask) {
-          await db
-            .collection('tasks')
-            .doc(newOrUpdatedTask.id)
-            .set(newOrUpdatedTask);
+      try {
+        const externalTasks = await GoogleTasksService.listTasks(taskListId);
+        for (const externalTask of externalTasks) {
+          const newOrUpdatedTask = createOrUpdateTask(
+            externalTask,
+            internalTasks,
+            projectId,
+            uid,
+          );
+          if (!!newOrUpdatedTask) {
+            await db
+              .collection('tasks')
+              .doc(newOrUpdatedTask.id)
+              .set(newOrUpdatedTask);
+          }
+        }
+      } catch (error) {
+        if (error?.result?.error?.errors[0]?.message === 'Login Required.') {
+          GoogleTasksService.subscribeSigninStatus(isSignedIn => {
+            if (isSignedIn) window.location.reload();
+          });
+          await GoogleTasksService.signIn();
+        } else {
+          console.error({ error });
         }
       }
     });
