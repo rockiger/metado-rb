@@ -130,7 +130,6 @@ export class GoogleTasksService {
    *
    */
   isSignedIn() {
-    console.log(this.auth.currentUser.get().getBasicProfile());
     if (!this.auth) return false;
     return this.auth.isSignedIn.get();
   }
@@ -188,7 +187,7 @@ export class GoogleTasksService {
   async listTasks(taskListId: string, pageToken: string = '') {
     const response = await this.google.client.tasks.tasks.list({
       tasklist: taskListId,
-      showCompleted: false,
+      showCompleted: true,
       showHidden: true,
       pageToken,
     });

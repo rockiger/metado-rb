@@ -2,39 +2,42 @@ import { Task, TaskMap, TaskState, Project } from '../types';
 import produce from 'immer';
 import * as _ from 'lodash';
 
-export { createOrUpdateTask, syncGithub, closeIssue, openIssue };
+import GoogleTasksService, {
+  Task as GoogleTask,
+} from 'utils/GoogleTasksService';
 
 /**
- * Sync all issues from a given github repo with our tasks database.
+ * Sync all tasks from a given Google Task list with our tasks database.
  */
 //! rewrite to sage to make it testable
-async function syncGithub(
+export async function sync(
   db: any,
   internalTasks: TaskMap,
   projectId: string,
   uid: string,
-  githubToken: string,
 ) {
-  const [, userName, projectName] = projectId.split('-');
-  const repoFullname = `${userName}/${projectName}`;
-  const externalTasks = await fetchIssuesFromGithubRepo(
-    repoFullname,
-    githubToken,
-  );
-  for (const externalTask of externalTasks) {
-    const newOrUpdatedTask = createOrUpdateTask(
-      externalTask,
-      internalTasks,
-      projectId,
-      uid,
-    );
-    if (!!newOrUpdatedTask) {
-      await db
-        .collection('tasks')
-        .doc(newOrUpdatedTask.id)
-        .set(newOrUpdatedTask);
-    }
-  }
+  const [, , taskListId] = projectId.split('-');
+  GoogleTasksService.load(() => {})
+    .catch(error => {
+      console.error('Error loading google services:', error);
+    })
+    .then(async () => {
+      const externalTasks = await GoogleTasksService.listTasks(taskListId);
+      for (const externalTask of externalTasks) {
+        const newOrUpdatedTask = createOrUpdateTask(
+          externalTask,
+          internalTasks,
+          projectId,
+          uid,
+        );
+        if (!!newOrUpdatedTask) {
+          await db
+            .collection('tasks')
+            .doc(newOrUpdatedTask.id)
+            .set(newOrUpdatedTask);
+        }
+      }
+    });
 }
 
 /**
@@ -42,38 +45,38 @@ async function syncGithub(
  * correspond to the values in the github issues. If not a corrected version is produced.
  * If there is no task a new one is created. If there is nothing to do null is returned.
  */
-function createOrUpdateTask(
-  externalTask: { [key: string]: string },
+export function createOrUpdateTask(
+  externalTask: GoogleTask,
   internalTasks: TaskMap,
   projectId: string,
   uid: string,
 ): Task | null {
-  const internalTaskId = `${projectId}-${externalTask.number}`;
+  const internalTaskId = `${projectId}-${externalTask.id}`;
   const internalTask = internalTasks[internalTaskId];
   if (internalTask) {
     if (
-      (externalTask.state === 'open' &&
+      (externalTask.status === 'needsAction' &&
         internalTask.status === TaskState.Done) ||
-      (externalTask.state === 'closed' &&
+      (externalTask.status === 'completed' &&
         internalTask.status !== TaskState.Done) ||
       externalTask.title !== internalTask.title ||
-      externalTask.body !== internalTask.description
+      externalTask.notes !== internalTask.description
     ) {
       let changedTask = produce<Task>(internalTask, (draftTask: Task) => {
         if (
-          externalTask.state === 'open' &&
+          externalTask.status === 'needsAction' &&
           draftTask.status === TaskState.Done
         ) {
           draftTask.status = TaskState.Backlog;
         }
         if (
-          externalTask.state === 'closed' &&
+          externalTask.status === 'completed' &&
           draftTask.status !== TaskState.Done
         ) {
           draftTask.status = TaskState.Done;
         }
-        if (externalTask.body !== draftTask.description) {
-          draftTask.description = externalTask.body;
+        if (externalTask.notes !== draftTask.description) {
+          draftTask.description = externalTask.notes || '';
         }
         if (externalTask.title !== draftTask.title) {
           draftTask.title = externalTask.title;
@@ -85,18 +88,20 @@ function createOrUpdateTask(
     }
   } else {
     const status =
-      externalTask.state === 'open' ? TaskState.Backlog : TaskState.Done;
-    const created = new Date(externalTask.created_at).toISOString();
-    const edited = new Date(externalTask.updated_at).toISOString();
-    const finished = externalTask.closed_at
-      ? new Date(externalTask.closed_at).toISOString()
+      externalTask.status === 'needsAction'
+        ? TaskState.Backlog
+        : TaskState.Done;
+    const created = new Date(externalTask.updatedAt).toISOString();
+    const edited = new Date(externalTask.updatedAt).toISOString();
+    const finished = externalTask.completed
+      ? new Date(externalTask.completedAt || '').toISOString()
       : '';
     const newTask: Task = {
       created,
       edited,
       finished,
       id: internalTaskId,
-      description: externalTask.body,
+      description: externalTask.notes || '',
       project: projectId,
       status,
       title: externalTask.title,
@@ -119,7 +124,7 @@ async function fetchIssuesFromGithubRepo(repoFullname, githubToken) {
   return externalTasks;
 }
 
-async function closeIssue(
+export async function closeIssue(
   githubToken: string,
   issueData: Task,
   project: Project,
@@ -163,7 +168,7 @@ export async function createIssue(githubToken, project: Project, issueData) {
   return { status: response.status, data };
 }
 
-async function openIssue(
+export async function openIssue(
   githubToken: string,
   issueData: Task,
   project: Project,
