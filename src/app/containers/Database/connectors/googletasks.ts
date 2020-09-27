@@ -20,6 +20,7 @@ export async function sync(
   GoogleTasksService.load(() => {})
     .catch(error => {
       console.error('Error loading google services:', error);
+      GoogleTasksService.signIn();
     })
     .then(async () => {
       const externalTasks = await GoogleTasksService.listTasks(taskListId);
@@ -168,28 +169,30 @@ export async function createIssue(githubToken, project: Project, issueData) {
   return { status: response.status, data };
 }
 
-export async function openIssue(
-  githubToken: string,
-  issueData: Task,
-  project: Project,
-) {
-  const { name: repo, owner } = project;
-  const issueNumber = _.last(issueData.id.split('-'));
-
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}`,
-    {
-      body: JSON.stringify({
-        state: 'open',
-      }),
-      headers: {
-        Authorization: `token ${githubToken}`,
-      },
-      method: 'PATCH',
-    },
-  );
-
-  console.log(response);
+export async function openTask(taskData: Task, project: Project) {
+  GoogleTasksService.load(() => {})
+    .catch(error => {
+      console.error('Error loading google services:', error);
+      GoogleTasksService.signIn();
+    })
+    .then(async () => {
+      const { name: repo, owner } = project;
+      const [, , listId, taskId] = taskData.id.split('-');
+      const task = {
+        id: taskId,
+        title: taskData.title,
+        notes: taskData.description,
+        completed: taskData.status === 'Done',
+        completedAt: taskData.status === 'Done' ? new Date().toISOString() : '',
+        parent: '',
+        updatedAt: new Date().toISOString(),
+        status: taskData.status === 'Done' ? 'completed' : 'needsAction',
+        listId: listId,
+        subtasks: [],
+        isDirty: false,
+      };
+      await GoogleTasksService.updateTask(task);
+    });
 }
 
 export async function updateIssue(
