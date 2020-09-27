@@ -76,12 +76,13 @@ export const ButtonClear = styled(ReaButton).attrs(p => ({
 
 export const A = styled.a``;
 
+type LabelProps = { color?: string };
 export const Label = styled.div`
   display: inline-block;
   line-height: 1;
   vertical-align: middle;
 
-  background-color: black;
+  background-color: ${p => p.color || 'var(--color-lightGrey)'};
   padding: 0.7rem 1rem;
   color: white;
   font-size: 1.2rem;
