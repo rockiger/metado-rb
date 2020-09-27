@@ -2,6 +2,7 @@ import { BoardPageState } from 'app/containers/BoardPage/types';
 import { PrivateRouteState } from 'app/containers/PrivateRoute/types';
 import { DatabaseState } from 'app/containers/Database/types';
 import { AddGithubRepoState } from 'app/containers/AddGithubRepo/types';
+import { AddGoogleTasklistState } from 'app/containers/AddGoogleTasklist/types';
 // [IMPORT NEW CONTAINERSTATE ABOVE] < Needed for generating containers seamlessly
 
 /* 
@@ -13,5 +14,6 @@ export interface RootState {
   privateRoute?: PrivateRouteState;
   database?: DatabaseState;
   addGithubRepo?: AddGithubRepoState;
+  addGoogleTasklist?: AddGoogleTasklistState;
   // [INSERT NEW REDUCER KEY ABOVE] < Needed for generating containers seamlessly
 }

@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import { RadioCircle } from 'styled-icons/boxicons-regular';
 import { Github } from 'styled-icons/boxicons-logos';
+import GoogleTasksLogoSrc from 'app/containers/AddGoogleTasklist/google-tasks-logo.png';
 
 import {
   Card,
@@ -50,6 +51,10 @@ export function BoardColumn({
               {!_.isEmpty(tasks) &&
                 col.taskIds.map((id, index) => {
                   const task = tasks[id];
+                  if (!task) {
+                    console.log('Missing Task in Board. Task-Id:', id);
+                    return null;
+                  }
                   const project = projects[task.project];
                   return (
                     <Draggable draggableId={id} key={id} index={index}>
@@ -63,10 +68,23 @@ export function BoardColumn({
                             <CardTitle>{task.title}</CardTitle>
                             <CardFooter>
                               <Spacer />
-                              <Label>
-                                <GithubLogo size="1.5rem" />
-                                {project.name}
-                              </Label>
+                              {project.type === 'github' && (
+                                <Label color="black">
+                                  <GithubLogo size="1.5rem" />
+                                  {project.name}
+                                </Label>
+                              )}
+                              {project.type === 'googletasks' && (
+                                <Label color="#3f8ef1">
+                                  <LogoWrapper>
+                                    <LogoImg
+                                      src={GoogleTasksLogoSrc}
+                                      alt="Google Tasks Logo"
+                                    />
+                                  </LogoWrapper>
+                                  {project.name}
+                                </Label>
+                              )}
                             </CardFooter>
                           </Task>
                         </div>
@@ -120,4 +138,17 @@ const Task = styled(Card)`
 
 const GithubLogo = styled(Github)`
   padding-right: 0.2rem;
+`;
+
+const LogoImg = styled.img`
+  width: 1.5rem;
+`;
+
+const LogoWrapper = styled.span`
+  border-radius: 100%;
+  display: inline-block;
+  height: 1.5rem;
+  line-height: 1;
+  margin-right: 0.2rem;
+  vertical-align: middle;
 `;

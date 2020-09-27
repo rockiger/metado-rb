@@ -13,6 +13,7 @@ import {
 } from 'app/components/UiComponents/Dialog';
 import { DialogStateReturn } from 'reakit/ts';
 import { Task } from 'app/containers/Database/types';
+import { now } from 'utils/helper';
 
 interface Props {
   dialogState: DialogStateReturn;
@@ -50,7 +51,7 @@ export function EditTask({
       >
         <form action="#" name="addtask" onSubmit={onSubmit}>
           <DialogHeader>
-            <h5>Edit Task: {task?.id}</h5>
+            <h5>Edit Task</h5>
           </DialogHeader>
           <DialogContent>
             <FormField>
@@ -101,7 +102,7 @@ export function EditTask({
   function onSubmit(ev) {
     ev.preventDefault();
     if (task && (task?.description !== description || task?.title !== title)) {
-      handleEditTask(task, { ...task, description, title });
+      handleEditTask(task, { ...task, description, title, edited: now() });
     }
     //! handleSubmit
     onClickCancel();
