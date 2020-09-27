@@ -1,6 +1,5 @@
 import { Task, TaskMap, TaskState, Project } from '../types';
 import produce from 'immer';
-import * as _ from 'lodash';
 
 import GoogleTasksService, {
   Task as GoogleTask,
@@ -113,37 +112,24 @@ export function createOrUpdateTask(
   }
 }
 
-async function fetchIssuesFromGithubRepo(repoFullname, githubToken) {
-  const response = await fetch(
-    `https://api.github.com/repos/${repoFullname}/issues?state=all`,
-    {
-      headers: {
-        Authorization: `token ${githubToken}`,
-      },
-    },
-  );
-  const externalTasks: any[] = await response.json();
-  return externalTasks;
-}
-
-export async function createIssue(githubToken, project: Project, issueData) {
-  const { name: repo, owner } = project;
-  const { title, description: body } = issueData;
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/issues`,
-    {
-      body: JSON.stringify({
-        title,
-        body,
-      }),
-      headers: {
-        Authorization: `token ${githubToken}`,
-      },
-      method: 'POST',
-    },
-  );
-  const data = await response.json();
-  return { status: response.status, data };
+export async function createTask(project: Project, taskData) {
+  await GoogleTasksService.load(() => {});
+  const [, , listId] = project.id.split('-');
+  const task = {
+    id: '',
+    title: taskData.title,
+    notes: taskData.description,
+    completed: false,
+    parent: '',
+    updatedAt: taskData.edited || now(),
+    status: 'needsAction',
+    listId: listId,
+    subtasks: [],
+    isDirty: false,
+  };
+  const response = await GoogleTasksService.insertTask(task);
+  console.log(response);
+  return response;
 }
 
 export async function updateTask(taskData: Task, project: Project) {

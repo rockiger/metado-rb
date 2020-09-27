@@ -150,7 +150,6 @@ export function BoardPage(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid]);
 
-  console.log({ activeBoard, boardId, board });
   if (
     (uid !== ownerId || ownerId === undefined || boardId === undefined) &&
     activeBoard
