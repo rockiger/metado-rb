@@ -285,8 +285,8 @@ export class GoogleTasksService {
   updateTask(task: Task) {
     return this.google.client.tasks.tasks.update({
       tasklist: task.listId,
-      task: `dasdasdasdas${task.id}`,
-      id: `dasdasdasdas${task.id}`,
+      task: task.id,
+      id: task.id,
       title: task.title,
       notes: task.notes,
       due: task.dueAt || null,
