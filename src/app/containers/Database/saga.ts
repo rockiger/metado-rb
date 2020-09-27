@@ -22,6 +22,8 @@ import {
   updateIssue,
 } from './connectors/github';
 
+import * as googletasksConnector from './connectors/googletasks';
+
 // Workaround for overload problem with call to firestore
 // https://stackoverflow.com/a/58814026
 export const call: any = effCall;
@@ -321,7 +323,16 @@ function* syncBoardFromProviders(
         yield call(
           syncGithub,
           db,
+          internalTasks,
+          projectId,
+          uid,
           profile.githubToken,
+        );
+      }
+      if (projectType === 'googletasks') {
+        yield call(
+          googletasksConnector.sync,
+          db,
           internalTasks,
           projectId,
           uid,
