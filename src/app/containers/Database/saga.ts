@@ -421,20 +421,7 @@ function* updateTask(action) {
       }
     }
     if (task.id.startsWith('googletasks')) {
-      if (oldTask.status === TaskState.Done && task.status !== TaskState.Done) {
-        yield call(googletasksConnector.openTask, task, project);
-      }
-      if (oldTask.status !== TaskState.Done && task.status === TaskState.Done) {
-        //!
-        yield call(closeIssue, profile.githubToken, task, project);
-      }
-      if (
-        oldTask.title !== task.title ||
-        oldTask.description !== task.description
-      ) {
-        //!
-        yield call(updateIssue, profile.githubToken, task, project);
-      }
+      yield call(googletasksConnector.updateTask, task, project);
     }
   } catch (error) {
     console.error(error);
