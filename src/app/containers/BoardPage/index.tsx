@@ -305,7 +305,7 @@ export function onDragEndResult(
   }
   const startColumn = board.columns[source.droppableId];
   const finishColumn = board.columns[destination.droppableId];
-  const title = finishColumn.title;
+  const newStatus = finishColumn.title;
 
   // same column
   if (startColumn.title === finishColumn.title) {
@@ -355,7 +355,11 @@ export function onDragEndResult(
   //change state of task
   const oldTask = tasks[draggableId];
   const newTask = produce(oldTask, draftTask => {
-    draftTask.status = title;
+    draftTask.status = newStatus;
+    draftTask.edited = new Date().toISOString();
+    if (newStatus === 'Done') {
+      draftTask.finished = new Date().toISOString();
+    }
   });
 
   return [
