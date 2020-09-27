@@ -47,6 +47,22 @@ const databaseSlice = createSlice({
     addGithubProjectSuccess(state) {
       state.addingProjectStatus = 'success';
     },
+    addGoogleTasksProject(
+      state,
+      action: PayloadAction<{
+        activeBoard: string;
+        taskList: { [x: string]: any };
+      }>,
+    ) {
+      state.addingProjectStatus = 'fetching';
+    },
+    addGoogleTasksProjectError(state, action: PayloadAction<{ error: any }>) {
+      state.addingProjectStatus = 'error';
+      state.error = action.payload.error;
+    },
+    addGoogleTasksProjectSuccess(state) {
+      state.addingProjectStatus = 'success';
+    },
     addTask(
       state,
       action: PayloadAction<{

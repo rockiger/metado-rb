@@ -24,12 +24,14 @@ import {
   Textarea,
   DialogFooter,
 } from 'app/components/UiComponents/Dialog';
+import { now } from 'utils/helper';
 
 interface Props {
   addTaskOnSubmit: (newTask: {
     description: string;
     projectId: string;
     title: string;
+    edited: string;
   }) => any;
   projects: ProjectMap;
 }
@@ -97,7 +99,9 @@ export function AddCard({ addTaskOnSubmit, projects }: Props) {
                   </option>
                   {Object.values(projects).map(project => (
                     <option key={project.id} value={project.id}>
-                      {project.fullname}
+                      {project.type === 'github'
+                        ? project.fullname
+                        : project.name}
                     </option>
                   ))}
                 </Select>
@@ -169,7 +173,7 @@ export function AddCard({ addTaskOnSubmit, projects }: Props) {
   function onSubmit(ev) {
     ev.preventDefault();
     console.log('onSubmit');
-    addTaskOnSubmit({ description, projectId, title });
+    addTaskOnSubmit({ description, projectId, title, edited: now() });
     dialog.hide();
     setDescription('');
     setTitle('');

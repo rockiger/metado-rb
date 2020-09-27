@@ -11,6 +11,7 @@ import { Link as RouterLink, Redirect, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { Github } from 'styled-icons/boxicons-logos';
 
+import { View, ContainedView } from 'app/components/AddToBoardComponents';
 import { Navbar } from 'app/components/Navbar';
 import {
   A,
@@ -28,6 +29,7 @@ import {
   Description,
   Step,
   Steps,
+  StepsWrapper,
   Title,
 } from 'app/components/UiComponents/Step';
 import {
@@ -51,6 +53,7 @@ import { actions, reducer, sliceKey } from './slice';
 import { selectAddGithubRepo } from './selectors';
 import { addGithubRepoSaga } from './saga';
 
+const BASE_ROUTE = '/projects/add/github/';
 const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
 }`;
@@ -65,6 +68,7 @@ export function AddGithubRepo(props: Props) {
   useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
   const dispatch = useDispatch();
 
+  //@ts-expect-error
   const { step } = useParams();
   const { repos, status } = useSelector(selectAddGithubRepo);
   const addingProjectStatus = useSelector(selectAddingProject);
@@ -74,8 +78,8 @@ export function AddGithubRepo(props: Props) {
   } = useSelector(selectBoard);
   const error = useSelector(selectError);
   const { githubToken, activeBoard } = useSelector(selectUserProfile);
-  const [selectedRepo, setSelectedRepo] = useState<number>(-1);
-  const [repo, setRepo] = useState(repos[selectedRepo]);
+  const [selectedEl, setSelectedEl] = useState<number>(-1);
+  const [repo, setRepo] = useState(repos[selectedEl]);
   const [view, setView] = useState(0);
   const [settingProject, setSettingProject] = useState<
     'init' | 'setting' | 'finished'
@@ -96,8 +100,8 @@ export function AddGithubRepo(props: Props) {
   }, [githubToken, repos]);
 
   useEffect(() => {
-    setRepo(repos[selectedRepo]);
-  }, [repos, selectedRepo]);
+    setRepo(repos[selectedEl]);
+  }, [repos, selectedEl]);
 
   useEffect(() => {
     switch (view) {
@@ -107,12 +111,12 @@ export function AddGithubRepo(props: Props) {
         }
         break;
       case 1:
-        if (selectedRepo !== -1) {
+        if (selectedEl !== -1) {
           setView(2);
         }
         break;
       case 2:
-        if (selectedRepo === -1) {
+        if (selectedEl === -1) {
           setView(1);
         } else if (
           addingProjectStatus === 'error' ||
@@ -128,16 +132,16 @@ export function AddGithubRepo(props: Props) {
       default:
         break;
     }
-  }, [addingProjectStatus, githubToken, selectedRepo, settingProject, view]);
+  }, [addingProjectStatus, githubToken, selectedEl, settingProject, view]);
 
   console.log({ activeBoard, githubToken, step, steps: STEPS });
 
   if (!STEPS.includes(step)) {
-    return <Redirect to={`/projects/add/github/${STEPS[0]}`} />;
+    return <Redirect to={`${BASE_ROUTE}${STEPS[0]}`} />;
   }
 
   if (view === 1 && step === STEPS[0] && githubToken) {
-    return <Redirect to={`/projects/add/github/${STEPS[1]}`} />;
+    return <Redirect to={`${BASE_ROUTE}${STEPS[1]}`} />;
   }
 
   return (
@@ -157,7 +161,7 @@ export function AddGithubRepo(props: Props) {
               <Steps>
                 <Step isActive={view === 0} isCompleted={0 < view}>
                   <StepContent>
-                    <Title>Generate API-Token</Title>
+                    <Title>Login to GitHub</Title>
                     <Description>
                       Get an API-token to authenticate with GitHub.
                     </Description>
@@ -174,7 +178,7 @@ export function AddGithubRepo(props: Props) {
                 <Step isActive={view === 2} isCompleted={2 < view}>
                   <StepContent>
                     <Title>Add to board</Title>
-                    <Description>Verify the repo details</Description>
+                    <Description>Verify the repo details.</Description>
                   </StepContent>
                 </Step>
               </Steps>
@@ -182,11 +186,9 @@ export function AddGithubRepo(props: Props) {
             <Card>
               {view === 0 && (
                 <>
-                  {step !== 0 && (
-                    <Redirect to={`/projects/add/github/${STEPS[0]}`} />
-                  )}
+                  {step !== 0 && <Redirect to={`${BASE_ROUTE}${STEPS[0]}`} />}
                   <View>
-                    <View1>
+                    <ContainedView>
                       <p>
                         We need you to login to GitHub and authorize Metado to
                         access your repositorys. This will allow us, to fetch
@@ -198,18 +200,16 @@ export function AddGithubRepo(props: Props) {
                       >
                         <Github size="1.5rem" /> GitHub - Login
                       </Button>
-                    </View1>
+                    </ContainedView>
                   </View>
                 </>
               )}
               {view === 1 && (
                 <>
-                  {selectedRepo !== -1 && (
-                    <Redirect to={`/projects/add/github/${STEPS[2]}`} />
+                  {selectedEl !== -1 && (
+                    <Redirect to={`${BASE_ROUTE}${STEPS[2]}`} />
                   )}
-                  {step !== 1 && (
-                    <Redirect to={`/projects/add/github/${STEPS[1]}`} />
-                  )}
+                  {step !== 1 && <Redirect to={`${BASE_ROUTE}${STEPS[1]}`} />}
                   <p>
                     Please select the repository from which you want to add the
                     issues to your tasks.
@@ -219,8 +219,8 @@ export function AddGithubRepo(props: Props) {
                     {repos.filter(addedProjectsFilter).map((repo, index) => (
                       <ListItem
                         key={repo.node_id}
-                        onClick={() => setSelectedRepo(index)}
-                        isSelected={index === selectedRepo}
+                        onClick={() => setSelectedEl(index)}
+                        isSelected={index === selectedEl}
                       >
                         <ListIcon>
                           <GithubIcon />
@@ -236,13 +236,11 @@ export function AddGithubRepo(props: Props) {
               )}
               {view === 2 && (
                 <>
-                  {step !== 2 && (
-                    <Redirect to={`/projects/add/github/${STEPS[2]}`} />
-                  )}
-                  {selectedRepo !== -1 && repo && (
+                  {step !== 2 && <Redirect to={`${BASE_ROUTE}${STEPS[2]}`} />}
+                  {selectedEl !== -1 && repo && (
                     <>
                       <View>
-                        <View1>
+                        <ContainedView>
                           <h4>Add {repo.name} to your tasks?</h4>
                           <Card>
                             <h5>
@@ -266,10 +264,10 @@ export function AddGithubRepo(props: Props) {
                               Back to Selection
                             </ButtonOutlined>{' '}
                             <Button onClick={() => onClickAdd(repo)}>
-                              Add <b> {` ${repo.name} `} </b> to task
+                              Add <b> {` ${repo.name} `} </b> to board
                             </Button>
                           </div>
-                        </View1>
+                        </ContainedView>
                       </View>
                     </>
                   )}
@@ -277,11 +275,9 @@ export function AddGithubRepo(props: Props) {
               )}
               {view === 3 && (
                 <>
-                  {step !== 3 && (
-                    <Redirect to={`/projects/add/github/${STEPS[3]}`} />
-                  )}
+                  {step !== 3 && <Redirect to={`${BASE_ROUTE}${STEPS[3]}`} />}
                   <View>
-                    <View1>
+                    <ContainedView>
                       {addingProjectStatus === 'error' && (
                         <>
                           <h4>
@@ -311,7 +307,7 @@ export function AddGithubRepo(props: Props) {
                           </div>
                         </>
                       )}
-                    </View1>
+                    </ContainedView>
                   </View>
                 </>
               )}
@@ -327,7 +323,7 @@ export function AddGithubRepo(props: Props) {
   }
 
   function onClickGoBack() {
-    setSelectedRepo(-1);
+    setSelectedEl(-1);
   }
 
   function onClickAdd(repo: { [x: string]: any }) {
@@ -335,23 +331,6 @@ export function AddGithubRepo(props: Props) {
     dispatch(databaseActions.addGithubProject({ activeBoard, repo }));
   }
 }
-
-const StepsWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  padding-bottom: 1.6rem;
-`;
-
-const View = styled.div`
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-`;
-
-const View1 = styled(View)`
-  max-width: 60rem;
-  text-align: center;
-`;
 
 const GithubIcon = styled(Github)`
   color: black;

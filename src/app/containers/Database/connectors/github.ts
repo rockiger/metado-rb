@@ -10,10 +10,10 @@ export { createOrUpdateTask, syncGithub, closeIssue, openIssue };
 //! rewrite to sage to make it testable
 async function syncGithub(
   db: any,
-  githubToken: string,
   internalTasks: TaskMap,
   projectId: string,
   uid: string,
+  githubToken: string,
 ) {
   const [, userName, projectName] = projectId.split('-');
   const repoFullname = `${userName}/${projectName}`;

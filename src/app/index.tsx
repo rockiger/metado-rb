@@ -12,12 +12,13 @@ import { Switch, Route, BrowserRouter } from 'react-router-dom';
 
 import { GlobalStyle } from 'styles/global-styles';
 
-import { LoginPage } from './components/LoginPage/Loadable';
-import { NotFoundPage } from './components/NotFoundPage/Loadable';
+import { AddGithubRepo } from './containers/AddGithubRepo/Loadable';
+import { AddGoogleTasklist } from './containers/AddGoogleTasklist/Loadable';
 import { BoardPage } from './containers/BoardPage/Loadable';
+import { LoginPage } from './components/LoginPage/Loadable';
 import { HomePage } from './containers/HomePage/Loadable';
+import { NotFoundPage } from './components/NotFoundPage/Loadable';
 import { PrivateRoute } from './containers/PrivateRoute';
-import { AddGithubRepo } from './containers/AddGithubRepo';
 
 export function App() {
   return (
@@ -39,6 +40,16 @@ export function App() {
           exact
           path="/projects/add/github/:step"
           component={AddGithubRepo}
+        />
+        <Route
+          exact
+          path="/projects/add/googletasks"
+          component={AddGoogleTasklist}
+        />
+        <Route
+          exact
+          path="/projects/add/googletasks/:step"
+          component={AddGoogleTasklist}
         />
         <Route component={NotFoundPage} />
       </Switch>
