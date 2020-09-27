@@ -51,7 +51,7 @@ export function EditTask({
       >
         <form action="#" name="addtask" onSubmit={onSubmit}>
           <DialogHeader>
-            <h5>Edit Task: {task?.id}</h5>
+            <h5>Edit Task</h5>
           </DialogHeader>
           <DialogContent>
             <FormField>
