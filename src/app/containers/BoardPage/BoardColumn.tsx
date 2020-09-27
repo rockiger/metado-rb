@@ -51,6 +51,10 @@ export function BoardColumn({
               {!_.isEmpty(tasks) &&
                 col.taskIds.map((id, index) => {
                   const task = tasks[id];
+                  if (!task) {
+                    console.log('Missing Task in Board. Task-Id:', id);
+                    return null;
+                  }
                   const project = projects[task.project];
                   return (
                     <Draggable draggableId={id} key={id} index={index}>

@@ -23,6 +23,7 @@ import {
 } from './connectors/github';
 
 import * as googletasksConnector from './connectors/googletasks';
+import { now } from 'utils/helper';
 
 // Workaround for overload problem with call to firestore
 // https://stackoverflow.com/a/58814026
@@ -39,51 +40,72 @@ export function* addTask(action) {
 
   // Create task in github and get result
   try {
-    const createResult = yield call(
-      createIssue,
-      profile.githubToken,
-      project,
-      taskData,
-    );
-    if (createResult.status === 201) {
-      const newTaskId = `${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
-
+    let createResult: any;
+    if (project.type === 'github') {
+      createResult = yield call(
+        createIssue,
+        profile.githubToken,
+        project,
+        taskData,
+      );
+    }
+    if (project.type === 'googletasks') {
+      createResult = yield call(
+        googletasksConnector.createTask,
+        project,
+        taskData,
+      );
+    }
+    console.log({ createResult, project });
+    console.log(createResult?.status);
+    if (createResult?.status >= 200 && createResult?.status < 300) {
+      let newTaskId = '';
+      if (project.type === 'github') {
+        newTaskId = `${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
+      }
+      debugger;
+      if (project.type === 'googletasks') {
+        newTaskId = `${project.id}-${createResult.result.id}`;
+      }
       // Create task in firesotere-
-      const newTask: Task = {
-        created: new Date().toISOString(),
-        edited: new Date().toISOString(),
-        finished: '',
-        id: newTaskId,
-        description: taskData.description,
-        project: project.id,
-        status: TaskState.Backlog,
-        title: taskData.title,
-        user: project.user,
-      };
-      const taskRef = db.collection('tasks').doc(newTaskId);
-      yield call([taskRef, taskRef.set], newTask);
+      console.log({ newTaskId });
+      if (newTaskId) {
+        const newTask: Task = {
+          created: now(),
+          edited: now(),
+          finished: '',
+          id: newTaskId,
+          description: taskData.description,
+          project: project.id,
+          status: TaskState.Backlog,
+          title: taskData.title,
+          user: project.user,
+        };
+        const taskRef = db.collection('tasks').doc(newTaskId);
+        yield call([taskRef, taskRef.set], newTask);
 
-      // Add Task to column, needs to be after task creation,
-      // otherwise we get a type error
-      const column = board.columns[0];
-      const newTaskIds = produce(column.taskIds, draftTaskIds => {
-        draftTaskIds.push(newTaskId);
-      });
-      const newColumn = produce(column, draftColumn => {
-        draftColumn.taskIds = newTaskIds;
-      });
+        // Add Task to column, needs to be after task creation,
+        // otherwise we get a type error
+        const column = board.columns[0];
+        const newTaskIds = produce(column.taskIds, draftTaskIds => {
+          draftTaskIds.push(newTaskId);
+        });
+        const newColumn = produce(column, draftColumn => {
+          draftColumn.taskIds = newTaskIds;
+        });
 
-      const newColumns = produce(board.columns, draftColumns => {
-        draftColumns[0] = newColumn;
-      });
+        const newColumns = produce(board.columns, draftColumns => {
+          draftColumns[0] = newColumn;
+        });
 
-      const newBoard = produce(board, draftBoard => {
-        draftBoard.columns = newColumns;
-      });
+        const newBoard = produce(board, draftBoard => {
+          draftBoard.columns = newColumns;
+        });
 
-      yield call(updateBoard, {
-        payload: { board: newBoard, uid: project.user },
-      });
+        yield call(updateBoard, {
+          payload: { board: newBoard, uid: project.user },
+        });
+      }
     }
   } catch (error) {
     console.error(error);
@@ -92,12 +114,11 @@ export function* addTask(action) {
 
 export function* addGithubProject(action) {
   const { activeBoard, repo } = action.payload;
-  const now = new Date().toISOString();
   const projectId = `github-${repo.owner.login}-${repo.name}`;
   const uid = yield select(selectUid);
 
   const newProject = {
-    created: now,
+    created: now(),
     fullname: repo.full_name,
     id: projectId,
     name: repo.name,
@@ -144,12 +165,11 @@ export function* addGithubProject(action) {
 
 export function* addGoogleTasksProject(action) {
   const { activeBoard, taskList } = action.payload;
-  const now = new Date().toISOString();
   const projectId = `googletasks-${taskList.ownerId}-${taskList.id}`;
   const uid = yield select(selectUid);
 
   const newProject = {
-    created: now,
+    created: now(),
     id: projectId,
     name: taskList.title,
     owner: taskList.ownerId,
