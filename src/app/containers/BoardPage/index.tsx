@@ -18,6 +18,7 @@ import media from 'styled-media-query';
 import { Navbar } from 'app/components/Navbar';
 import {
   Button,
+  ButtonClear,
   Card,
   Column,
   PageHeader,
@@ -171,9 +172,14 @@ export function BoardPage(props: Props) {
         {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
           <>
             {board?.projects?.length < 10 && (
-              <Button as={Link} to={`/projects/add/github`}>
-                Add GitHub Project
-              </Button>
+              <>
+                <ButtonClear as={Link} to={`/projects/add/github`}>
+                  Add Google Tasks List
+                </ButtonClear>
+                <ButtonClear as={Link} to={`/projects/add/github`}>
+                  Add GitHub Repo
+                </ButtonClear>
+              </>
             )}
             {board && (
               <AddCard

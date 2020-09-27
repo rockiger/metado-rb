@@ -6,12 +6,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDialogState, DialogDisclosure } from 'reakit/Dialog';
 
-import {
-  Button,
-  ButtonClear,
-  Row,
-  ButtonOutlined,
-} from 'app/components/UiComponents';
+import { Button, Row, ButtonOutlined } from 'app/components/UiComponents';
 import { ProjectMap } from 'app/containers/Database/types';
 import {
   DialogBackdrop,
@@ -66,7 +61,7 @@ export function AddCard({ addTaskOnSubmit, projects }: Props) {
   return (
     <div ref={node}>
       <Row align="center">
-        <DialogDisclosure as={ButtonClear} {...dialog}>
+        <DialogDisclosure as={Button} {...dialog}>
           <b>+ Add Card</b>
         </DialogDisclosure>
       </Row>
