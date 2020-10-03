@@ -15,7 +15,7 @@ import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
 
-import { Navbar } from 'app/components/Navbar';
+import { Navbar } from 'app/components/PrivateNavbar';
 import {
   Button,
   ButtonClear,
@@ -173,7 +173,7 @@ export function BoardPage(props: Props) {
           <>
             {board?.projects?.length < 10 && (
               <>
-                <ButtonClear as={Link} to={`/projects/add/github`}>
+                <ButtonClear as={Link} to={`/projects/add/googletasks`}>
                   Add Google Tasks List
                 </ButtonClear>
                 <ButtonClear as={Link} to={`/projects/add/github`}>
