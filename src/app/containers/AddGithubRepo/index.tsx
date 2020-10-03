@@ -12,7 +12,7 @@ import styled from 'styled-components/macro';
 import { Github } from 'styled-icons/boxicons-logos';
 
 import { View, ContainedView } from 'app/components/AddToBoardComponents';
-import { Navbar } from 'app/components/Navbar';
+import { Navbar } from 'app/components/PrivateNavbar';
 import {
   A,
   Button,

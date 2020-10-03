@@ -16,7 +16,7 @@ import { selectAddGoogleTasklist } from './selectors';
 import { addGoogleTasklistSaga } from './saga';
 
 import { View, ContainedView } from 'app/components/AddToBoardComponents';
-import { Navbar } from 'app/components/Navbar';
+import { Navbar } from 'app/components/PrivateNavbar';
 import {
   Button,
   Card,
