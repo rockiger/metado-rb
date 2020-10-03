@@ -378,7 +378,8 @@ export const BoardContent = styled(Row)<{ ref: any }>`
   justify-content: space-evenly;
   overflow: auto;
   padding: 2rem;
-  width: 100% ${media.greaterThan('medium')`
+  width: 100%;
+  ${media.greaterThan('medium')`
     padding: 2rem 4rem;
   `};
 `;

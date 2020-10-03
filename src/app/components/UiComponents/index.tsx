@@ -35,7 +35,7 @@ export const PrivatePage = styled.div`
 export const PageHeader = styled.header`
   align-items: center;
   display: flex;
-  padding: 3.2rem 3.2rem 0;
+  padding: 3.2rem 5.92rem 0;
   width: 100%;
 `;
 
