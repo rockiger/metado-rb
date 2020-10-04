@@ -26,8 +26,8 @@ export function Navbar(props: Props) {
         </LogoLink>
       </Left>
       <Middle>
-        <NavbarLink to="/">Privacy</NavbarLink>
-        <NavbarLink to="/">Terms</NavbarLink>
+        <NavbarLink to="/privacy">Privacy</NavbarLink>
+        <NavbarLink to="/terms">Terms</NavbarLink>
       </Middle>
       <Right>
         <NavbarLink to="/login">Login</NavbarLink>

@@ -45,6 +45,15 @@ export const PageTitle = styled.h1`
   margin: 0;
 `;
 
+export const Section = styled.section`
+  padding: 4.8rem 3.2rem;
+  ${media.greaterThan('medium')`
+    display: flex;
+    margin: 0 auto;
+    padding: 8rem 6%;
+  `}
+`;
+
 export const Content = styled.div`
   align-items: flex-start;
   gap: 1.5rem;
@@ -60,6 +69,10 @@ export const Container = styled.div`
   margin-left: auto;
   margin-right: auto;
   max-width: 1200px;
+`;
+
+export const ContentPage = styled.div`
+  padding: 8rem 6%;
 `;
 
 export const Spacer = styled.div`

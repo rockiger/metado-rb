@@ -5,7 +5,7 @@ import media from 'styled-media-query';
 
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from 'app/components/Navbar';
-import { Button } from 'app/components/UiComponents';
+import { Button, Section } from 'app/components/UiComponents';
 
 export function HomePage() {
   return (
@@ -56,16 +56,6 @@ export function HomePage() {
     </>
   );
 }
-
-const Section = styled.section`
-  /* background-color: var(--bg-color-secondary); */
-  padding: 4.8rem 3.2rem;
-  ${media.greaterThan('medium')`
-    display: flex;
-    margin: 0 auto;
-    padding: 8rem 6%;
-  `}
-`;
 
 const SectionPart = styled.div`
   ${media.greaterThan('medium')`
