@@ -298,6 +298,11 @@ hr {
 	margin: 3.0rem 0;
 }
 
+
+img {
+  max-width: 100%;
+}
+
 input[type='color'],
 input[type='date'],
 input[type='datetime'],
@@ -387,11 +392,6 @@ input[type='radio'] {
 	font-weight: normal;
 	margin-left: .5rem;
 }
-
-img {
-  max-width: 100%;
-}
-
 
 dl,
 ol,
