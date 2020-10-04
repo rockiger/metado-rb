@@ -19,6 +19,8 @@ import { LoginPage } from './components/LoginPage/Loadable';
 import { HomePage } from './containers/HomePage/Loadable';
 import { NotFoundPage } from './components/NotFoundPage/Loadable';
 import { PrivateRoute } from './containers/PrivateRoute';
+import { PrivacyPage } from './containers/PrivacyPage/Loadable';
+import { TermsPage } from './containers/TermsPage/Loadable';
 
 export function App() {
   return (
@@ -35,6 +37,7 @@ export function App() {
         <PrivateRoute path="/b/:ownerId" component={BoardPage} />
         <PrivateRoute path="/b" component={BoardPage} />
         <Route exact path="/login" component={LoginPage} />
+        <Route exact path="/privacy" component={PrivacyPage} />
         <Route exact path="/projects/add/github" component={AddGithubRepo} />
         <Route
           exact
@@ -51,6 +54,8 @@ export function App() {
           path="/projects/add/googletasks/:step"
           component={AddGoogleTasklist}
         />
+        <Route exact path="/terms" component={TermsPage} />
+
         <Route component={NotFoundPage} />
       </Switch>
       <GlobalStyle />
