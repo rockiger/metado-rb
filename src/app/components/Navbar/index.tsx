@@ -7,6 +7,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useToolbarState, Toolbar, ToolbarItem } from 'reakit/Toolbar';
 import styled from 'styled-components/macro';
+import media from 'styled-media-query';
+
 import { Button } from '../UiComponents';
 
 interface Props {}
@@ -29,9 +31,9 @@ export function Navbar(props: Props) {
       </Middle>
       <Right>
         <NavbarLink to="/login">Login</NavbarLink>
-        <Button as={Link} to={`/login`}>
+        <SignupButton as={Link} to={`/login`}>
           Sign up
-        </Button>
+        </SignupButton>
       </Right>
     </NavbarContainer>
   );
@@ -39,10 +41,14 @@ export function Navbar(props: Props) {
 
 const NavbarContainer = styled(Toolbar)`
   align-items: center;
-  display: grid;
-  grid-template: auto 1fr auto / auto 1fr auto;
+  display: flex;
   height: 6rem;
   box-shadow: var(--box-shadow);
+
+  ${media.greaterThan('medium')`
+    display: grid;
+    grid-template: auto 1fr auto / auto 1fr auto;
+  `};
 `;
 
 const NavbarLink = styled(Link)`
@@ -52,8 +58,11 @@ const NavbarPart = styled.div`
   align-items: center;
   display: flex;
   height: 6rem;
-  min-width: 250px;
   padding: 0 2rem;
+
+  ${media.greaterThan('medium')`
+    min-width: 250px;
+  `}
 `;
 const Left = styled(NavbarPart)``;
 const Middle = styled(NavbarPart)`
@@ -61,7 +70,11 @@ const Middle = styled(NavbarPart)`
   justify-content: center;
 `;
 const Right = styled(NavbarPart)`
-  justify-content: flex-end;
+  display: none;
+  ${media.greaterThan('medium')`
+    display: flex;
+    justify-content: flex-end;
+  `}
 `;
 
 export const LogoLink = styled(ToolbarItem)`
@@ -72,3 +85,5 @@ export const LogoLink = styled(ToolbarItem)`
 export const Logo = styled.img`
   height: 1.8rem;
 `;
+
+export const SignupButton = styled(Button)``;
