@@ -1,14 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
-import { Github } from 'styled-icons/boxicons-logos';
 import media from 'styled-media-query';
 
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from 'app/components/Navbar';
 import { Button } from 'app/components/UiComponents';
-
-import GoogleTasksLogoSrc from 'app/containers/AddGoogleTasklist/google-tasks-logo.png';
 
 export function HomePage() {
   return (
