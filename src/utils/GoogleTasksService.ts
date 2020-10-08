@@ -24,6 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
 export class GoogleTasksService {
+  // defined here: https://console.developers.google.com/apis/credentials?project=metado-tasks-con-1600813279966&folder=&organizationId=
   private readonly clientId: string =
     '814923041781-2m58okiddrggddj4kf9ro7ra4lhvq071.apps.googleusercontent.com';
 

@@ -1,16 +1,20 @@
 /* --- STATE --- */
 export interface DatabaseState {
+  addingProjectStatus: LoadingStatus;
   authUser: AuthUser;
   board: Board;
   boardStatus: LoadingStatus;
-  addingProjectStatus: LoadingStatus;
-  projects: ProjectMap;
-  tasks: TaskMap;
   error: any;
+  projects: ProjectMap;
+  user: User;
+  tasks: TaskMap;
 }
 
 export interface AuthUser {
-  [key: string]: any;
+  email: string;
+  displayName: string;
+  photoURL: string;
+  uid: string;
 }
 
 export interface Board {
@@ -64,6 +68,11 @@ export enum TaskState {
   Todo = 'Todo',
   Doing = 'Doing',
   Done = 'Done',
+}
+
+export interface User {
+  activeBoard: string;
+  [key: string]: any;
 }
 
 export type ContainerState = DatabaseState;

@@ -44,7 +44,7 @@ import {
   selectAddingProject,
   selectBoard,
   selectError,
-  selectUserProfile,
+  selectUser,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
 
@@ -77,7 +77,7 @@ export function AddGithubRepo(props: Props) {
     board: { projects },
   } = useSelector(selectBoard);
   const error = useSelector(selectError);
-  const { githubToken, activeBoard } = useSelector(selectUserProfile);
+  const { githubToken, activeBoard } = useSelector(selectUser);
   const [selectedEl, setSelectedEl] = useState<number>(-1);
   const [repo, setRepo] = useState(repos[selectedEl]);
   const [view, setView] = useState(0);
@@ -147,7 +147,7 @@ export function AddGithubRepo(props: Props) {
   return (
     <>
       <Helmet>
-        <title>AddGithubRepo</title>
+        <title>Add Github Repo</title>
         <meta name="description" content="Description of AddGithubRepo" />
       </Helmet>
       <PrivatePage>

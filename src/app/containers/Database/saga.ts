@@ -11,7 +11,7 @@ import {
 } from 'redux-saga/effects';
 
 import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
-import { selectUserProfile, selectUid } from './selectors';
+import { selectUser, selectUid } from './selectors';
 import { actions } from './slice';
 import { Board, TaskMap, ProjectMap, TaskState, Task } from './types';
 import {
@@ -36,7 +36,7 @@ export const call: any = effCall;
 export function* addTask(action) {
   const { board, projects, taskData } = action.payload;
   const project = projects[taskData.projectId];
-  const profile = yield select(selectUserProfile);
+  const profile = yield select(selectUser);
 
   // Create task in github and get result
   try {
@@ -334,7 +334,7 @@ function* syncBoardFromProviders(
 ) {
   const { board, tasks: internalTasks, uid } = action.payload;
   const projectIds = board.projects;
-  const profile = yield select(selectUserProfile);
+  const profile = yield select(selectUser);
 
   try {
     for (const projectId of projectIds) {
@@ -397,7 +397,11 @@ function* updateActiveBoard(
   const { boardId, uid } = action.payload;
   const userRef = db.collection('users').doc(uid);
   try {
-    yield call([userRef, userRef.update], { activeBoard: boardId });
+    yield call(
+      [userRef, userRef.set],
+      { activeBoard: boardId },
+      { merge: true },
+    );
   } catch (error) {
     console.error(error);
   }
@@ -421,7 +425,7 @@ function* updateBoard(action) {
 function* updateTask(action) {
   console.log('updateTask', { action });
   const { oldTask, projects, task } = action.payload;
-  const profile = yield select(selectUserProfile);
+  const profile = yield select(selectUser);
   const project = projects[oldTask.project];
   const taskRef = db.collection('tasks').doc(task.id);
   try {
@@ -449,10 +453,12 @@ function* updateTask(action) {
 }
 
 function* updateUserCredentials(action) {
-  const { uid, username, email } = action.payload;
+  const { uid, displayName, email } = action.payload;
   const userRef = db.collection('users').doc(uid);
   try {
-    yield call([userRef, userRef.set], { email, username }, { merge: true });
+    const user = yield call([userRef, userRef.get]);
+    console.log('updateUserCredenttials', { user });
+    yield call([userRef, userRef.set], { email, displayName }, { merge: true });
   } catch (error) {
     console.error(error);
   }
@@ -479,13 +485,21 @@ function* databaseWatcherSaga() {
 
 function* syncUserSaga() {
   const channel = yield call(rsf.auth.channel);
+  console.log('open user channel');
   while (true) {
     const { error, user } = yield take(channel);
+    console.log('update user', { error, user });
     if (user) {
-      const profileRef = db.collection('users').doc(user.uid);
-      const profileSnapshot = yield call([profileRef, profileRef.get]);
-      const profile = profileSnapshot.data();
-      yield put(actions.syncUser({ ...user.toJSON(), profile }));
+      console.log(user);
+      const { email, displayName, photoURL, uid } = user;
+      yield put(
+        actions.syncUser({
+          email,
+          displayName,
+          photoURL,
+          uid,
+        }),
+      );
     } else yield put(actions.syncUserError(error));
   }
 }

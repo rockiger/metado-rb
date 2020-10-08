@@ -4,9 +4,10 @@ import {
   AuthUser,
   Board,
   ContainerState,
+  ProjectMap,
   Task,
   TaskMap,
-  ProjectMap,
+  User,
 } from './types';
 
 const initialBoard: Board = {
@@ -25,6 +26,7 @@ export const initialState: ContainerState = {
   boardStatus: 'init',
   projects: {},
   tasks: {},
+  user: { activeBoard: '' },
   error: null,
 };
 const databaseSlice = createSlice({
@@ -85,7 +87,8 @@ const databaseSlice = createSlice({
     ) {},
     logout(state) {},
     logoutSuccess(state) {
-      state.authUser = {};
+      state.authUser = emptyAuthUser();
+      state.user = emptyUser();
     },
     setBoard(state, action: PayloadAction<{ board: Board }>) {
       state.board = action.payload.board;
@@ -113,7 +116,11 @@ const databaseSlice = createSlice({
     },
     updateUserCredentials(
       state,
-      action: PayloadAction<{ email: string; uid: string; username: string }>,
+      action: PayloadAction<{
+        email: string;
+        uid: string;
+        displayName: string;
+      }>,
     ) {},
     openBoardChannel(
       state,
@@ -129,12 +136,12 @@ const databaseSlice = createSlice({
     resetAddProject(state) {
       state.addingProjectStatus = 'init';
     },
-    syncUser(state, action: PayloadAction<{ [key: string]: any }>) {
+    syncUser(state, action: PayloadAction<AuthUser>) {
       setLocalAuthUser(action.payload);
       state.authUser = action.payload;
     },
     syncUserError(state, action: PayloadAction<any>) {
-      setLocalAuthUser(null);
+      setLocalAuthUser(emptyAuthUser());
       console.log(action);
     },
     syncBoardFromProviders(
@@ -147,18 +154,33 @@ const databaseSlice = createSlice({
       state,
       action: PayloadAction<{ boardId: string; uid: string }>,
     ) {
-      state.authUser.profile.activeBoard = action.payload.boardId;
+      state.user.activeBoard = action.payload.boardId;
     },
   },
 });
 
 export const { actions, reducer, name: sliceKey } = databaseSlice;
 
-function getLocalAuthUser() {
+function emptyAuthUser(): AuthUser {
+  return {
+    email: '',
+    displayName: '',
+    photoURL: '',
+    uid: '',
+  };
+}
+
+function emptyUser(): User {
+  return {
+    activeBoard: '',
+  };
+}
+
+function getLocalAuthUser(): AuthUser {
   const authStorageJson = localStorage.getItem('authUser');
   const authStorage = authStorageJson ? JSON.parse(authStorageJson) : {};
   if (isAuthUser(authStorage)) return authStorage;
-  return {};
+  return emptyAuthUser();
 }
 
 function isAuthUser(obj: any): obj is AuthUser {
