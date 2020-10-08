@@ -46,7 +46,7 @@ import {
   selectAddingProject,
   selectBoard,
   selectError,
-  selectUserProfile,
+  selectUser,
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
 import GoogleTasksService, { TaskList } from 'utils/GoogleTasksService';
@@ -75,7 +75,7 @@ export function AddGoogleTasklist(props: Props) {
 
   //@ts-expect-error
   const { step } = useParams();
-  const { activeBoard } = useSelector(selectUserProfile);
+  const { activeBoard } = useSelector(selectUser);
   const addingProjectStatus = useSelector(selectAddingProject);
   // WARNING projects is not always filled, only when we are comming from board
   const {
@@ -164,7 +164,7 @@ export function AddGoogleTasklist(props: Props) {
   return (
     <>
       <Helmet>
-        <title>AddGoogleTasklist</title>
+        <title>Add Google Tasklist</title>
         <meta name="description" content="Description of AddGoogleTasklist" />
       </Helmet>
       <PrivatePage>

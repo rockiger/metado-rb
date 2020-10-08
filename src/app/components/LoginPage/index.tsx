@@ -29,7 +29,7 @@ export function LoginPage({ location }: Props) {
   const signInSuccessCallback = useCallback(
     authResult => {
       const { uid, displayName, email } = authResult.user;
-      console.log({ uid, displayName, email });
+      console.log('signInSuccessCallback', { uid, displayName, email });
       /*Object.keys(authResult.user).forEach(k =>
       console.log(k, ':', authResult.user[k]),
     ); */
@@ -37,7 +37,7 @@ export function LoginPage({ location }: Props) {
         databaseActions.updateUserCredentials({
           email,
           uid,
-          username: displayName,
+          displayName: displayName,
         }),
       );
       return true;

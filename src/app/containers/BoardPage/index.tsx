@@ -95,6 +95,9 @@ export function BoardPage(props: Props) {
       if (!boardId && !activeBoard && uid) {
         console.log('create Board');
         await dispatch(
+          databaseActions.updateActiveBoard({ boardId: 'main-board', uid }),
+        );
+        await dispatch(
           databaseActions.updateBoard({
             board: {
               columns: [
@@ -111,9 +114,6 @@ export function BoardPage(props: Props) {
             },
             uid,
           }),
-        );
-        await dispatch(
-          databaseActions.updateActiveBoard({ boardId: 'main-board', uid }),
         );
       }
     };
@@ -161,7 +161,7 @@ export function BoardPage(props: Props) {
   return (
     <PrivatePage>
       <Helmet>
-        <title>BoardPage</title>
+        <title>Board</title>
         <meta name="description" content="Description of BoardPage" />
       </Helmet>
       <Navbar />
@@ -236,7 +236,7 @@ export function BoardPage(props: Props) {
           <Card>
             <Column align="center">
               <h5>
-                It seems your board doesn't have any project attached. Go and
+                It seems your board doesn't have any projects attached. Go and
                 add one.
               </h5>
               <p>
@@ -246,6 +246,11 @@ export function BoardPage(props: Props) {
                   style={{ width: '40rem' }}
                 />
               </p>
+
+              <Button as={Link} to={`/projects/add/googletasks`}>
+                Add Google Tasks List
+              </Button>
+              <p></p>
               <Button as={Link} to={`/projects/add/github`}>
                 Add GitHub Project
               </Button>

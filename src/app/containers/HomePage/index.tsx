@@ -1,18 +1,29 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Link, Redirect } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
 
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from 'app/components/Navbar';
 import { Button, Section } from 'app/components/UiComponents';
+import { selectIsAuthenticated } from 'app/containers/Database/selectors';
 
 export function HomePage() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
+  if (isAuthenticated) {
+    return <Redirect to="/b" />;
+  }
+
   return (
     <>
       <Helmet>
-        <title>Home Page</title>
-        <meta name="description" content="A Boilerplate application homepage" />
+        <title>All your todos in one board.</title>
+        <meta
+          name="description"
+          content="Metado shows all your task from different web apps and projects in one place. So you can focus on your work and not on task list management."
+        />
       </Helmet>
 
       <Navbar />

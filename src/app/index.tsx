@@ -25,10 +25,7 @@ import { TermsPage } from './containers/TermsPage/Loadable';
 export function App() {
   return (
     <BrowserRouter>
-      <Helmet
-        titleTemplate="%s - React Boilerplate"
-        defaultTitle="React Boilerplate"
-      >
+      <Helmet titleTemplate="%s - Metado" defaultTitle="Metado">
         <meta name="description" content="A React Boilerplate application" />
       </Helmet>
       <Switch>
@@ -38,18 +35,22 @@ export function App() {
         <PrivateRoute path="/b" component={BoardPage} />
         <Route exact path="/login" component={LoginPage} />
         <Route exact path="/privacy" component={PrivacyPage} />
-        <Route exact path="/projects/add/github" component={AddGithubRepo} />
-        <Route
+        <PrivateRoute
+          exact
+          path="/projects/add/github"
+          component={AddGithubRepo}
+        />
+        <PrivateRoute
           exact
           path="/projects/add/github/:step"
           component={AddGithubRepo}
         />
-        <Route
+        <PrivateRoute
           exact
           path="/projects/add/googletasks"
           component={AddGoogleTasklist}
         />
-        <Route
+        <PrivateRoute
           exact
           path="/projects/add/googletasks/:step"
           component={AddGoogleTasklist}

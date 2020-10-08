@@ -1,5 +1,4 @@
 import { createSelector } from '@reduxjs/toolkit';
-import _ from 'lodash';
 import { RootState } from 'types';
 
 import { initialState } from './slice';
@@ -13,7 +12,7 @@ export const selectAddingProject = createSelector(
 
 export const selectActiveBoard = createSelector(
   [selectDomain],
-  state => state.authUser.profile.activeBoard,
+  state => state.user.activeBoard,
 );
 
 export const selectBoard = createSelector([selectDomain], state => ({
@@ -23,7 +22,7 @@ export const selectBoard = createSelector([selectDomain], state => ({
 
 export const selectIsAuthenticated = createSelector(
   [selectDomain],
-  state => !_.isEmpty(state.authUser),
+  state => state.authUser.uid,
 );
 
 export const selectProjects = createSelector(
@@ -38,9 +37,6 @@ export const selectUid = createSelector(
   state => state.authUser.uid,
 );
 
-export const selectUserProfile = createSelector(
-  [selectDomain],
-  state => state.authUser.profile,
-);
+export const selectUser = createSelector([selectDomain], state => state.user);
 
 export const selectError = createSelector([selectDomain], state => state.error);
