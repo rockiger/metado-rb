@@ -54,11 +54,11 @@ import { selectAddGithubRepo } from './selectors';
 import { addGithubRepoSaga } from './saga';
 
 const BASE_ROUTE = '/projects/add/github/';
-const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
+/* const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
-}`;
+}`; */
 const CLIENT_ID = '58f80a76bbfb3166f37f';
-const REDIRECT_URI = `${BASE_URL}/projects/add/github`;
+//const REDIRECT_URI = `https://metado.app/projects/add/github`;
 const STEPS = ['0', '1', '2', '3'];
 
 interface Props {}
@@ -196,7 +196,7 @@ export function AddGithubRepo(props: Props) {
                       </p>
                       <Button
                         as={A}
-                        href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo&redirect_uri=${REDIRECT_URI}`}
+                        href={`https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo`}
                       >
                         <Github size="1.5rem" /> GitHub - Login
                       </Button>
