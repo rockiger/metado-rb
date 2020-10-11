@@ -66,28 +66,42 @@ export function BoardPage(props: Props) {
   const tasks = useSelector(selectTasks);
   const uid = useSelector(selectUid);
   const [isBoardUpdated, setIsBoardUpdated] = useState(false);
+  const [status, setStatus] = useState<
+    'init' | 'boardConnected' | 'tasksConnected' | 'synced'
+  >('init');
   const editDialogState = useDialogState();
   const [editTaskState, setEditTaskState] = useState<Task | null>(null);
   const editDialogFinalFocusRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (boardId && board?.id !== boardId && ownerId && ownerId === uid) {
-      dispatch(databaseActions.openBoardChannel({ uid: ownerId, boardId }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, boardId, ownerId, uid]);
+  console.log({ status });
 
   useEffect(() => {
-    if (!_.isEmpty(board?.projects) && _.isEmpty(tasks)) {
-      dispatch(
-        databaseActions.openTasksChannel({
-          uid: ownerId,
-          projectIds: board?.projects,
-        }),
-      );
+    if (status === 'init') {
+      console.log('connect board', { boardId, board, ownerId, uid });
+      if (boardId && board?.id !== boardId && ownerId && ownerId === uid) {
+        dispatch(databaseActions.openBoardChannel({ uid: ownerId, boardId }));
+        console.log('connecting board ...');
+        setStatus('boardConnected');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, ownerId, tasks]);
+  }, [board, boardId, ownerId, uid, status]);
+
+  useEffect(() => {
+    console.log('connect tasks', { tasks, board });
+    if (status === 'boardConnected') {
+      if (!_.isEmpty(board?.projects)) {
+        dispatch(
+          databaseActions.openTasksChannel({
+            uid: ownerId,
+            projectIds: board?.projects,
+          }),
+        );
+        setStatus('tasksConnected');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, ownerId, status, tasks]);
 
   useEffect(() => {
     const createAndUpdateBoard = async () => {
@@ -132,17 +146,15 @@ export function BoardPage(props: Props) {
   }, []);
 
   useEffect(() => {
-    if (
-      !isBoardUpdated &&
-      !_.isEmpty(board?.projects) &&
-      !_.isEmpty(tasks) &&
-      uid
-    ) {
-      dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
-      setIsBoardUpdated(true);
+    if (status === 'tasksConnected') {
+      if (!isBoardUpdated && !_.isEmpty(board?.projects) && uid) {
+        dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
+        setIsBoardUpdated(true);
+        setStatus('synced');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, isBoardUpdated, tasks, uid]);
+  }, [board, isBoardUpdated, status, tasks, uid]);
 
   useEffect(() => {
     if (uid) {
