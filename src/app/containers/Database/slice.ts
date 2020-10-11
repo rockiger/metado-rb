@@ -100,6 +100,9 @@ const databaseSlice = createSlice({
     setTasks(state, action: PayloadAction<{ tasks: TaskMap }>) {
       state.tasks = action.payload.tasks;
     },
+    setUser(state, action: PayloadAction<{ user: User }>) {
+      state.user = action.payload.user;
+    },
     updateBoard(state, action: PayloadAction<{ board: Board; uid: string }>) {
       state.board = action.payload.board;
     },
@@ -136,11 +139,11 @@ const databaseSlice = createSlice({
     resetAddProject(state) {
       state.addingProjectStatus = 'init';
     },
-    syncUser(state, action: PayloadAction<AuthUser>) {
+    syncAuthUser(state, action: PayloadAction<AuthUser>) {
       setLocalAuthUser(action.payload);
       state.authUser = action.payload;
     },
-    syncUserError(state, action: PayloadAction<any>) {
+    syncAuthUserError(state, action: PayloadAction<any>) {
       setLocalAuthUser(emptyAuthUser());
       console.log(action);
     },
