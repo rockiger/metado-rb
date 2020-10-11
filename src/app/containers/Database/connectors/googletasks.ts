@@ -16,7 +16,7 @@ export async function sync(
   projectId: string,
   uid: string,
 ) {
-  const [, , taskListId] = projectId.split('-');
+  const [, , , taskListId] = projectId.split('-');
   GoogleTasksService.load(() => {})
     .catch(error => {
       console.error('Error loading google services:', error);
@@ -24,6 +24,7 @@ export async function sync(
     .then(async () => {
       try {
         const externalTasks = await GoogleTasksService.listTasks(taskListId);
+        console.log('Google sync', { externalTasks });
         for (const externalTask of externalTasks) {
           const newOrUpdatedTask = createOrUpdateTask(
             externalTask,

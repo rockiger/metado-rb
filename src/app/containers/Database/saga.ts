@@ -37,6 +37,7 @@ export function* addTask(action) {
   const { board, projects, taskData } = action.payload;
   const project = projects[taskData.projectId];
   const profile = yield select(selectUser);
+  const uid = yield select(selectUid);
 
   // Create task in github and get result
   try {
@@ -61,11 +62,10 @@ export function* addTask(action) {
     if (createResult?.status >= 200 && createResult?.status < 300) {
       let newTaskId = '';
       if (project.type === 'github') {
-        newTaskId = `${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
+        newTaskId = `${uid}-${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
       }
-      debugger;
       if (project.type === 'googletasks') {
-        newTaskId = `${project.id}-${createResult.result.id}`;
+        newTaskId = `${uid}-${project.id}-${createResult.result.id}`;
       }
       // Create task in firesotere-
       console.log({ newTaskId });
@@ -114,8 +114,9 @@ export function* addTask(action) {
 
 export function* addGithubProject(action) {
   const { activeBoard, repo } = action.payload;
-  const projectId = `github-${repo.owner.login}-${repo.name}`;
+  //! add uid
   const uid = yield select(selectUid);
+  const projectId = `${uid}-github-${repo.owner.login}-${repo.name}`;
 
   const newProject = {
     created: now(),
@@ -165,8 +166,9 @@ export function* addGithubProject(action) {
 
 export function* addGoogleTasksProject(action) {
   const { activeBoard, taskList } = action.payload;
-  const projectId = `googletasks-${taskList.ownerId}-${taskList.id}`;
+  //! add uid
   const uid = yield select(selectUid);
+  const projectId = `${uid}-googletasks-${taskList.ownerId}-${taskList.id}`;
 
   const newProject = {
     created: now(),
@@ -324,7 +326,28 @@ function* openTasksChannel(action) {
         finished: convertTimestamp(data.finished),
       };
     });
+    console.log('Change tasks', tasks);
     yield put(actions.setTasks({ tasks }));
+  }
+}
+
+function* openUserChannel(action) {
+  const { uid } = action.payload;
+  const userRef = db.collection('users').doc(uid);
+
+  // create and export channel to authUserChannel
+  const channel = eventChannel(emit => userRef.onSnapshot(emit));
+  yield channel;
+
+  // get user to look if required values are there. Create them if needed.
+  const user = yield call([userRef, userRef.get]);
+  const { activeBoard } = user.data();
+  yield put(actions.setUser({ user: user.data() }));
+
+  console.log('open user channel', { activeBoard, userData: user.data() });
+  while (true) {
+    const snapshot = yield take(channel);
+    yield put(actions.setUser({ user: snapshot.data() }));
   }
 }
 
@@ -338,7 +361,7 @@ function* syncBoardFromProviders(
 
   try {
     for (const projectId of projectIds) {
-      const [projectType] = projectId.split('-');
+      const [, projectType] = projectId.split('-');
       if (projectType === 'github' && profile.githubToken) {
         yield call(
           syncGithub,
@@ -483,9 +506,11 @@ function* databaseWatcherSaga() {
   yield takeLatest(actions.updateUserCredentials.type, updateUserCredentials);
 }
 
-function* syncUserSaga() {
+function* syncAuthUserSaga() {
+  let userChannel: any = null;
   const channel = yield call(rsf.auth.channel);
-  console.log('open user channel');
+  console.log('open auth channel');
+
   while (true) {
     const { error, user } = yield take(channel);
     console.log('update user', { error, user });
@@ -493,19 +518,30 @@ function* syncUserSaga() {
       console.log(user);
       const { email, displayName, photoURL, uid } = user;
       yield put(
-        actions.syncUser({
+        actions.syncAuthUser({
           email,
           displayName,
           photoURL,
           uid,
         }),
       );
-    } else yield put(actions.syncUserError(error));
+      if (uid) {
+        userChannel = yield call(openUserChannel, {
+          payload: { uid },
+        });
+      } else {
+        userChannel?.close && userChannel.close();
+      }
+      console.log({ userChannel });
+    } else {
+      yield put(actions.syncAuthUserError(error));
+      userChannel?.close && userChannel.close();
+    }
   }
 }
 
 export function* databaseSaga() {
-  yield all([syncUserSaga(), databaseWatcherSaga()]);
+  yield all([syncAuthUserSaga(), databaseWatcherSaga()]);
 }
 
 ////////////
