@@ -3,18 +3,14 @@
  * LoginPage
  *
  */
-import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { Link, Redirect } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import firebase from 'firebase';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
 
-import { firebaseAuth } from 'app/containers/Database/firebase';
-import { selectIsAuthenticated } from 'app/containers/Database/selectors';
-import { actions as databaseActions } from 'app/containers/Database/slice';
+import { db, firebaseAuth, useAuth } from 'app/containers/Database/firebase';
 
 interface Props {
   location: any;
@@ -22,31 +18,11 @@ interface Props {
 
 export function LoginPage({ location }: Props) {
   const from = location && location.state && location.state.from;
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { user } = useAuth();
   const signInSuccessUrl = from || '/b';
-  const dispatch = useDispatch();
-
-  const signInSuccessCallback = useCallback(
-    authResult => {
-      const { uid, displayName, email } = authResult.user;
-      console.log('signInSuccessCallback', { uid, displayName, email });
-      /*Object.keys(authResult.user).forEach(k =>
-      console.log(k, ':', authResult.user[k]),
-    ); */
-      dispatch(
-        databaseActions.updateUserCredentials({
-          email,
-          uid,
-          displayName: displayName,
-        }),
-      );
-      return true;
-    },
-    [dispatch],
-  );
 
   const uiConfig = {
-    signInFlow: 'redirect',
+    signInFlow: 'popup',
     signInSuccessUrl,
     signInOptions: [
       // firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -58,7 +34,7 @@ export function LoginPage({ location }: Props) {
     },
   };
 
-  if (isAuthenticated) {
+  if (user) {
     return <Redirect to="/b" />;
   }
 
@@ -80,6 +56,57 @@ export function LoginPage({ location }: Props) {
       </Right>
     </Container>
   );
+}
+
+function signInSuccessCallback(authResult) {
+  const { uid, displayName, email } = authResult.user;
+  const { user } = authResult;
+  console.log('signInSuccessCallback', {
+    isNewUser: authResult.additionalUserInfo.isNewUser,
+    uid,
+    displayName,
+    email,
+  });
+
+  if (authResult.additionalUserInfo.isNewUser) {
+    setupNewUser(user);
+  }
+  return false;
+}
+
+function setupNewUser(user) {
+  console.log('setupNewUser', user.uid);
+  const userRef = db.collection('users').doc(user.uid);
+  const board = {
+    columns: [
+      { taskIds: [], title: 'Backlog' },
+      { taskIds: [], title: 'Todo' },
+      { taskIds: [], title: 'Doing' },
+      { taskIds: [], title: 'Done' },
+    ],
+    id: 'main-board',
+    isDeleted: false,
+    projects: [],
+    showBacklog: true,
+    title: 'Main Board',
+  };
+  const boardRef = db
+    .collection('users')
+    .doc(user.uid)
+    .collection('boards')
+    .doc(board.id);
+
+  userRef
+    .set({ activeBoard: 'main-board' }, { merge: true })
+    .then(() => console.log('setupNewUserSuccessSetActiveBoard'))
+    .catch(error => console.error(error));
+
+  boardRef
+    .set(board)
+    .then(() => console.log('setupNewUserSuccessSetBoard'))
+    .catch(error => console.error(error));
+
+  return true;
 }
 
 const Container = styled.div`

@@ -7,12 +7,12 @@ import media from 'styled-media-query';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from 'app/components/Navbar';
 import { Button, Section } from 'app/components/UiComponents';
-import { selectIsAuthenticated } from 'app/containers/Database/selectors';
+import { useAuth } from '../Database/firebase';
 
 export function HomePage() {
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { user } = useAuth();
 
-  if (isAuthenticated) {
+  if (user) {
     return <Redirect to="/b" />;
   }
 
