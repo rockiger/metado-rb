@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Route, Redirect, useLocation } from 'react-router-dom';
 
-import { selectIsAuthenticated } from 'app/containers/Database/selectors';
+import { useAuth } from 'app/containers/Database/firebase';
 
 import { useInjectReducer } from 'utils/redux-injectors';
 import { reducer, sliceKey } from './slice';
@@ -22,14 +21,14 @@ interface Props {
 export function PrivateRoute({ component: Component, ...rest }: Props) {
   useInjectReducer({ key: sliceKey, reducer: reducer });
 
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { user } = useAuth();
   const location = useLocation();
 
   return (
     <Route
       {...rest}
       render={props =>
-        isAuthenticated ? (
+        user ? (
           <Component {...props} />
         ) : (
           <Redirect

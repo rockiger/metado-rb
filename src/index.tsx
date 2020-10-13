@@ -27,6 +27,7 @@ import { theme } from 'styles/theme';
 // Initialize languages
 import './locales/i18n';
 import { Database } from 'app/containers/Database';
+import { AuthProvider } from 'app/containers/Database/firebase';
 
 const store = configureAppStore();
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
@@ -38,11 +39,13 @@ const ConnectedApp = ({ Component }: Props) => (
   <Provider store={store}>
     <Database />
     <ThemeProvider theme={theme}>
-      <HelmetProvider>
-        <React.StrictMode>
-          <Component />
-        </React.StrictMode>
-      </HelmetProvider>
+      <AuthProvider>
+        <HelmetProvider>
+          <React.StrictMode>
+            <Component />
+          </React.StrictMode>
+        </HelmetProvider>
+      </AuthProvider>
     </ThemeProvider>
   </Provider>
 );
