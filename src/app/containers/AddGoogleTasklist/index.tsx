@@ -6,14 +6,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useSelector, useDispatch } from 'react-redux';
 import { Link as RouterLink, Redirect, useParams } from 'react-router-dom';
+import produce from 'immer';
 import styled from 'styled-components/macro';
-
-import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
-import { reducer, sliceKey } from './slice';
-import { selectAddGoogleTasklist } from './selectors';
-import { addGoogleTasklistSaga } from './saga';
 
 import { View, ContainedView } from 'app/components/AddToBoardComponents';
 import { Navbar } from 'app/components/PrivateNavbar';
@@ -42,46 +37,26 @@ import {
   StepsWrapper,
   Title,
 } from 'app/components/UiComponents/Step';
-import {
-  selectAddingProject,
-  selectBoard,
-  selectError,
-  selectUser,
-} from 'app/containers/Database/selectors';
-import { actions as databaseActions } from 'app/containers/Database/slice';
+import { useAuth } from 'app/containers/Database/firebase';
+import { db } from 'app/containers/Database/firebase';
+import { Board } from 'app/containers/Database/types';
 import GoogleTasksService, { TaskList } from 'utils/GoogleTasksService';
 
 import logo from './google-tasks-logo.png';
+import { now } from 'utils/helper';
 
 const BASE_ROUTE = '/projects/add/googletasks/';
 const STEPS = ['0', '1', '2', '3'];
 
-interface Props {}
-
-export function AddGoogleTasklist(props: Props) {
-  useInjectReducer({
-    key: sliceKey,
-    reducer: reducer,
-  });
-  useInjectSaga({
-    key: sliceKey,
-    saga: addGoogleTasklistSaga,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const addGoogleTasklist = useSelector(selectAddGoogleTasklist);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const dispatch = useDispatch();
-
+export function AddGoogleTasklist() {
   //@ts-expect-error
   const { step } = useParams();
-  const { activeBoard } = useSelector(selectUser);
-  const addingProjectStatus = useSelector(selectAddingProject);
-  // WARNING projects is not always filled, only when we are comming from board
-  const {
-    board: { projects },
-  } = useSelector(selectBoard);
-  const error = useSelector(selectError);
+  const { user, profile } = useAuth();
+  const [addingProjectStatus, setAddingProjectStatus] = useState<FetchStatus>(
+    'init',
+  );
+  const [board, setBoard] = useState<Board | undefined>();
+  const [error, setError] = useState<any>();
   const [googleLoaded, setGoogleLoaded] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [googleErroed, setGoogleErroed] = useState<string | undefined>(
@@ -105,6 +80,24 @@ export function AddGoogleTasklist(props: Props) {
         setGoogleErroed(error);
       });
   }, []);
+
+  useEffect(() => {
+    const getBoard = async () => {
+      if (profile?.activeBoard && user?.uid) {
+        const boardRef = db
+          .collection('users')
+          .doc(user.uid)
+          .collection('boards')
+          .doc(profile.activeBoard);
+        const boardSnapshot = (await boardRef.get()) as firebase.firestore.DocumentSnapshot<
+          Board
+        >;
+        const boardData = boardSnapshot.data();
+        setBoard(boardData);
+      }
+    };
+    getBoard();
+  }, [profile, user]);
 
   useEffect(() => {
     const getTaskLists = async () => {
@@ -353,7 +346,7 @@ export function AddGoogleTasklist(props: Props) {
   );
 
   function addedProjectsFilter(tasklist) {
-    return !projects.includes(
+    return !board?.projects.includes(
       `googletasks-${GoogleTasksService.getUserId()}-${tasklist.id}`,
     );
   }
@@ -364,11 +357,12 @@ export function AddGoogleTasklist(props: Props) {
 
   function onClickAdd(taskList: { [x: string]: any }) {
     setSettingProject('fetching');
-    dispatch(
-      databaseActions.addGoogleTasksProject({
-        activeBoard,
-        taskList: { ...taskList, ownerId: GoogleTasksService.getUserId() },
-      }),
+    addGoogleTasksProject(
+      profile?.activeBoard,
+      setAddingProjectStatus,
+      setError,
+      { ...taskList, ownerId: GoogleTasksService.getUserId() },
+      user?.uid,
     );
   }
 
@@ -378,6 +372,58 @@ export function AddGoogleTasklist(props: Props) {
 
   function updateSigninStatus(signedIn: boolean) {
     setIsSignedIn(signedIn);
+  }
+}
+
+async function addGoogleTasksProject(
+  activeBoard,
+  setAddingProjectStatus,
+  setError,
+  taskList,
+  uid,
+) {
+  setAddingProjectStatus('fetching');
+  const projectId = `${uid}-googletasks-${taskList.ownerId}-${taskList.id}`;
+
+  const newProject = {
+    created: now(),
+    id: projectId,
+    name: taskList.title,
+    owner: taskList.ownerId,
+    type: 'googletasks',
+    user: uid,
+  };
+  const projectsRef = db.collection('projects').doc(projectId);
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(activeBoard);
+
+  try {
+    await projectsRef.set(newProject, { merge: true });
+    const boardSnapshot = (await boardRef.get()) as firebase.firestore.DocumentSnapshot<
+      Board
+    >;
+    const board = boardSnapshot.data();
+    // Check if board has less than 10 projects, otherwise abort, because there
+    // are only searches for 10 projects possible with firestore.
+    // See syncBoardFromProviders
+    if (board && board.projects && board.projects.length < 10) {
+      const changedBoard = produce(board, draftBoard => {
+        draftBoard.projects.push(projectId);
+      });
+      await boardRef.set(changedBoard);
+      setAddingProjectStatus('success');
+    } else {
+      console.error('Board already has maximum of 10 projects.');
+      setAddingProjectStatus('error');
+      setError('Board already has maximum of 10 projects.');
+    }
+  } catch (error) {
+    console.error(error);
+    setAddingProjectStatus('error');
+    setError(error);
   }
 }
 
