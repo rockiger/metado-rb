@@ -44,6 +44,7 @@ import GoogleTasksService, { TaskList } from 'utils/GoogleTasksService';
 
 import logo from './google-tasks-logo.png';
 import { now } from 'utils/helper';
+import { syncBoardFromProviders } from '../BoardPage/helpers';
 
 const BASE_ROUTE = '/projects/add/googletasks/';
 const STEPS = ['0', '1', '2', '3'];
@@ -148,7 +149,7 @@ export function AddGoogleTasklist() {
     }
   }, [addingProjectStatus, isSignedIn, selectedEl, settingProject, view]);
 
-  console.log({ googleErroed, googleLoaded, isSignedIn });
+  // console.log({ googleErroed, googleLoaded, isSignedIn });
 
   if (!STEPS.includes(step)) {
     return <Redirect to={`${BASE_ROUTE}${STEPS[0]}`} />;
@@ -280,10 +281,16 @@ export function AddGoogleTasklist() {
                               Back to Selection
                             </ButtonOutlined>{' '}
                             <Button
+                              disabled={addingProjectStatus === 'fetching'}
                               onClick={() => onClickAdd(taskLists[selectedEl])}
                             >
-                              Add <b> {` ${taskLists[selectedEl].title} `} </b>{' '}
-                              to board
+                              {addingProjectStatus === 'fetching'
+                                ? 'Adding'
+                                : 'Add'}{' '}
+                              <b> {` ${taskLists[selectedEl].title} `} </b>{' '}
+                              {addingProjectStatus === 'fetching'
+                                ? '...'
+                                : 'to board'}
                             </Button>
                           </div>
                         </ContainedView>
@@ -414,6 +421,17 @@ async function addGoogleTasksProject(
         draftBoard.projects.push(projectId);
       });
       await boardRef.set(changedBoard);
+
+      // connect tasks
+      const tasksRef = db
+        .collection('tasks')
+        .where('project', 'in', changedBoard?.projects)
+        .where('user', '==', uid);
+      const tasksSnapshot = await tasksRef.get();
+      let tasks = {};
+      tasksSnapshot.forEach(doc => (tasks[doc.id] = doc.data()));
+
+      await syncBoardFromProviders(changedBoard, () => {}, tasks, uid);
       setAddingProjectStatus('success');
     } else {
       console.error('Board already has maximum of 10 projects.');
