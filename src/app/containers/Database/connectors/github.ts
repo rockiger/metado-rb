@@ -2,13 +2,13 @@ import { Task, TaskMap, TaskState, Project } from '../types';
 import produce from 'immer';
 import * as _ from 'lodash';
 
-export { createOrUpdateTask, syncGithub, closeIssue, openIssue };
+export { createOrUpdateTask, closeIssue, openIssue };
 
 /**
  * Sync all issues from a given github repo with our tasks database.
  */
 //! rewrite to sage to make it testable
-async function syncGithub(
+export async function sync(
   db: any,
   internalTasks: TaskMap,
   projectId: string,

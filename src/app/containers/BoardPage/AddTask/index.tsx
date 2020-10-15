@@ -22,16 +22,12 @@ import {
 import { now } from 'utils/helper';
 
 interface Props {
-  addTaskOnSubmit: (newTask: {
-    description: string;
-    projectId: string;
-    title: string;
-    edited: string;
-  }) => any;
+  board: any;
+  ownerId: string;
   projects: ProjectMap;
 }
 
-export function AddCard({ addTaskOnSubmit, projects }: Props) {
+export function AddCard({ board, ownerId, projects }: Props) {
   const node = useRef<HTMLDivElement>(null);
   const [description, setDescription] = useState<string>('');
   const [isClosed, setIsClosed] = useState<boolean>(true);
@@ -168,9 +164,18 @@ export function AddCard({ addTaskOnSubmit, projects }: Props) {
   function onSubmit(ev) {
     ev.preventDefault();
     console.log('onSubmit');
-    addTaskOnSubmit({ description, projectId, title, edited: now() });
+    addTaskToBoard(board, ownerId, projects, {
+      description,
+      projectId,
+      title,
+      edited: now(),
+    });
     dialog.hide();
     setDescription('');
     setTitle('');
+  }
+
+  function addTaskToBoard(board, owner, projects, taskData) {
+    //dispatch(databaseActions.addTask({ board, owner, projects, taskData }));
   }
 }

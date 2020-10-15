@@ -10,15 +10,16 @@ import {
   select,
 } from 'redux-saga/effects';
 
-import { reduxSagaFirebase as rsf, fireStore as db } from './firebase';
+import { reduxSagaFirebase as rsf, db } from './firebase';
 import { selectUser, selectUid } from './selectors';
 import { actions } from './slice';
 import { Board, TaskMap, ProjectMap, TaskState, Task } from './types';
+import * as githubConnector from './connectors/github';
+
 import {
   closeIssue,
   createIssue,
   openIssue,
-  syncGithub,
   updateIssue,
 } from './connectors/github';
 
@@ -364,7 +365,7 @@ function* syncBoardFromProviders(
       const [, projectType] = projectId.split('-');
       if (projectType === 'github' && profile.githubToken) {
         yield call(
-          syncGithub,
+          githubConnector.sync,
           db,
           internalTasks,
           projectId,
@@ -541,7 +542,7 @@ function* syncAuthUserSaga() {
 }
 
 export function* databaseSaga() {
-  yield all([syncAuthUserSaga(), databaseWatcherSaga()]);
+  yield all([, /* syncAuthUserSaga() */ databaseWatcherSaga()]);
 }
 
 ////////////
