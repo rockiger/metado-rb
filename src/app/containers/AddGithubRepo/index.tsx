@@ -48,10 +48,8 @@ import {
 } from 'app/containers/Database/selectors';
 import { actions as databaseActions } from 'app/containers/Database/slice';
 
-import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
-import { actions, reducer, sliceKey } from './slice';
+import { actions } from './slice';
 import { selectAddGithubRepo } from './selectors';
-import { addGithubRepoSaga } from './saga';
 
 const BASE_ROUTE = '/projects/add/github/';
 /* const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
@@ -63,9 +61,7 @@ const STEPS = ['0', '1', '2', '3'];
 
 interface Props {}
 
-export function AddGithubRepo(props: Props) {
-  useInjectReducer({ key: sliceKey, reducer: reducer });
-  useInjectSaga({ key: sliceKey, saga: addGithubRepoSaga });
+export function AddGithubRepo() {
   const dispatch = useDispatch();
 
   //@ts-expect-error

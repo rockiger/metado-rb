@@ -1,7 +1,7 @@
 import { call as effCall } from 'redux-saga/effects';
 import { expectSaga } from 'redux-saga-test-plan';
 
-import { reduxSagaFirebase as rsf, fireStore as db } from '../firebase';
+import { reduxSagaFirebase as rsf, db } from '../firebase';
 import { addGithubProject, call } from '../saga';
 import { actions } from '../slice';
 

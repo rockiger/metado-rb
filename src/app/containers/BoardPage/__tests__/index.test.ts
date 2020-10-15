@@ -5,8 +5,10 @@ import { actions as databaseActions } from 'app/containers/Database/slice';
 import { Board, TaskMap, TaskState } from 'app/containers/Database/types';
 
 import { onDragEndResult } from '../index';
+import { now } from 'utils/helper';
 
 describe('onDragEndResult', () => {
+  const projects = {};
   const baseDropResult: DropResult = {
     draggableId: 'github-rockiger-junto-140',
     type: 'DEFAULT',
@@ -27,7 +29,9 @@ describe('onDragEndResult', () => {
       draftResult.destination = undefined;
     });
 
-    expect(onDragEndResult(result, board, ownerId, tasks)).toEqual([]);
+    expect(onDragEndResult(result, board, ownerId, projects, tasks)).toEqual(
+      [],
+    );
   });
 
   it('should return an empty array if the source and the destination are the same', () => {
@@ -38,7 +42,9 @@ describe('onDragEndResult', () => {
       };
     });
 
-    expect(onDragEndResult(result, board, ownerId, tasks)).toEqual([]);
+    expect(onDragEndResult(result, board, ownerId, projects, tasks)).toEqual(
+      [],
+    );
   });
 
   it('should return a single entry array if the source and the destination droppableIds are the same but the indexes are', () => {
@@ -57,11 +63,11 @@ describe('onDragEndResult', () => {
       ];
     });
 
-    expect(onDragEndResult(result, board, ownerId, tasks)).toEqual([
-      databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
+    expect(onDragEndResult(result, board, ownerId, projects, tasks)).toEqual([
+      ['updateBoard', { board: newBoard, uid: ownerId }],
     ]);
   });
-  it('should return a two entrys array if the source and the destination droppableIds are the same but the indexes are', () => {
+  it('should return a two entrys array if the source and the destination droppableIds are different', () => {
     const result: DropResult = produce(baseDropResult, draftResult => {});
 
     const newBoard = produce(board, draftBoard => {
@@ -79,14 +85,19 @@ describe('onDragEndResult', () => {
 
     const newTask = produce(tasks[result.draggableId], draftTask => {
       draftTask.status = TaskState.Doing;
+      draftTask.edited = now();
     });
 
-    expect(onDragEndResult(result, board, ownerId, tasks)).toEqual([
-      databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
-      databaseActions.updateTask({
-        oldTask: tasks[result.draggableId],
-        task: newTask,
-      }),
+    expect(onDragEndResult(result, board, ownerId, projects, tasks)).toEqual([
+      ['updateBoard', { board: newBoard, uid: ownerId }],
+      [
+        'updateTask',
+        {
+          oldTask: tasks[result.draggableId],
+          projects,
+          task: newTask,
+        },
+      ],
     ]);
   });
 });

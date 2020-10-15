@@ -7,7 +7,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { Helmet } from 'react-helmet-async';
-import { useSelector, useDispatch } from 'react-redux';
 import { Link, Redirect, useParams } from 'react-router-dom';
 import { useDialogState } from 'reakit/Dialog';
 import produce from 'immer';
@@ -29,139 +28,123 @@ import {
 } from 'app/components/UiComponents';
 
 import {
-  selectActiveBoard,
-  selectBoard,
-  selectTasks,
-  selectUid,
-  selectProjects,
-} from 'app/containers/Database/selectors';
-import { actions as databaseActions } from 'app/containers/Database/slice';
-import {
   Board as BoardType,
   ProjectMap,
   Task,
   TaskMap,
+  TaskState,
 } from 'app/containers/Database/types';
-import { useInjectReducer, useInjectSaga } from 'utils/redux-injectors';
 
 import { BoardColumn } from './BoardColumn';
-import { reducer, sliceKey } from './slice';
-import { boardPageSaga } from './saga';
 import { AddCard } from './AddTask';
 import { EditTask } from './EditTask';
+import { db, useAuth } from '../Database/firebase';
+import { syncBoardFromProviders } from './helpers';
+import {
+  closeIssue,
+  openIssue,
+  updateIssue,
+} from '../Database/connectors/github';
+import * as googletasksConnector from '../Database/connectors/googletasks';
 
-interface Props {}
-
-export function BoardPage(props: Props) {
-  useInjectReducer({ key: sliceKey, reducer: reducer });
-  useInjectSaga({ key: sliceKey, saga: boardPageSaga });
-  const dispatch = useDispatch();
+export function BoardPage() {
   const { ownerId, boardId } = useParams<{
     ownerId: string;
     boardId: string;
   }>();
-  const activeBoard = useSelector(selectActiveBoard);
-  const { board, boardStatus } = useSelector(selectBoard);
-  const projects = useSelector(selectProjects);
-  const tasks = useSelector(selectTasks);
-  const uid = useSelector(selectUid);
-  const [isBoardUpdated, setIsBoardUpdated] = useState(false);
+
   const [status, setStatus] = useState<
-    'init' | 'boardConnected' | 'tasksConnected' | 'synced'
+    'init' | 'profileLoaded' | 'boardConnected' | 'tasksConnected' | 'synced'
   >('init');
   const editDialogState = useDialogState();
   const [editTaskState, setEditTaskState] = useState<Task | null>(null);
   const editDialogFinalFocusRef = useRef<HTMLElement>(null);
 
-  console.log({ status });
+  const { user, profile } = useAuth();
+  const uid = user?.uid;
+  const [board, setBoard] = useState<any>({});
+  const [listeners, setListeners] = useState<(() => void)[]>([]);
+  const [projects, setProjects] = useState<any>({});
+  const [, setProfile] = useState<any>({});
+  const activeBoard = profile?.activeBoard;
+  const [tasks, setTasks] = useState<any>({});
+
+  // console.log({ activeBoard, board, status, tasks, uid: uid, user });
 
   useEffect(() => {
-    if (status === 'init') {
-      console.log('connect board', { boardId, board, ownerId, uid });
-      if (boardId && board?.id !== boardId && ownerId && ownerId === uid) {
-        dispatch(databaseActions.openBoardChannel({ uid: ownerId, boardId }));
-        console.log('connecting board ...');
+    const getData = async () => {
+      let profileData;
+      let internalStatus = 'init';
+
+      if (status === 'init' && user?.uid) {
+        console.log('getData');
+        const profileRef = db.collection('users').doc(user.uid);
+        const profileSnapshot = await profileRef.get();
+        profileData = profileSnapshot.data();
+        setProfile(profileData);
+        internalStatus = 'profileLoaded';
+        setStatus('profileLoaded');
+      }
+      if (
+        user &&
+        boardId &&
+        ownerId === user.uid &&
+        internalStatus === 'profileLoaded'
+      ) {
+        // connect board
+        const boardRef = db
+          .collection('users')
+          .doc(ownerId)
+          .collection('boards')
+          .doc(boardId);
+        const boardSnapshot = await boardRef.get();
+        const boardData = boardSnapshot.data();
+        const boardListener = boardRef.onSnapshot(doc => setBoard(doc.data()));
+        setListeners([...listeners, boardListener]);
         setStatus('boardConnected');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, boardId, ownerId, uid, status]);
 
-  useEffect(() => {
-    console.log('connect tasks', { tasks, board });
-    if (status === 'boardConnected') {
-      if (!_.isEmpty(board?.projects)) {
-        dispatch(
-          databaseActions.openTasksChannel({
-            uid: ownerId,
-            projectIds: board?.projects,
-          }),
-        );
-        setStatus('tasksConnected');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, ownerId, status, tasks]);
+        if (boardData?.projects.length) {
+          // get projects
+          const projectsRef = db
+            .collection('projects')
+            .where('id', 'in', boardData.projects);
+          const projectsSnapshot = await projectsRef.get();
+          let projectsData = {};
+          projectsSnapshot.forEach(doc => (projectsData[doc.id] = doc.data()));
+          setProjects(projectsData);
 
-  useEffect(() => {
-    const createAndUpdateBoard = async () => {
-      console.log({ boardId, activeBoard, uid });
-      if (!boardId && !activeBoard && uid) {
-        console.log('create Board');
-        await dispatch(
-          databaseActions.updateActiveBoard({ boardId: 'main-board', uid }),
-        );
-        await dispatch(
-          databaseActions.updateBoard({
-            board: {
-              columns: [
-                { taskIds: [], title: 'Backlog' },
-                { taskIds: [], title: 'Todo' },
-                { taskIds: [], title: 'Doing' },
-                { taskIds: [], title: 'Done' },
-              ],
-              id: 'main-board',
-              isDeleted: false,
-              projects: [],
-              showBacklog: true,
-              title: 'Main Board',
-            },
-            uid,
-          }),
-        );
+          // connect tasks
+          const tasksRef = db
+            .collection('tasks')
+            .where('project', 'in', boardData?.projects)
+            .where('user', '==', ownerId);
+          const tasksSnapshot = await tasksRef.get();
+          let tasksData = {};
+          tasksSnapshot.forEach(doc => (tasksData[doc.id] = doc.data()));
+          const taskListener = tasksRef.onSnapshot(snapShot => {
+            let tasksData = {};
+            snapShot.forEach(doc => (tasksData[doc.id] = doc.data()));
+            setTasks(tasksData);
+          });
+          setListeners([...listeners, taskListener]);
+          setStatus('tasksConnected');
+
+          // sync board with connectors
+          await syncBoardFromProviders(boardData, setBoard, tasksData, ownerId);
+          // colocato projects
+        }
       }
     };
-    createAndUpdateBoard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardId, activeBoard, uid]);
-
-  //! if projectStatus==='success' and _.isEmpty(projects) show, add some projects
+    getData();
+  }, [boardId, ownerId, status, user, listeners]);
 
   useEffect(() => {
     return () => {
-      dispatch(databaseActions.closeBoardChannel());
-      dispatch(databaseActions.closeTasksChannel());
+      console.log('Remove listeners');
+      listeners.forEach(unsubscribe => unsubscribe());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (status === 'tasksConnected') {
-      if (!isBoardUpdated && !_.isEmpty(board?.projects) && uid) {
-        dispatch(databaseActions.syncBoardFromProviders({ board, tasks, uid }));
-        setIsBoardUpdated(true);
-        setStatus('synced');
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board, isBoardUpdated, status, tasks, uid]);
-
-  useEffect(() => {
-    if (uid) {
-      dispatch(databaseActions.getProjects({ uid }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid]);
 
   if (
     (uid !== ownerId || ownerId === undefined || boardId === undefined) &&
@@ -181,7 +164,7 @@ export function BoardPage(props: Props) {
       <PageHeader>
         <PageTitle>{board?.title}</PageTitle>
         <Spacer />
-        {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
+        {status === 'tasksConnected' && !_.isEmpty(board?.projects) && (
           <>
             {board?.projects?.length < 10 && (
               <>
@@ -194,22 +177,14 @@ export function BoardPage(props: Props) {
               </>
             )}
             {board && (
-              <AddCard
-                addTaskOnSubmit={_.partial(
-                  addTaskToBoard,
-                  board,
-                  ownerId,
-                  projects,
-                )}
-                projects={reduceProjects(board.projects, projects)}
-              />
+              <AddCard board={board} ownerId={ownerId} projects={projects} />
             )}
           </>
         )}
       </PageHeader>
 
       <BoardContent ref={editDialogFinalFocusRef}>
-        {boardStatus === 'success' && !_.isEmpty(board?.projects) && (
+        {status === 'tasksConnected' && !_.isEmpty(board?.projects) && (
           <>
             <DragDropContext
               onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
@@ -229,7 +204,6 @@ export function BoardPage(props: Props) {
               dialogState={editDialogState}
               finalFocusRef={editDialogFinalFocusRef}
               handleCancelEdit={() => setEditTaskState(null)}
-              handleEditTask={handleEditTask}
               task={editTaskState}
             />
           </>
@@ -237,7 +211,7 @@ export function BoardPage(props: Props) {
         {!activeBoard && !boardId && !board?.id && (
           <div>Preparing your board...</div>
         )}
-        {((boardStatus === 'success' && !board.id && boardId) ||
+        {((status === 'tasksConnected' && !board.id && boardId) ||
           (ownerId && ownerId !== uid)) && (
           <>
             <div>Couldn't find board</div>
@@ -274,29 +248,71 @@ export function BoardPage(props: Props) {
   );
 
   function handleClickTask(task: Task) {
-    console.log('handelClickTask', { task });
     setEditTaskState(task);
     editDialogState.show();
   }
 
-  function onDragEnd(
+  async function onDragEnd(
     result: DropResult,
     board: BoardType,
     ownerId: string,
     tasks: TaskMap,
   ) {
-    console.log({ result });
     const dragResult = onDragEndResult(result, board, ownerId, projects, tasks);
-    dragResult.forEach(el => dispatch(el));
-  }
+    dragResult.forEach(async el => {
+      console.log(el[0], el[1]);
+      if (el[0] === 'updateBoard') {
+        const { board, uid } = el[1];
+        setBoard(board);
 
-  function addTaskToBoard(board, owner, projects, taskData) {
-    dispatch(databaseActions.addTask({ board, owner, projects, taskData }));
-  }
+        const boardRef = db
+          .collection('users')
+          .doc(uid)
+          .collection('boards')
+          .doc(board.id);
+        try {
+          await boardRef.set(board);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      if (el[0] === 'updateTask') {
+        const { oldTask, projects, task } = el[1];
+        const profile = { githubToken: '!!!' }; //!
+        const project = projects[oldTask.project];
+        setTasks({ ...tasks, [task.id]: task });
 
-  function handleEditTask(oldTask, task) {
-    console.log('handleEditTask', { task });
-    dispatch(databaseActions.updateTask({ oldTask, task, projects }));
+        const taskRef = db.collection('tasks').doc(task.id);
+        try {
+          await taskRef.set(task);
+          if (task.id.startsWith('github') && profile.githubToken) {
+            if (
+              oldTask.status === TaskState.Done &&
+              task.status !== TaskState.Done
+            ) {
+              openIssue(profile.githubToken, task, project);
+            }
+            if (
+              oldTask.status !== TaskState.Done &&
+              task.status === TaskState.Done
+            ) {
+              closeIssue(profile.githubToken, task, project);
+            }
+            if (
+              oldTask.title !== task.title ||
+              oldTask.description !== task.description
+            ) {
+              updateIssue(profile.githubToken, task, project);
+            }
+          }
+          if (task.id.startsWith('googletasks')) {
+            googletasksConnector.updateTask(task, project);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    });
   }
 }
 
@@ -315,7 +331,7 @@ export function onDragEndResult(
   ownerId: string,
   projects: ProjectMap,
   tasks: TaskMap,
-) {
+): [string, { [key: string]: any }][] {
   const { destination, source, draggableId } = result;
   // nothing changed
   if (
@@ -347,7 +363,7 @@ export function onDragEndResult(
       draftBoard.columns = newColumns;
     });
 
-    return [databaseActions.updateBoard({ board: newBoard, uid: ownerId })];
+    return [['updateBoard', { board: newBoard, uid: ownerId }]];
   }
 
   // moving from one column to another
@@ -385,8 +401,8 @@ export function onDragEndResult(
   });
 
   return [
-    databaseActions.updateBoard({ board: newBoard, uid: ownerId }),
-    databaseActions.updateTask({ oldTask, task: newTask, projects }),
+    ['updateBoard', { board: newBoard, uid: ownerId }],
+    ['updateTask', { oldTask, task: newTask, projects }],
   ];
 }
 export const BoardContent = styled(Row)<{ ref: any }>`
@@ -400,15 +416,3 @@ export const BoardContent = styled(Row)<{ ref: any }>`
     padding: 2rem 4rem;
   `};
 `;
-
-function reduceProjects(
-  projectIds: string[],
-  projects: ProjectMap,
-): ProjectMap {
-  return Object.keys(projects)
-    .filter(key => projectIds.includes(key))
-    .reduce((obj, key) => {
-      obj[key] = projects[key];
-      return obj;
-    }, {});
-}
