@@ -424,7 +424,7 @@ async function addGoogleTasksProject(
       });
       await boardRef.set(changedBoard);
 
-      // connect tasks
+      // get tasks
       const tasksRef = db
         .collection('tasks')
         .where('project', 'in', changedBoard?.projects)

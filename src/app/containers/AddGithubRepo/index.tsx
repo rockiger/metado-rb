@@ -44,6 +44,7 @@ import {
 import { db, useAuth } from '../Database/firebase';
 import { now } from 'utils/helper';
 import { Board } from '../Database/types';
+import { syncBoardFromProviders } from '../BoardPage/helpers';
 
 const BASE_ROUTE = '/projects/add/github/';
 /* const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
@@ -135,13 +136,6 @@ export function AddGithubRepo() {
         break;
     }
   }, [addingProjectStatus, profile, selectedEl, settingProject, view]);
-
-  console.log({
-    activeBoard: profile?.activeBoard,
-    githubToken: profile?.githubToken,
-    step,
-    steps: STEPS,
-  });
 
   if (!STEPS.includes(step)) {
     return <Redirect to={`${BASE_ROUTE}${STEPS[0]}`} />;
@@ -270,8 +264,17 @@ export function AddGithubRepo() {
                             <ButtonOutlined onClick={onClickGoBack}>
                               Back to Selection
                             </ButtonOutlined>{' '}
-                            <Button onClick={() => onClickAdd(repo)}>
-                              Add <b> {` ${repo.name} `} </b> to board
+                            <Button
+                              disabled={addingProjectStatus === 'fetching'}
+                              onClick={() => onClickAdd(repo)}
+                            >
+                              {addingProjectStatus === 'fetching'
+                                ? 'Adding'
+                                : 'Add'}{' '}
+                              <b> {` ${repo.name} `} </b>{' '}
+                              {addingProjectStatus === 'fetching'
+                                ? '...'
+                                : 'to board'}
                             </Button>
                           </div>
                         </ContainedView>
@@ -403,6 +406,17 @@ export async function addGithubProject(
         draftBoard.projects.push(projectId);
       });
       boardRef.set(changedBoard);
+
+      // get tasks
+      const tasksRef = db
+        .collection('tasks')
+        .where('project', 'in', changedBoard?.projects)
+        .where('user', '==', uid);
+      const tasksSnapshot = await tasksRef.get();
+      let tasks = {};
+      tasksSnapshot.forEach(doc => (tasks[doc.id] = doc.data()));
+
+      await syncBoardFromProviders(changedBoard, () => {}, tasks, uid);
       setAddingProjectStatus('success');
     } else {
       console.error('Board already has maximum of 10 projects.');
