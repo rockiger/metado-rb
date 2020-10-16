@@ -7,6 +7,7 @@ import React from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import { Link, Redirect } from 'react-router-dom';
 import firebase from 'firebase';
+import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
 
@@ -66,15 +67,14 @@ function signInSuccessCallback(authResult) {
     uid,
     displayName,
     email,
+    authResult,
   });
 
-  if (authResult.additionalUserInfo.isNewUser) {
-    setupNewUser(user);
-  }
+  updateUser(authResult);
   return false;
 }
 
-function setupNewUser(user) {
+function updateUser({ additionalUserInfo, credential, user }) {
   console.log('setupNewUser', user.uid);
   const userRef = db.collection('users').doc(user.uid);
   const board = {
@@ -96,16 +96,26 @@ function setupNewUser(user) {
     .collection('boards')
     .doc(board.id);
 
-  userRef
-    .set({ activeBoard: 'main-board' }, { merge: true })
-    .then(() => console.log('setupNewUserSuccessSetActiveBoard'))
-    .catch(error => console.error(error));
+  const profile = {
+    ...(additionalUserInfo?.isNewUser && { activeBoard: 'main-Board' }),
+    ...(credential?.providerId === 'github.com' && {
+      githubToken: credential.accessToken,
+    }),
+  };
 
-  boardRef
-    .set(board)
-    .then(() => console.log('setupNewUserSuccessSetBoard'))
-    .catch(error => console.error(error));
+  if (!_.isEmpty(profile)) {
+    userRef
+      .set(profile, { merge: true })
+      .then(() => console.log('setupNewUserSuccessSetActiveBoard'))
+      .catch(error => console.error(error));
+  }
 
+  if (additionalUserInfo?.isNewUser) {
+    boardRef
+      .set(board)
+      .then(() => console.log('setupNewUserSuccessSetBoard'))
+      .catch(error => console.error(error));
+  }
   return true;
 }
 

@@ -58,8 +58,10 @@ export function AddGoogleTasklist() {
   );
   const [board, setBoard] = useState<Board | undefined>();
   const [error, setError] = useState<any>();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [googleLoaded, setGoogleLoaded] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [googleErroed, setGoogleErroed] = useState<string | undefined>(
     undefined,
   );
