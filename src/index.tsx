@@ -10,7 +10,6 @@ import 'react-app-polyfill/stable';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import * as serviceWorker from 'serviceWorker';
 import { ThemeProvider } from 'styled-components';
 import 'sanitize.css/sanitize.css';
@@ -20,34 +19,27 @@ import { App } from 'app';
 
 import { HelmetProvider } from 'react-helmet-async';
 
-import { configureAppStore } from 'store/configureStore';
-
 import { theme } from 'styles/theme';
 
 // Initialize languages
 import './locales/i18n';
-import { Database } from 'app/containers/Database';
 import { AuthProvider } from 'app/containers/Database/firebase';
 
-const store = configureAppStore();
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
 
 interface Props {
   Component: typeof App;
 }
 const ConnectedApp = ({ Component }: Props) => (
-  <Provider store={store}>
-    <Database />
-    <ThemeProvider theme={theme}>
-      <AuthProvider>
-        <HelmetProvider>
-          <React.StrictMode>
-            <Component />
-          </React.StrictMode>
-        </HelmetProvider>
-      </AuthProvider>
-    </ThemeProvider>
-  </Provider>
+  <ThemeProvider theme={theme}>
+    <AuthProvider>
+      <HelmetProvider>
+        <React.StrictMode>
+          <Component />
+        </React.StrictMode>
+      </HelmetProvider>
+    </AuthProvider>
+  </ThemeProvider>
 );
 const render = (Component: typeof App) => {
   ReactDOM.render(<ConnectedApp Component={Component} />, MOUNT_NODE);

@@ -1,15 +1,13 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Clickable } from 'reakit/Clickable';
 import { useToolbarState, Toolbar, ToolbarItem } from 'reakit/Toolbar';
 import styled from 'styled-components/macro';
 import { LogOut } from 'styled-icons/boxicons-regular';
 
-import { actions as databaseActions } from 'app/containers/Database/slice';
+import { firebaseAuth } from 'app/containers/Database/firebase';
 
 export function Navbar() {
-  const dispatch = useDispatch();
   const toolbar = useToolbarState({ loop: true });
   return (
     <NavbarWrapper {...toolbar} aria-label="Board Navbar" role="navigation">
@@ -27,7 +25,7 @@ export function Navbar() {
 
   function onClick() {
     console.log('logout');
-    dispatch(databaseActions.logout());
+    firebaseAuth.signOut();
   }
 }
 
