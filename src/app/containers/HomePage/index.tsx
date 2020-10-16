@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Link, Redirect } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';

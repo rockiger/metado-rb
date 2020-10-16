@@ -1,7 +1,6 @@
 import React, { createContext, useEffect, useContext, useState } from 'react';
 import firebase, { User } from 'firebase';
 import '@firebase/firestore'; // 👈 If you're using firestore
-import ReduxSagaFirebase from 'redux-saga-firebase';
 
 type Status = 'init' | 'user' | 'profile';
 
@@ -16,7 +15,6 @@ const myFirebaseApp = firebase.initializeApp({
   measurementId: 'G-0W9C3L7Z2B',
 });
 
-export const reduxSagaFirebase = new ReduxSagaFirebase(myFirebaseApp);
 export const authProvider = new firebase.auth.GithubAuthProvider();
 export const firebaseAuth = firebase.auth();
 export const db = myFirebaseApp.firestore();

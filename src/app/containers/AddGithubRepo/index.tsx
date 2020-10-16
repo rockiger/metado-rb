@@ -6,8 +6,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useSelector, useDispatch } from 'react-redux';
 import { Link as RouterLink, Redirect, useParams } from 'react-router-dom';
+import produce from 'immer';
 import styled from 'styled-components/macro';
 import { Github } from 'styled-icons/boxicons-logos';
 
@@ -40,16 +40,10 @@ import {
   ListContent,
   ListIcon,
 } from 'app/components/UiComponents/List';
-import {
-  selectAddingProject,
-  selectBoard,
-  selectError,
-  selectUser,
-} from 'app/containers/Database/selectors';
-import { actions as databaseActions } from 'app/containers/Database/slice';
 
-import { actions } from './slice';
-import { selectAddGithubRepo } from './selectors';
+import { db, useAuth } from '../Database/firebase';
+import { now } from 'utils/helper';
+import { Board } from '../Database/types';
 
 const BASE_ROUTE = '/projects/add/github/';
 /* const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
@@ -62,18 +56,17 @@ const STEPS = ['0', '1', '2', '3'];
 interface Props {}
 
 export function AddGithubRepo() {
-  const dispatch = useDispatch();
+  const { user, profile } = useAuth();
 
   //@ts-expect-error
   const { step } = useParams();
-  const { repos, status } = useSelector(selectAddGithubRepo);
-  const addingProjectStatus = useSelector(selectAddingProject);
-  // WARNING projects is not always filled, only when we are comming from board
-  const {
-    board: { projects },
-  } = useSelector(selectBoard);
-  const error = useSelector(selectError);
-  const { githubToken, activeBoard } = useSelector(selectUser);
+  const [repos, setRepos] = useState<any[]>([]);
+  const [isFetchingRepos, setIsFetchingRepos] = useState(false);
+  const [error, setError] = useState<any>(null);
+  const [addingProjectStatus, setAddingProjectStatus] = useState<FetchStatus>(
+    'init',
+  );
+  const [board, setBoard] = useState<Board | undefined>();
   const [selectedEl, setSelectedEl] = useState<number>(-1);
   const [repo, setRepo] = useState(repos[selectedEl]);
   const [view, setView] = useState(0);
@@ -82,18 +75,31 @@ export function AddGithubRepo() {
   >('init');
 
   useEffect(() => {
-    dispatch(databaseActions.resetAddProject());
-    return () => {
-      dispatch(databaseActions.resetAddProject());
+    const getBoard = async () => {
+      if (profile?.activeBoard && user?.uid) {
+        const boardRef = db
+          .collection('users')
+          .doc(user.uid)
+          .collection('boards')
+          .doc(profile.activeBoard);
+        const boardSnapshot = (await boardRef.get()) as firebase.firestore.DocumentSnapshot<
+          Board
+        >;
+        const boardData = boardSnapshot.data();
+        setBoard(boardData);
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    getBoard();
+  }, [profile, user]);
 
   useEffect(() => {
-    if (githubToken && repos.length === 0)
-      dispatch(actions.fetchGithubRepos({ githubToken }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [githubToken, repos]);
+    const getRepos = async () => {
+      if (profile?.githubToken && repos.length === 0) {
+        await fetchGithubRepos(profile.githubToken);
+      }
+    };
+    getRepos();
+  }, [profile, repos]);
 
   useEffect(() => {
     setRepo(repos[selectedEl]);
@@ -102,7 +108,7 @@ export function AddGithubRepo() {
   useEffect(() => {
     switch (view) {
       case 0:
-        if (githubToken) {
+        if (profile?.githubToken) {
           setView(1);
         }
         break;
@@ -128,15 +134,20 @@ export function AddGithubRepo() {
       default:
         break;
     }
-  }, [addingProjectStatus, githubToken, selectedEl, settingProject, view]);
+  }, [addingProjectStatus, profile, selectedEl, settingProject, view]);
 
-  console.log({ activeBoard, githubToken, step, steps: STEPS });
+  console.log({
+    activeBoard: profile?.activeBoard,
+    githubToken: profile?.githubToken,
+    step,
+    steps: STEPS,
+  });
 
   if (!STEPS.includes(step)) {
     return <Redirect to={`${BASE_ROUTE}${STEPS[0]}`} />;
   }
 
-  if (view === 1 && step === STEPS[0] && githubToken) {
+  if (view === 1 && step === STEPS[0] && profile?.githubToken) {
     return <Redirect to={`${BASE_ROUTE}${STEPS[1]}`} />;
   }
 
@@ -210,7 +221,7 @@ export function AddGithubRepo() {
                     Please select the repository from which you want to add the
                     issues to your tasks.
                   </p>
-                  {status === 'fetching' && <p>Loading...</p>}
+                  {isFetchingRepos && <p>Loading...</p>}
                   <List>
                     {repos.filter(addedProjectsFilter).map((repo, index) => (
                       <ListItem
@@ -315,7 +326,27 @@ export function AddGithubRepo() {
   );
 
   function addedProjectsFilter(repo) {
-    return !projects.includes(`github-${repo.owner.login}-${repo.name}`);
+    return !board?.projects.includes(`github-${repo.owner.login}-${repo.name}`);
+  }
+
+  async function fetchGithubRepos(githubToken) {
+    const getReposFromGithub = () =>
+      fetch('https://api.github.com/user/repos?per_page=100', {
+        headers: {
+          Authorization: `token ${githubToken}`,
+        },
+      }).then(res => res.json());
+    try {
+      setIsFetchingRepos(true);
+      const repos: any[] = await getReposFromGithub();
+      console.log(repos);
+      setRepos(repos);
+      setIsFetchingRepos(false);
+    } catch (error) {
+      console.error(error);
+      setError(error);
+      setIsFetchingRepos(false);
+    }
   }
 
   function onClickGoBack() {
@@ -324,7 +355,64 @@ export function AddGithubRepo() {
 
   function onClickAdd(repo: { [x: string]: any }) {
     setSettingProject('setting');
-    dispatch(databaseActions.addGithubProject({ activeBoard, repo }));
+    addGithubProject(
+      profile?.activeBoard,
+      repo,
+      setAddingProjectStatus,
+      setError,
+      user?.uid,
+    );
+  }
+}
+
+export async function addGithubProject(
+  activeBoard,
+  repo,
+  setAddingProjectStatus,
+  setError,
+  uid,
+) {
+  setAddingProjectStatus('fetching');
+  const projectId = `${uid}-github-${repo.owner.login}-${repo.name}`;
+
+  const newProject = {
+    created: now(),
+    fullname: repo.full_name,
+    id: projectId,
+    name: repo.name,
+    owner: repo.owner.login,
+    type: 'github',
+    user: uid,
+  };
+  const projectsRef = db.collection('projects').doc(projectId);
+  const boardRef = db
+    .collection('users')
+    .doc(uid)
+    .collection('boards')
+    .doc(activeBoard);
+
+  try {
+    await projectsRef.set(newProject, { merge: true });
+    const boardSnapshot = await boardRef.get();
+    const board = boardSnapshot.data();
+    // Check if board has less than 10 projects, otherwise abort, because there
+    // are only searches for 10 projects possible with firestore.
+    // See syncBoardFromProviders
+    if (board && board.projects && board.projects.length < 10) {
+      const changedBoard = produce(board, draftBoard => {
+        draftBoard.projects.push(projectId);
+      });
+      boardRef.set(changedBoard);
+      setAddingProjectStatus('success');
+    } else {
+      console.error('Board already has maximum of 10 projects.');
+      setAddingProjectStatus('error');
+      setError('Board already has maximum of 10 projects.');
+    }
+  } catch (error) {
+    console.error(error);
+    setAddingProjectStatus('error');
+    setError(error);
   }
 }
 
