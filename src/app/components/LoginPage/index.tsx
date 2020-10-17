@@ -61,7 +61,6 @@ export function LoginPage({ location }: Props) {
 
 function signInSuccessCallback(authResult) {
   const { uid, displayName, email } = authResult.user;
-  const { user } = authResult;
   console.log('signInSuccessCallback', {
     isNewUser: authResult.additionalUserInfo.isNewUser,
     uid,
