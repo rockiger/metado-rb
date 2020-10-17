@@ -35,8 +35,10 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => firebase.auth().currentUser);
-  const [profile, setProfile] = useState<Dict | null | undefined>(null);
+  const [user, setUser] = useState(getLocalAuthUser);
+  const [profile, setProfile] = useState<Dict | null | undefined>(
+    getLocalAuthProfile,
+  );
 
   const [status, setStatus] = useState<Status>('init');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -54,6 +56,7 @@ export function AuthProvider({ children }) {
       const profileRef = db.collection('users').doc(user.uid);
       const unsubscribe = profileRef.onSnapshot(doc => {
         setProfile(doc.data());
+        setLocalAuthProfile(doc.data());
         setStatus('profile');
       });
       return () => unsubscribe();
@@ -68,6 +71,37 @@ export function AuthProvider({ children }) {
 
   function onChangeUser(user) {
     setUser(user);
+    setLocalAuthUser(user);
     if (user) setStatus('user');
   }
+}
+
+function getLocalAuthUser() {
+  const authStorageJson = localStorage.getItem('authUser');
+  const authStorage = authStorageJson ? JSON.parse(authStorageJson) : {};
+  if (isAuthUser(authStorage)) return authStorage;
+  return null;
+}
+
+function isAuthUser(obj: any): obj is firebase.User {
+  return typeof obj === 'object';
+}
+
+function setLocalAuthUser(authUser) {
+  localStorage.setItem('authUser', JSON.stringify(authUser));
+}
+
+function getLocalAuthProfile() {
+  const authStorageJson = localStorage.getItem('authProfile');
+  const authStorage = authStorageJson ? JSON.parse(authStorageJson) : {};
+  if (isAuthProfile(authStorage)) return authStorage;
+  return null;
+}
+
+function isAuthProfile(obj: any): obj is Dict {
+  return typeof obj === 'object';
+}
+
+function setLocalAuthProfile(authProfile) {
+  localStorage.setItem('authProfile', JSON.stringify(authProfile));
 }
