@@ -50,7 +50,9 @@ const BASE_ROUTE = '/projects/add/github/';
 /* const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
 }`; */
-const CLIENT_ID = '58f80a76bbfb3166f37f';
+// Github OAuth-App 'Metado Board' https://github.com/settings/applications/1396171
+// this is different from 'Metado' which is only used for login.
+const CLIENT_ID = '87b8d6bfb033d2c5d68a';
 //const REDIRECT_URI = `https://metado.app/projects/add/github`;
 const STEPS = ['0', '1', '2', '3'];
 
