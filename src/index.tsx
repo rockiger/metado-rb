@@ -25,6 +25,9 @@ import { theme } from 'styles/theme';
 import './locales/i18n';
 import { AuthProvider } from 'app/containers/Database/firebase';
 
+// Remove console.log from production
+if (process.env.NODE_ENV !== 'development') console.log = () => {};
+
 const MOUNT_NODE = document.getElementById('root') as HTMLElement;
 
 interface Props {
