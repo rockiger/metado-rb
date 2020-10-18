@@ -60,7 +60,7 @@ interface Props {}
 
 export function AddGithubRepo() {
   const { user, profile } = useAuth();
-
+  const codeParameter = getCodeParameter();
   //@ts-expect-error
   const { step } = useParams();
   const [repos, setRepos] = useState<any[]>([]);
@@ -69,6 +69,7 @@ export function AddGithubRepo() {
   const [addingProjectStatus, setAddingProjectStatus] = useState<FetchStatus>(
     'init',
   );
+  const [, setGettingGithubTokenStatus] = useState<FetchStatus>('init');
   const [board, setBoard] = useState<Board | undefined>();
   const [selectedEl, setSelectedEl] = useState<number>(-1);
   const [repo, setRepo] = useState(repos[selectedEl]);
@@ -107,6 +108,28 @@ export function AddGithubRepo() {
   useEffect(() => {
     setRepo(repos[selectedEl]);
   }, [repos, selectedEl]);
+
+  useEffect(() => {
+    const setGithubToken = async () => {
+      if (codeParameter && user?.uid) {
+        setGettingGithubTokenStatus('fetching');
+        try {
+          const githubToken = await fetchGithubToken(codeParameter);
+          console.log(githubToken);
+          const userRef = db.collection('users').doc(user.uid);
+          userRef
+            .set({ githubToken }, { merge: true })
+            .then(() => console.log('onSuccessGithubLoginSuccess'))
+            .catch(error => console.error(error));
+          setGettingGithubTokenStatus('success');
+        } catch (error) {
+          console.error(error);
+          setGettingGithubTokenStatus('error');
+        }
+      }
+    };
+    setGithubToken();
+  }, [codeParameter, user]);
 
   useEffect(() => {
     switch (view) {
@@ -430,6 +453,41 @@ export async function addGithubProject(
     setAddingProjectStatus('error');
     setError(error);
   }
+}
+
+async function fetchGithubToken(code) {
+  try {
+    const baseUrl =
+      process.env.NODE_ENV !== 'development'
+        ? 'https://metado.app/'
+        : 'http://localhost:5000';
+    const requestUrl = `${baseUrl}/githubToken?code=${code}`;
+    console.log(requestUrl);
+    const response = await fetch(requestUrl);
+    const json = await response.json();
+    console.log({ response, json });
+    const { token } = json;
+
+    if (token) {
+      return token;
+    } else {
+      return Error("Couldn't fetch token from Github.");
+    }
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+/**
+ * Returns the code parameter in the url
+ * @returns string
+ */
+function getCodeParameter() {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const code = urlParams.get('code');
+  return code;
 }
 
 const GithubIcon = styled(Github)`

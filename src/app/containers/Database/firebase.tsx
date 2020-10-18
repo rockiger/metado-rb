@@ -1,6 +1,8 @@
 import React, { createContext, useEffect, useContext, useState } from 'react';
-import firebase, { User } from 'firebase';
+import * as firebase from 'firebase/app';
+import { User } from 'firebase';
 import '@firebase/firestore'; // 👈 If you're using firestore
+import '@firebase/auth';
 
 type Status = 'init' | 'user' | 'profile';
 
@@ -52,7 +54,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (user?.uid) {
+      console.log({ user });
       const profileRef = db.collection('users').doc(user.uid);
       const unsubscribe = profileRef.onSnapshot(doc => {
         setProfile(doc.data());
