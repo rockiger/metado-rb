@@ -53,6 +53,7 @@ export function BoardPage() {
     boardId: string;
   }>();
 
+  console.log('Boardpage');
   const [status, setStatus] = useState<
     'init' | 'profileLoaded' | 'boardConnected' | 'tasksConnected' | 'synced'
   >('init');
@@ -65,7 +66,6 @@ export function BoardPage() {
   const [board, setBoard] = useState<any>({});
   const [listeners, setListeners] = useState<(() => void)[]>([]);
   const [projects, setProjects] = useState<any>({});
-  const [, setProfile] = useState<any>({});
   const activeBoard = profile?.activeBoard;
   const [tasks, setTasks] = useState<any>({});
 
@@ -73,24 +73,7 @@ export function BoardPage() {
 
   useEffect(() => {
     const getData = async () => {
-      let profileData;
-      let internalStatus = 'init';
-
-      if (status === 'init' && user?.uid) {
-        console.log('getData');
-        const profileRef = db.collection('users').doc(user.uid);
-        const profileSnapshot = await profileRef.get();
-        profileData = profileSnapshot.data();
-        setProfile(profileData);
-        internalStatus = 'profileLoaded';
-        setStatus('profileLoaded');
-      }
-      if (
-        user &&
-        boardId &&
-        ownerId === user.uid &&
-        internalStatus === 'profileLoaded'
-      ) {
+      if (user && boardId && ownerId === user.uid && status === 'init') {
         // connect board
         const boardRef = db
           .collection('users')
@@ -147,7 +130,10 @@ export function BoardPage() {
   }, []);
 
   if (
-    (uid !== ownerId || ownerId === undefined || boardId === undefined) &&
+    (uid !== ownerId ||
+      ownerId === undefined ||
+      boardId === undefined ||
+      (status === 'boardConnected' && board === undefined)) &&
     activeBoard
   ) {
     return <Redirect to={`/b/${uid}/${activeBoard}`} />;
@@ -211,14 +197,14 @@ export function BoardPage() {
         {!activeBoard && !boardId && !board?.id && (
           <div>Preparing your board...</div>
         )}
-        {((status === 'tasksConnected' && !board.id && boardId) ||
+        {((status === 'tasksConnected' && !board?.id && boardId) ||
           (ownerId && ownerId !== uid)) && (
           <>
             <div>Couldn't find board</div>
             <p>Go to last used board...</p>
           </>
         )}
-        {board.id && _.isEmpty(board.projects) && (
+        {board?.id && _.isEmpty(board.projects) && (
           <Card>
             <Column align="center">
               <h5>

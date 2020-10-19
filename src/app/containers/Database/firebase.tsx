@@ -9,7 +9,7 @@ type Status = 'init' | 'user' | 'profile';
 const myFirebaseApp = firebase.initializeApp({
   apiKey: 'AIzaSyDijpCw3wqXRZa8zXN9j8rRq_RFQu1ED_g',
   authDomain: 'metado-f91ea.firebaseapp.com',
-  databaseURL: 'https://metado-f91ea.firebaseio.com',
+  databaseURL: 'https://metado.app',
   projectId: 'metado-f91ea',
   storageBucket: 'metado-f91ea.appspot.com',
   messagingSenderId: '933456903215',
