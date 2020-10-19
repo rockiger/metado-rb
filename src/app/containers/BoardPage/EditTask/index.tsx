@@ -19,6 +19,7 @@ interface Props {
   dialogState: DialogStateReturn;
   finalFocusRef: any;
   handleCancelEdit: () => void;
+  handleEditTask: (oldTask: any, task: any) => void;
   task: Task | null;
 }
 
@@ -26,6 +27,7 @@ export function EditTask({
   dialogState,
   finalFocusRef,
   handleCancelEdit,
+  handleEditTask,
   task,
 }: Props) {
   const [description, setDescription] = useState('');
@@ -103,9 +105,5 @@ export function EditTask({
       handleEditTask(task, { ...task, description, title, edited: now() });
     }
     onClickCancel();
-  }
-
-  function handleEditTask(oldTask, task) {
-    //!dispatch(databaseActions.updateTask({ oldTask, task, projects }));
   }
 }
