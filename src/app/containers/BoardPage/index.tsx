@@ -190,6 +190,7 @@ export function BoardPage() {
               dialogState={editDialogState}
               finalFocusRef={editDialogFinalFocusRef}
               handleCancelEdit={() => setEditTaskState(null)}
+              handleEditTask={updateTask}
               task={editTaskState}
             />
           </>
@@ -263,42 +264,45 @@ export function BoardPage() {
         }
       }
       if (el[0] === 'updateTask') {
-        const { oldTask, projects, task } = el[1];
-        const profile = { githubToken: '!!!' }; //!
-        const project = projects[oldTask.project];
-        setTasks({ ...tasks, [task.id]: task });
-
-        const taskRef = db.collection('tasks').doc(task.id);
-        try {
-          await taskRef.set(task);
-          if (task.id.startsWith('github') && profile.githubToken) {
-            if (
-              oldTask.status === TaskState.Done &&
-              task.status !== TaskState.Done
-            ) {
-              openIssue(profile.githubToken, task, project);
-            }
-            if (
-              oldTask.status !== TaskState.Done &&
-              task.status === TaskState.Done
-            ) {
-              closeIssue(profile.githubToken, task, project);
-            }
-            if (
-              oldTask.title !== task.title ||
-              oldTask.description !== task.description
-            ) {
-              updateIssue(profile.githubToken, task, project);
-            }
-          }
-          if (task.id.startsWith('googletasks')) {
-            googletasksConnector.updateTask(task, project);
-          }
-        } catch (error) {
-          console.error(error);
-        }
+        const { oldTask, task } = el[1];
+        await updateTask(oldTask, task);
       }
     });
+  }
+
+  async function updateTask(oldTask: any, task: any) {
+    const project = projects[oldTask.project];
+    setTasks({ ...tasks, [task.id]: task });
+    const taskRef = db.collection('tasks').doc(task.id);
+    try {
+      await taskRef.set(task);
+      const [, projectType] = task.id.split('-');
+      if (projectType === 'github' && profile?.githubToken) {
+        if (
+          oldTask.status === TaskState.Done &&
+          task.status !== TaskState.Done
+        ) {
+          openIssue(profile.githubToken, task, project);
+        }
+        if (
+          oldTask.status !== TaskState.Done &&
+          task.status === TaskState.Done
+        ) {
+          closeIssue(profile.githubToken, task, project);
+        }
+        if (
+          oldTask.title !== task.title ||
+          oldTask.description !== task.description
+        ) {
+          updateIssue(profile.githubToken, task, project);
+        }
+      }
+      if (projectType === 'googletasks') {
+        googletasksConnector.updateTask(task, project);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 
