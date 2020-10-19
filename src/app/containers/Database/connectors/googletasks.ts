@@ -117,6 +117,7 @@ export function createOrUpdateTask(
       project: projectId,
       status,
       title: externalTask.title,
+      type: 'googletasks',
       user: uid,
     };
     return newTask;
@@ -125,7 +126,7 @@ export function createOrUpdateTask(
 
 export async function createTask(project: Project, taskData) {
   await GoogleTasksService.load(() => {});
-  const [, , listId] = project.id.split('-');
+  const [, , , listId] = project.id.split('-');
   const task = {
     id: '',
     title: taskData.title,
@@ -150,7 +151,8 @@ export async function updateTask(taskData: Task, project: Project) {
       GoogleTasksService.signIn();
     })
     .then(async () => {
-      const [, , listId, taskId] = taskData.id.split('-');
+      const [, , , listId, taskId] = taskData.id.split('-');
+      console.log({ listId, taskId });
       const task = {
         id: taskId,
         title: taskData.title,
