@@ -56,6 +56,7 @@ export interface Task {
   project: string;
   status: TaskState;
   title: string;
+  type: string;
   user: string;
 }
 
