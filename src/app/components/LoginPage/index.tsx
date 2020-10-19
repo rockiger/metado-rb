@@ -96,7 +96,7 @@ function updateUser({ additionalUserInfo, credential, user }) {
     .doc(board.id);
 
   const profile = {
-    ...(additionalUserInfo?.isNewUser && { activeBoard: 'main-Board' }),
+    ...(additionalUserInfo?.isNewUser && { activeBoard: 'main-board' }),
     ...(credential?.providerId === 'github.com' && {
       githubToken: credential.accessToken,
     }),
