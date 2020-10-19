@@ -19,15 +19,19 @@ import {
   Textarea,
   DialogFooter,
 } from 'app/components/UiComponents/Dialog';
-import { now } from 'utils/helper';
 
 interface Props {
   board: any;
+  handleAddTask: (taskData: {
+    description: string;
+    projectId: string;
+    title: string;
+  }) => void;
   ownerId: string;
   projects: ProjectMap;
 }
 
-export function AddCard({ board, ownerId, projects }: Props) {
+export function AddCard({ board, handleAddTask, ownerId, projects }: Props) {
   const node = useRef<HTMLDivElement>(null);
   const [description, setDescription] = useState<string>('');
   const [isClosed, setIsClosed] = useState<boolean>(true);
@@ -164,18 +168,13 @@ export function AddCard({ board, ownerId, projects }: Props) {
   function onSubmit(ev) {
     ev.preventDefault();
     console.log('onSubmit');
-    addTaskToBoard(board, ownerId, projects, {
+    handleAddTask({
       description,
       projectId,
       title,
-      edited: now(),
     });
     dialog.hide();
     setDescription('');
     setTitle('');
-  }
-
-  function addTaskToBoard(board, owner, projects, taskData) {
-    //dispatch(databaseActions.addTask({ board, owner, projects, taskData }));
   }
 }
