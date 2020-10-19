@@ -42,10 +42,12 @@ import { db, useAuth } from '../Database/firebase';
 import { syncBoardFromProviders } from './helpers';
 import {
   closeIssue,
+  createIssue,
   openIssue,
   updateIssue,
 } from '../Database/connectors/github';
 import * as googletasksConnector from '../Database/connectors/googletasks';
+import { now } from 'utils/helper';
 
 export function BoardPage() {
   const { ownerId, boardId } = useParams<{
@@ -163,7 +165,12 @@ export function BoardPage() {
               </>
             )}
             {board && (
-              <AddCard board={board} ownerId={ownerId} projects={projects} />
+              <AddCard
+                board={board}
+                handleAddTask={addTask}
+                ownerId={ownerId}
+                projects={projects}
+              />
             )}
           </>
         )}
@@ -234,6 +241,79 @@ export function BoardPage() {
     </PrivatePage>
   );
 
+  async function addTask(taskData: {
+    description: string;
+    projectId: string;
+    title: string;
+  }) {
+    const project = projects[taskData.projectId];
+
+    // Create task in github and get result
+    try {
+      let createResult: any;
+      if (project.type === 'github') {
+        createResult = await createIssue(
+          profile?.githubToken,
+          project,
+          taskData,
+        );
+      }
+      if (project.type === 'googletasks') {
+        createResult = await googletasksConnector.createTask(project, taskData);
+      }
+      console.log({ createResult, project });
+      console.log(createResult?.status);
+      if (createResult?.status >= 200 && createResult?.status < 300) {
+        let newTaskId = '';
+        if (project.type === 'github') {
+          newTaskId = `${user?.uid}-${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
+        }
+        if (project.type === 'googletasks') {
+          newTaskId = `${user?.uid}-${project.id}-${createResult.result.id}`;
+        }
+        // Create task in firesotere-
+        console.log({ newTaskId });
+        if (newTaskId) {
+          const newTask: Task = {
+            created: now(),
+            edited: now(),
+            finished: '',
+            id: newTaskId,
+            description: taskData.description,
+            project: project.id,
+            status: TaskState.Backlog,
+            title: taskData.title,
+            type: project.type,
+            user: project.user,
+          };
+          const taskRef = db.collection('tasks').doc(newTaskId);
+          await taskRef.set(newTask);
+
+          // Add Task to column, needs to be after task creation,
+          // otherwise we get a type error
+          const column = board.columns[0];
+          const newTaskIds = produce(column.taskIds, draftTaskIds => {
+            draftTaskIds.unshift(newTaskId);
+          });
+          const newColumn = produce(column, draftColumn => {
+            draftColumn.taskIds = newTaskIds;
+          });
+
+          const newColumns = produce(board.columns, draftColumns => {
+            draftColumns[0] = newColumn;
+          });
+
+          const newBoard = produce(board, draftBoard => {
+            draftBoard.columns = newColumns;
+          });
+
+          updateBoard(newBoard, project.user);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
   function handleClickTask(task: Task) {
     setEditTaskState(task);
     editDialogState.show();
@@ -250,24 +330,28 @@ export function BoardPage() {
       console.log(el[0], el[1]);
       if (el[0] === 'updateBoard') {
         const { board, uid } = el[1];
-        setBoard(board);
 
-        const boardRef = db
-          .collection('users')
-          .doc(uid)
-          .collection('boards')
-          .doc(board.id);
-        try {
-          await boardRef.set(board);
-        } catch (error) {
-          console.error(error);
-        }
+        await updateBoard(board, uid);
       }
       if (el[0] === 'updateTask') {
         const { oldTask, task } = el[1];
         await updateTask(oldTask, task);
       }
     });
+  }
+
+  async function updateBoard(board: any, uid: any) {
+    setBoard(board);
+    const boardRef = db
+      .collection('users')
+      .doc(uid)
+      .collection('boards')
+      .doc(board.id);
+    try {
+      await boardRef.set(board);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async function updateTask(oldTask: any, task: any) {
