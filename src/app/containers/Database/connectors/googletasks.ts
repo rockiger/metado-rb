@@ -166,6 +166,7 @@ export async function updateTask(taskData: Task, project: Project) {
         subtasks: [],
         isDirty: false,
       };
+      console.log('await GoogleTasksService.updateTask(task);');
       await GoogleTasksService.updateTask(task);
     });
 }

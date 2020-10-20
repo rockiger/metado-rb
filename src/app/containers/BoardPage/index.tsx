@@ -269,7 +269,7 @@ export function BoardPage() {
           newTaskId = `${user?.uid}-${project.type}-${project.owner}-${project.name}-${createResult.data.number}`;
         }
         if (project.type === 'googletasks') {
-          newTaskId = `${user?.uid}-${project.id}-${createResult.result.id}`;
+          newTaskId = `${project.id}-${createResult.result.id}`;
         }
         // Create task in firesotere-
         console.log({ newTaskId });
@@ -354,35 +354,35 @@ export function BoardPage() {
     }
   }
 
-  async function updateTask(oldTask: any, task: any) {
+  async function updateTask(oldTask: Task, task: Task) {
     const project = projects[oldTask.project];
     setTasks({ ...tasks, [task.id]: task });
+    console.log({ task });
     const taskRef = db.collection('tasks').doc(task.id);
     try {
       await taskRef.set(task);
-      const [, projectType] = task.id.split('-');
-      if (projectType === 'github' && profile?.githubToken) {
+      if (task.type === 'github' && profile?.githubToken) {
         if (
           oldTask.status === TaskState.Done &&
           task.status !== TaskState.Done
         ) {
-          openIssue(profile.githubToken, task, project);
+          await openIssue(profile.githubToken, task, project);
         }
         if (
           oldTask.status !== TaskState.Done &&
           task.status === TaskState.Done
         ) {
-          closeIssue(profile.githubToken, task, project);
+          await closeIssue(profile.githubToken, task, project);
         }
         if (
           oldTask.title !== task.title ||
           oldTask.description !== task.description
         ) {
-          updateIssue(profile.githubToken, task, project);
+          await updateIssue(profile.githubToken, task, project);
         }
       }
-      if (projectType === 'googletasks') {
-        googletasksConnector.updateTask(task, project);
+      if (task.type === 'googletasks') {
+        await googletasksConnector.updateTask(task, project);
       }
     } catch (error) {
       console.error(error);
