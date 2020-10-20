@@ -354,7 +354,9 @@ export function AddGithubRepo() {
   );
 
   function addedProjectsFilter(repo) {
-    return !board?.projects.includes(`github-${repo.owner.login}-${repo.name}`);
+    return !board?.projects.includes(
+      `${user?.uid}-github-${repo.owner.login}-${repo.name}`,
+    );
   }
 
   async function fetchGithubRepos(githubToken) {
@@ -430,7 +432,7 @@ export async function addGithubProject(
       const changedBoard = produce(board, draftBoard => {
         draftBoard.projects.push(projectId);
       });
-      boardRef.set(changedBoard);
+      await boardRef.set(changedBoard);
 
       // get tasks
       const tasksRef = db

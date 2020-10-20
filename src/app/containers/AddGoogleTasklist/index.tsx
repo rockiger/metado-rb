@@ -356,7 +356,9 @@ export function AddGoogleTasklist() {
 
   function addedProjectsFilter(tasklist) {
     return !board?.projects.includes(
-      `googletasks-${GoogleTasksService.getUserId()}-${tasklist.id}`,
+      `${user?.uid}-googletasks-${GoogleTasksService.getUserId()}-${
+        tasklist.id
+      }`,
     );
   }
 
@@ -364,9 +366,9 @@ export function AddGoogleTasklist() {
     GoogleTasksService.signIn();
   }
 
-  function onClickAdd(taskList: { [x: string]: any }) {
+  async function onClickAdd(taskList: { [x: string]: any }) {
     setSettingProject('fetching');
-    addGoogleTasksProject(
+    await addGoogleTasksProject(
       profile?.activeBoard,
       setAddingProjectStatus,
       setError,
