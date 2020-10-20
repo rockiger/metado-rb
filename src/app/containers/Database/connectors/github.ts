@@ -15,7 +15,8 @@ export async function sync(
   uid: string,
   githubToken: string,
 ) {
-  const [, , , displayName, projectName] = projectId.split('-');
+  const [, , displayName, projectName] = projectId.split('-');
+  console.log({ projectId });
   const repoFullname = `${displayName}/${projectName}`;
   const externalTasks = await fetchIssuesFromGithubRepo(
     repoFullname,

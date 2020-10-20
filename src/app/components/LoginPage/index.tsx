@@ -97,9 +97,10 @@ function updateUser({ additionalUserInfo, credential, user }) {
 
   const profile = {
     ...(additionalUserInfo?.isNewUser && { activeBoard: 'main-board' }),
+    /* only add a githubToken for public projects
     ...(credential?.providerId === 'github.com' && {
       githubToken: credential.accessToken,
-    }),
+    }), */
   };
 
   if (!_.isEmpty(profile)) {
