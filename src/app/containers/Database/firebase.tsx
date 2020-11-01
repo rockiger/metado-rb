@@ -3,6 +3,7 @@ import * as firebase from 'firebase/app';
 import { User } from 'firebase';
 import '@firebase/firestore'; // 👈 If you're using firestore
 import '@firebase/auth';
+import '@firebase/analytics';
 
 type Status = 'init' | 'user' | 'profile';
 
@@ -17,6 +18,7 @@ const myFirebaseApp = firebase.initializeApp({
   measurementId: 'G-0W9C3L7Z2B',
 });
 
+if (process.env.NODE_ENV !== 'development') firebase.analytics();
 export const authProvider = new firebase.auth.GithubAuthProvider();
 export const firebaseAuth = firebase.auth();
 export const db = myFirebaseApp.firestore();
@@ -81,7 +83,7 @@ export function AuthProvider({ children }) {
 
 function getLocalAuthUser() {
   const authStorageJson = localStorage.getItem('authUser');
-  const authStorage = authStorageJson ? JSON.parse(authStorageJson) : {};
+  const authStorage = authStorageJson ? JSON.parse(authStorageJson) : null;
   if (isAuthUser(authStorage)) return authStorage;
   return null;
 }
