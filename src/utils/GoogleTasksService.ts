@@ -121,6 +121,7 @@ export class GoogleTasksService {
    */
   async load(callback: (isSignedIn: boolean) => void) {
     await this.loadScript();
+    // @ts-ignore
     this.auth = this.google.auth2.getAuthInstance();
 
     this.subscribeSigninStatus(callback);
@@ -168,6 +169,7 @@ export class GoogleTasksService {
    * @returns TaskList[]
    */
   async listTaskLists() {
+    // @ts-ignore
     const response = await this.google.client.tasks.tasklists.list();
 
     return response.result.items.map(
@@ -186,6 +188,7 @@ export class GoogleTasksService {
    * @returns Task[]
    */
   async listTasks(taskListId: string, pageToken: string = '') {
+    // @ts-ignore
     const response = await this.google.client.tasks.tasks.list({
       tasklist: taskListId,
       showCompleted: true,
@@ -239,6 +242,7 @@ export class GoogleTasksService {
    * @param taskList: TaskList
    */
   insertTaskList(taskList: TaskList) {
+    // @ts-ignore
     return this.google.client.tasks.tasklists.insert({
       title: taskList.title,
     });
@@ -252,6 +256,7 @@ export class GoogleTasksService {
    * @param completed: boolean
    */
   updateTaskCompletion(task: string, tasklist: string, completed: boolean) {
+    // @ts-ignore
     return this.google.client.tasks.tasks.update({
       tasklist,
       task,
@@ -266,6 +271,7 @@ export class GoogleTasksService {
    * @param task: Task
    */
   insertTask(task: Task) {
+    // @ts-ignore
     return this.google.client.tasks.tasks.insert({
       tasklist: task.listId,
       task: task.id,
@@ -284,6 +290,7 @@ export class GoogleTasksService {
    * @param task: Task
    */
   updateTask(task: Task) {
+    // @ts-ignore
     return this.google.client.tasks.tasks.update({
       tasklist: task.listId,
       task: task.id,
@@ -302,6 +309,7 @@ export class GoogleTasksService {
    * @param tasklist: string
    */
   deleteTask(task: string, tasklist: string) {
+    // @ts-ignore
     return this.google.client.tasks.tasks.delete({
       tasklist,
       task,
