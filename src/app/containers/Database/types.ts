@@ -29,6 +29,7 @@ export interface Board {
 export interface Column {
   taskIds: string[];
   title: string;
+  noOfTasksToShow?: 15 | 30 | 0 | undefined;
 }
 
 export type LoadingStatus = 'init' | 'fetching' | 'error' | 'success';

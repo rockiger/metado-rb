@@ -182,16 +182,22 @@ export function BoardPage() {
             <DragDropContext
               onDragEnd={result => onDragEnd(result, board, ownerId, tasks)}
             >
-              {board.columns.map((col, index) => (
-                <BoardColumn
-                  col={col}
-                  index={index}
-                  key={index}
-                  projects={projects}
-                  tasks={tasks}
-                  handleClickTask={handleClickTask}
-                />
-              ))}
+              {board.columns.map((col, index) => {
+                if (index === 0 && !board.showBacklog) {
+                  return null;
+                }
+                return (
+                  <BoardColumn
+                    col={col}
+                    index={index}
+                    key={index}
+                    projects={projects}
+                    tasks={tasks}
+                    handleClickTask={handleClickTask}
+                    setNoOfTasksToShow={setNoOfTasksToShow}
+                  />
+                );
+              })}
             </DragDropContext>
             <EditTask
               dialogState={editDialogState}
@@ -338,6 +344,16 @@ export function BoardPage() {
         await updateTask(oldTask, task);
       }
     });
+  }
+
+  async function setNoOfTasksToShow(colTitle, noOfTasks) {
+    const colNos = { Backlog: 0, Todo: 1, Doing: 2, Done: 3 };
+    const colNo = colNos[colTitle];
+
+    const newBoard = produce(board, draft => {
+      draft.columns[colNo]['noOfTasksToShow'] = noOfTasks;
+    });
+    updateBoard(newBoard, uid);
   }
 
   async function updateBoard(board: any, uid: any) {

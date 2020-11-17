@@ -34,6 +34,7 @@ interface Props {
   handleClickTask: (task: TaskType) => void;
   index: number;
   projects: ProjectMap;
+  setNoOfTasksToShow: (colTitle: string, noOfTasks: number) => void;
   tasks: TaskMap;
 }
 
@@ -42,13 +43,20 @@ export function BoardColumn({
   handleClickTask,
   index,
   projects,
+  setNoOfTasksToShow,
   tasks,
 }: Props): JSX.Element {
   return (
     <Column key={col.title}>
       <ColumnTitle>
         <ColumnIcon size="2rem" /> <Spacer>{col.title}</Spacer>
-        {col.title === 'Done' && <DoneColumnMenu />}
+        {col.title === 'Done' && (
+          <DoneColumnMenu
+            colTitle={col.title}
+            noOfTasksToShow={col.noOfTasksToShow}
+            setNoOfTasksToShow={setNoOfTasksToShow}
+          />
+        )}
       </ColumnTitle>
       <Droppable droppableId={`${index}`}>
         {provided => (
@@ -61,8 +69,12 @@ export function BoardColumn({
               {!_.isEmpty(tasks) &&
                 col.taskIds.map((id, index) => {
                   const task = tasks[id];
+                  console.log({ noOfTasks: col.noOfTasksToShow, index });
                   if (!task) {
                     console.log('Missing Task in Board. Task-Id:', id);
+                    return null;
+                  }
+                  if (col.noOfTasksToShow && col.noOfTasksToShow < index) {
                     return null;
                   }
                   const project = projects[task.project];
@@ -111,8 +123,16 @@ export function BoardColumn({
   );
 }
 
-export function DoneColumnMenu() {
-  const menu = useMenuState({ orientation: 'vertical', visible: true });
+export function DoneColumnMenu({
+  colTitle,
+  noOfTasksToShow,
+  setNoOfTasksToShow,
+}: {
+  colTitle: string;
+  noOfTasksToShow: 15 | 30 | 0 | undefined;
+  setNoOfTasksToShow: (colTitle: string, noOfTasks: number) => void;
+}) {
+  const menu = useMenuState({ orientation: 'vertical' });
   return (
     <>
       <MenuButton {...menu}>
@@ -122,14 +142,36 @@ export function DoneColumnMenu() {
         <MenuItem as="div" {...menu}>
           <DoneColumMenuItemContent>Show</DoneColumMenuItemContent>
           <ButtonGroup>
-            <GroupButton aria-selected="false">10</GroupButton>
-            <GroupButton aria-selected="false">30</GroupButton>
-            <GroupButton aria-selected="true">All</GroupButton>
+            <GroupButton
+              aria-selected={noOfTasksToShow === 15}
+              onClick={() => onClickNoOfTasks(15)}
+            >
+              15
+            </GroupButton>
+            <GroupButton
+              aria-selected={noOfTasksToShow === 30}
+              onClick={() => onClickNoOfTasks(30)}
+            >
+              30
+            </GroupButton>
+            <GroupButton
+              aria-selected={
+                noOfTasksToShow === 0 || noOfTasksToShow === undefined
+              }
+              onClick={() => onClickNoOfTasks(0)}
+            >
+              All
+            </GroupButton>
           </ButtonGroup>
         </MenuItem>
       </MenuVertical>
     </>
   );
+
+  function onClickNoOfTasks(noOfTasks) {
+    console.log(noOfTasks);
+    setNoOfTasksToShow(colTitle, noOfTasks);
+  }
 }
 
 const DoneColumMenuItemContent = styled(Spacer)`
