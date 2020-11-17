@@ -3,6 +3,7 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import { RadioCircle } from 'styled-icons/boxicons-regular';
+import { GearFill } from 'styled-icons/bootstrap';
 import { Github } from 'styled-icons/boxicons-logos';
 import GoogleTasksLogoSrc from 'app/containers/AddGoogleTasklist/google-tasks-logo.png';
 
@@ -13,6 +14,13 @@ import {
   Label,
   Spacer,
 } from 'app/components/UiComponents';
+import {
+  useMenuState,
+  Menu,
+  MenuItem,
+  MenuButton,
+  MenuSeparator,
+} from 'app/components/UiComponents/Menu';
 import {
   Column as ColumnType,
   ProjectMap,
@@ -38,7 +46,8 @@ export function BoardColumn({
   return (
     <Column key={col.title}>
       <ColumnTitle>
-        <ColumnIcon size="2rem" /> {col.title}
+        <ColumnIcon size="2rem" /> <Spacer>{col.title}</Spacer>
+        {col.title === 'Done' && <DoneColumnMenu />}
       </ColumnTitle>
       <Droppable droppableId={`${index}`}>
         {provided => (
@@ -98,6 +107,26 @@ export function BoardColumn({
         )}
       </Droppable>
     </Column>
+  );
+}
+
+export function DoneColumnMenu() {
+  const menu = useMenuState();
+
+  return (
+    <>
+      <MenuButton {...menu}>
+        <GearFill size="1.5rem" />
+      </MenuButton>
+      <Menu {...menu} aria-label="Preferences">
+        <MenuItem {...menu}>Settings</MenuItem>
+        <MenuItem {...menu} disabled>
+          Extensions
+        </MenuItem>
+        <MenuSeparator {...menu} />
+        <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
+      </Menu>
+    </>
   );
 }
 
