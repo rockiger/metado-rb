@@ -8,18 +8,19 @@ import { Github } from 'styled-icons/boxicons-logos';
 import GoogleTasksLogoSrc from 'app/containers/AddGoogleTasklist/google-tasks-logo.png';
 
 import {
+  ButtonGroup,
   Card,
   CardFooter,
   CardTitle,
   Label,
   Spacer,
+  GroupButton,
 } from 'app/components/UiComponents';
 import {
   useMenuState,
-  Menu,
   MenuItem,
   MenuButton,
-  MenuSeparator,
+  MenuVertical,
 } from 'app/components/UiComponents/Menu';
 import {
   Column as ColumnType,
@@ -111,24 +112,30 @@ export function BoardColumn({
 }
 
 export function DoneColumnMenu() {
-  const menu = useMenuState();
-
+  const menu = useMenuState({ orientation: 'vertical', visible: true });
   return (
     <>
       <MenuButton {...menu}>
         <GearFill size="1.5rem" />
       </MenuButton>
-      <Menu {...menu} aria-label="Preferences">
-        <MenuItem {...menu}>Settings</MenuItem>
-        <MenuItem {...menu} disabled>
-          Extensions
+      <MenuVertical {...menu} aria-label="Preferences">
+        <MenuItem as="div" {...menu}>
+          <DoneColumMenuItemContent>Show</DoneColumMenuItemContent>
+          <ButtonGroup>
+            <GroupButton aria-selected="false">10</GroupButton>
+            <GroupButton aria-selected="false">30</GroupButton>
+            <GroupButton aria-selected="true">All</GroupButton>
+          </ButtonGroup>
         </MenuItem>
-        <MenuSeparator {...menu} />
-        <MenuItem {...menu}>Keyboard shortcuts</MenuItem>
-      </Menu>
+      </MenuVertical>
     </>
   );
 }
+
+const DoneColumMenuItemContent = styled(Spacer)`
+  margin-right: 3rem;
+  margin-top: -2px;
+`;
 
 const Column = styled.div`
   background-color: white;

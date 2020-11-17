@@ -3,6 +3,7 @@ import { createGlobalStyle } from 'styled-components';
 export const GlobalStyle = createGlobalStyle`
   :root {
     --bg-color: hsl(0, 0%, 100%);
+    --bg-color-primary: hsl(221, 100%, 90%);
     --bg-color-secondary: hsl(240, 14%, 96%); /* secondary */
     --border: 1px solid var(--border-color);
     --border-color: rgba(34,36,38,.15);
@@ -17,14 +18,16 @@ export const GlobalStyle = createGlobalStyle`
     --color-secondary: hsl(348, 95%, 68%)
     --color-success: hsl(113, 81%, 41%);
     --color-tertiary: hsl(36, 99%, 65%);
+    --color-text: hsl(207, 10%, 42%);
     --font-family: 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     --font-size: 1.6rem;
+    --margin: 1.4rem 0;
+    --min-height: 4rem;
     --grid-maxWidth: 120rem;
     --grid-gutter: 2rem;
     --padding-horizontal: 4.2rem;
     --padding-dialog: 1.8rem 2.2rem;
     --padding-vertical: 0;
-    --color-text: hsl(207, 10%, 42%);
     --transition: background-color .1s ease,opacity .1s ease,color .1s ease,box-shadow .1s ease,-webkit-box-shadow .1s ease;
 }
   }

@@ -87,6 +87,55 @@ export const ButtonClear = styled(ReaButton).attrs(p => ({
   className: 'button button-clear',
 }))``;
 
+export const ButtonGroup = styled.div`
+  display: inline-flex;
+  flex-direction: row;
+  font-size: 0;
+  vertical-align: baseline;
+
+  &:after {
+    content: '.';
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+  }
+`;
+
+export const GroupButton = styled(ButtonOutlined)`
+  && {
+    flex: 1 0 auto;
+    border-radius: 0;
+    border-left-width: 0;
+    height: 3rem;
+    line-height: 3rem;
+    padding: 0 2.4rem;
+
+    &:first-child {
+      margin-left: 0;
+      border-bottom-left-radius: var(--border-radius);
+      border-bottom-right-radius: 0;
+      border-left-width: 1px;
+      border-top-left-radius: var(--border-radius);
+      border-top-right-radius: 0;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: var(--border-radius);
+      border-top-left-radius: 0;
+      border-top-right-radius: var(--border-radius);
+    }
+
+    &[aria-selected='true'],
+    &[aria-selected='true']:focus {
+      border-color: var(--color-primary);
+      background-color: var(--bg-color-primary);
+      color: var(bg-color-primary);
+    }
+  }
+`;
+
 export const A = styled.a``;
 
 type LabelProps = { color?: string };
