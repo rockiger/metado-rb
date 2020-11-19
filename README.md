@@ -2,6 +2,8 @@
 
 Metado is a cross-project plannerhows all your task from different web apps and projects in one place. So you can focus on your work and not on task list management.
 
+![metado-screenshot](https://metado.app/images/metado-board.png)
+
 ## Manage all your work from one board.
 
 <p>&nbsp;</p>
