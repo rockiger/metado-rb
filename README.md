@@ -1,6 +1,6 @@
 ## All your to-dos on one board.
 
-Metado is a cross-project plannerhows all your task from different web apps and projects in one place. So you can focus on your work and not on task list management.
+Metado is a cross-project planner that shows all your tasks from different web apps and projects in one board. So you can focus on your work and not on task list management.
 
 ![metado-screenshot](https://metado.app/images/metado-board.png)
 
@@ -23,20 +23,6 @@ Start development by cloning the project and running `yarn` inside the project-d
 - Styled-Components
 - React-Router
 - Firebase
-
-<dl>
-
-  <dt>Typescript</dt>
-
-  <dt>Styled-components</dt>
-  <dd>Write composable CSS that's co-located with your components for complete modularity. Unique generated class names keep the specificity low while eliminating style clashes. Ship only the styles that are on the page for the best performance.</dd>
-
-  <dt>React-Router</dt>
-  <dd>It's natural to want to add pages (e.g. `/about`) to your application, and routing makes this possible.</dd>
-
-  <dt>Firebase</dt>
-  <dd>
-</dl>
 
 ## License
 
