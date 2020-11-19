@@ -1,142 +1,42 @@
-<img width="914" alt="React Boilerplate Meets CRA" src="https://user-images.githubusercontent.com/3495307/80274591-2d5daa00-86e4-11ea-8fba-404f1cdba87e.png" align="center">
-<br />
+## All your to-dos on one board.
 
-<div align="center" >Crafted for <strong>highly scalable</strong> & <strong>performant</strong> and <strong>easily maintainable</strong> React.js applications <br /> 
-with a focus on  
-<strong>best DX</strong> and <strong>best practices</strong>.
-</div>
+Metado is a cross-project plannerhows all your task from different web apps and projects in one place. So you can focus on your work and not on task list management.
 
-<br />
+## Manage all your work from one board.
 
-<div align="center">
-  <a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/actions?query=workflow%3Abuild">
-    <img src="https://github.com/react-boilerplate/react-boilerplate-cra-template/workflows/build/badge.svg" alt="Build Status" />
-  </a>
-  <a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/actions?query=workflow%3Atests">
-    <img src="https://github.com/react-boilerplate/react-boilerplate-cra-template/workflows/test/badge.svg" alt="Tests Status" />
-  </a>
-  <a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/actions?query=workflow%release">
-    <img src="https://github.com/react-boilerplate/react-boilerplate-cra-template/workflows/release/badge.svg" alt="Release Status" />
-  </a>
-</div>
+<p>&nbsp;</p>
 
-<div align="center">
-  <a href="https://coveralls.io/github/react-boilerplate/react-boilerplate-cra-template">
-    <img src="https://coveralls.io/repos/github/react-boilerplate/react-boilerplate-cra-template/badge.svg?branch=master" alt="Coverage" />
-  </a>
-  <a href="https://opencollective.com/react-boilerplate">
-    <img src="https://opencollective.com/react-boilerplate/backers/badge.svg" alt="Backers" />
-  </a>
-  <a href="https://opencollective.com/react-boilerplate/">
-    <img src="https://opencollective.com/react-boilerplate/sponsors/badge.svg" alt="Sponsors" />
-  </a>
-</div>
-
-<br />
-
----
-
-The official [Create React App](https://github.com/facebook/create-react-app) template of [React Boilerplate](https://github.com/react-boilerplate/react-boilerplate)
-![](https://img.shields.io/github/stars/react-boilerplate/react-boilerplate?style=flat)
-
-Start your `create-react-app` projects in seconds with the best, industry-standard tools and practices made ready for you.
-
-**📚Documentation:** [Gitbook](https://cansahin.gitbook.io/react-boilerplate-cra-template/)
-
-**🎨 Check the example app:** [Boilerplate Example Application](https://react-boilerplate.github.io/react-boilerplate-cra-template/)
-
-**🚑 Collection of `'HOW TO'`s:** [Examples & Tutorials for common patterns](https://github.com/react-boilerplate/cra-template-examples)
-
-**📦 Package:** [npm](https://www.npmjs.com/package/cra-template-rb)
-
-![version](https://img.shields.io/npm/v/cra-template-rb)
-![version](https://img.shields.io/npm/dm/cra-template-rb)
+<div class="x45re-1 x45re-9 fCXIkx"><div class="x45re-6 x45re-10 dBKfuh"><svg viewBox="0 0 24 24" height="4.8rem" width="4.8rem" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="StyledIconBase-ea9ulj-0 iKhrnw"><path d="M13 7.101l.01.001a4.978 4.978 0 012.526 1.362 5.005 5.005 0 011.363 2.528 5.061 5.061 0 01-.001 2.016 4.976 4.976 0 01-1.363 2.527l1.414 1.414a7.014 7.014 0 001.908-3.54 6.98 6.98 0 000-2.819 6.957 6.957 0 00-1.907-3.539 6.97 6.97 0 00-2.223-1.5 6.921 6.921 0 00-1.315-.408c-.137-.028-.275-.043-.412-.063V2L9 6l4 4V7.101zm-7.45 7.623c.174.412.392.812.646 1.19.249.37.537.718.854 1.034a7.036 7.036 0 002.224 1.501c.425.18.868.317 1.315.408.167.034.338.056.508.078v2.944l4-4-4-4v3.03c-.035-.006-.072-.003-.107-.011a4.978 4.978 0 01-2.526-1.362 4.994 4.994 0 01.001-7.071L7.051 7.05a7.01 7.01 0 00-1.5 2.224A6.974 6.974 0 005 12a6.997 6.997 0 00.55 2.724z"></path></svg></div><h3>Sync your work</h3><p><b>Easily</b> sync tasks from <b>different sources</b>. Add issues from Github, Gitlab, and Bitbucket or task from Google Tasks, Microsoft To Do, and many more.</p></div><div class="x45re-1 x45re-9 fCXIkx"><div class="x45re-6 x45re-10 dBKfuh"><svg viewBox="0 0 24 24" height="4.8rem" width="4.8rem" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="StyledIconBase-ea9ulj-0 iKhrnw"><path d="M7 17.013l4.413-.015 9.632-9.54c.378-.378.586-.88.586-1.414s-.208-1.036-.586-1.414l-1.586-1.586c-.756-.756-2.075-.752-2.825-.003L7 12.583v4.43zM18.045 4.458l1.589 1.583-1.597 1.582-1.586-1.585 1.594-1.58zM9 13.417l6.03-5.973 1.586 1.586-6.029 5.971L9 15.006v-1.589z"></path><path d="M5 21h14c1.103 0 2-.897 2-2v-8.668l-2 2V19H8.158c-.026 0-.053.01-.079.01-.033 0-.066-.009-.1-.01H5V5h6.847l2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2z"></path></svg></div><h3>Edit your tasks</h3><p>Need to change a task description? You can <b>edit your tasks</b> right <b>from your board</b>. Your team members will see the changes automatically.</p></div><div class="x45re-1 x45re-9 fCXIkx"><div class="x45re-6 x45re-10 dBKfuh"><svg viewBox="0 0 24 24" height="4.8rem" width="4.8rem" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="StyledIconBase-ea9ulj-0 iKhrnw"><path d="M21.447 6.105l-6-3a1 1 0 00-.895 0L9 5.882 3.447 3.105A1 1 0 002 4v13c0 .379.214.725.553.895l6 3a1 1 0 00.895 0L15 18.118l5.553 2.776a.992.992 0 00.972-.043c.295-.183.475-.504.475-.851V7c0-.379-.214-.725-.553-.895zM10 7.618l4-2v10.764l-4 2V7.618zm-6-2l4 2v10.764l-4-2V5.618zm16 12.764l-4-2V5.618l4 2v10.764z"></path></svg></div><h3>Plan your work</h3><p>Get your work into the order you prefer. You can <b>sort your tasks</b> in a Kanban board - even if your source app doesn't allow it. Your work <b>is always planned the way you want</b>.</p></div>
+<p>&nbsp;</p>
 
 ---
 
 ## Install & Start
 
-Create React App with the template
+Start development by cloning the project and running `yarn` inside the project-directory projects in seconds with the best, industry-standard tools and practices made ready for you.
 
-```shell
-npx create-react-app --template cra-template-rb my-app
-```
+## Technology used
 
-Start and check our example app, if you want
-
-```shell
-cd my-app
-yarn start
-```
-
-Remove the example app to start your project!
-
-```shell
-yarn cleanAndSetup
-```
-
-## Features
+- TypeScript
+- Styled-Components
+- React-Router
+- Firebase
 
 <dl>
 
-  <dt>Predictable state management</dt>
-  <dd>Unidirectional data flow allows for change logging and time travel debugging.</dd>
+  <dt>Typescript</dt>
 
-  <dt>Instant feedback</dt>
-  <dd>Enjoy the best DX (Developer eXperience) and code your app at the speed of thought! Your saved changes to the CSS and JS are reflected instantaneously without refreshing the page. Preserve application state even when you update something in the underlying code!</dd>
-
-  <dt>Next generation CSS</dt>
+  <dt>Styled-components</dt>
   <dd>Write composable CSS that's co-located with your components for complete modularity. Unique generated class names keep the specificity low while eliminating style clashes. Ship only the styles that are on the page for the best performance.</dd>
 
-  <dt>Industry-standard routing</dt>
+  <dt>React-Router</dt>
   <dd>It's natural to want to add pages (e.g. `/about`) to your application, and routing makes this possible.</dd>
 
-  <dt>Industry-standard i18n internationalization support</dt>
-  <dd>Scalable apps need to support multiple languages, easily add and support multiple languages.</dd>
-
-  <dt>Typescript</dt>
-  <dd>Typescript is the key to scalability. Build self-documented code, easy-to-debug code and create maintainable large applications and codebases with a highly productive development experience.</dd>
-
-  <dt>Quick scaffolding</dt>
-  <dd>Create components, containers, routes, selectors and sagas - and their tests - right from the CLI!</dd>
-
-  <dt>Static code analysis</dt>
-  <dd>Focus on writing new features without worrying about formatting or code quality. With the right editor setup, your code will automatically be formatted and linted as you work.</dd>
-
-  <dt>SEO</dt>
-  <dd>We support SEO (document head tags management) for search engines that support indexing of JavaScript content. (eg. Google)</dd>
+  <dt>Firebase</dt>
+  <dd>
 </dl>
-
-But wait... there's more!
-
-- _The best test setup:_ Automatically guarantee code quality and non-breaking
-  changes. (Seen a react app with 100% test coverage before?)
-- _The fastest fonts:_ Say goodbye to vacant text.
-- _Stay fast_: Profile your app's performance from the comfort of your command
-  line!
-
-<sub><i>Keywords: Create React App, React Boilerplate, Custom Template, Typescript, React.js, Redux, Hot Reloading, ESNext, Babel, react-router, Offline First, ServiceWorker, `styled-components`, redux-saga, FontFaceObserver</i></sub>
-
-## Contributors
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/Can-Sahin"><img src="https://avatars2.githubusercontent.com/u/33245689" width="80px;" alt=""/><br /><sub><b>Can Sahin</b></sub></a><br /><a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/commits?author=Can-Sahin" title="Code">💻</a> <a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/commits?author=Can-Sahin" title="Documentation">📖</a> <a href="#ideas-Can-Sahin" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/pulls?q=is%3Apr+reviewed-by%3ACan-Sahin" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/commits?author=Can-Sahin" title="Tests">⚠️</a></td>
-    <td align="center"><a href="https://github.com/receptiryaki"><img src="https://avatars0.githubusercontent.com/u/3495307" width="80px;" alt=""/><br /><sub><b>Recep Tiryaki</b></sub></a><br /><a href="https://github.com/react-boilerplate/react-boilerplate-cra-template/commits?author=receptiryaki" title="Code">💻</a> <a href="#ideas-receptiryaki" title="Ideas, Planning, & Feedback">🤔</a></td>
-  </tr>
-</table>
-
-<!-- markdownlint-enable -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## License
 
-This project is licensed under the MIT license, Copyright (c) 2019 Can Sahin.
+This project is licensed under the GNU GPLv3, Copyright (c) 2020 Marco Laspe.
 For more information see `LICENSE.md`.
