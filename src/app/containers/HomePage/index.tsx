@@ -30,7 +30,7 @@ export function HomePage() {
         <title>All your to-dos on one board.</title>
         <meta
           name="description"
-          content="Metado shows all your task from different web apps and projects in one place. So you can focus on your work and not on task list management."
+          content="Metado is a cross-project planner that shows all your task from different web apps and projects in one place. So you can focus on your work and not on task list management."
         />
       </Helmet>
 
@@ -48,9 +48,9 @@ export function HomePage() {
               <b>All</b> your to-dos on <b>one</b> board.
             </h1>
             <h3>
-              Metado shows all your task from different web apps and projects in
-              one place. So you can focus on your work and not on task list
-              management.{' '}
+              Metado is a cross-project planner that shows all your task from
+              different web apps and projects in one place. So you can focus on
+              your work and not on task list management.{' '}
             </h3>
             <p>
               <Button as={Link} to="/login">
