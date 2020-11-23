@@ -242,21 +242,25 @@ export function AddGithubRepo() {
                   </p>
                   {isFetchingRepos && <p>Loading...</p>}
                   <List>
-                    {repos.filter(addedProjectsFilter).map((repo, index) => (
-                      <ListItem
-                        key={repo.node_id}
-                        onClick={() => setSelectedEl(index)}
-                        isSelected={index === selectedEl}
-                      >
-                        <ListIcon>
-                          <GithubIcon />
-                        </ListIcon>
-                        <ListContent>
-                          <ListHeader as="div">{repo.full_name}</ListHeader>
-                          <ListDescription>{repo.description}</ListDescription>
-                        </ListContent>
-                      </ListItem>
-                    ))}
+                    {repos.map((repo, index) =>
+                      !addedProjectsFilter(repo) ? null : (
+                        <ListItem
+                          key={repo.node_id}
+                          onClick={() => setSelectedEl(index)}
+                          isSelected={index === selectedEl}
+                        >
+                          <ListIcon>
+                            <GithubIcon />
+                          </ListIcon>
+                          <ListContent>
+                            <ListHeader as="div">{repo.full_name}</ListHeader>
+                            <ListDescription>
+                              {repo.description}
+                            </ListDescription>
+                          </ListContent>
+                        </ListItem>
+                      ),
+                    )}
                   </List>
                 </>
               )}
