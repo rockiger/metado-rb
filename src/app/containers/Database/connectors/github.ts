@@ -11,13 +11,13 @@ export { createOrUpdateTask, closeIssue, openIssue };
 export async function sync(
   db: any,
   internalTasks: TaskMap,
-  projectId: string,
+  project: Project,
   uid: string,
   githubToken: string,
 ) {
-  const [, , displayName, projectName] = projectId.split('-');
-  console.log({ projectId });
-  const repoFullname = `${displayName}/${projectName}`;
+  const { owner, name } = project;
+  console.log({ project });
+  const repoFullname = `${owner}/${name}`;
   const externalTasks = await fetchIssuesFromGithubRepo(
     repoFullname,
     githubToken,
@@ -26,7 +26,7 @@ export async function sync(
     const newOrUpdatedTask = createOrUpdateTask(
       externalTask,
       internalTasks,
-      projectId,
+      project.id,
       uid,
     );
     if (!!newOrUpdatedTask) {

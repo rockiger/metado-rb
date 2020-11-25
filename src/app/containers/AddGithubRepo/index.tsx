@@ -45,6 +45,7 @@ import { db, useAuth } from '../Database/firebase';
 import { now } from 'utils/helper';
 import { Board } from '../Database/types';
 import { syncBoardFromProviders } from '../BoardPage/helpers';
+import { getProjectsById } from '../Database';
 
 const BASE_ROUTE = '/projects/add/github/';
 /* const BASE_URL = `${window.location.protocol}//${window.location.hostname}${
@@ -433,7 +434,7 @@ export async function addGithubProject(
     // are only searches for 10 projects possible with firestore.
     // See syncBoardFromProviders
     if (board && board.projects && board.projects.length < 10) {
-      const changedBoard = produce(board, draftBoard => {
+      const changedBoard = produce(board as Board, draftBoard => {
         draftBoard.projects.push(projectId);
       });
       await boardRef.set(changedBoard);
@@ -447,7 +448,13 @@ export async function addGithubProject(
       let tasks = {};
       tasksSnapshot.forEach(doc => (tasks[doc.id] = doc.data()));
 
-      await syncBoardFromProviders(changedBoard, () => {}, tasks, uid);
+      await syncBoardFromProviders(
+        changedBoard,
+        await getProjectsById(changedBoard.projects),
+        () => {},
+        tasks,
+        uid,
+      );
       setAddingProjectStatus('success');
     } else {
       console.error('Board already has maximum of 10 projects.');
