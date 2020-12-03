@@ -16,7 +16,7 @@ export async function sync(
   githubToken: string,
 ) {
   const { owner, name } = project;
-  console.log({ project });
+  // console.log({ project });
   const repoFullname = `${owner}/${name}`;
   const externalTasks = await fetchIssuesFromGithubRepo(
     repoFullname,

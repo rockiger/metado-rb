@@ -69,9 +69,9 @@ export function BoardColumn({
               {!_.isEmpty(tasks) &&
                 col.taskIds.map((id, index) => {
                   const task = tasks[id];
-                  console.log({ noOfTasks: col.noOfTasksToShow, index });
+                  // console.log({ noOfTasks: col.noOfTasksToShow, index });
                   if (!task) {
-                    console.log('Missing Task in Board. Task-Id:', id);
+                    // console.log('Missing Task in Board. Task-Id:', id);
                     return null;
                   }
                   if (col.noOfTasksToShow && col.noOfTasksToShow < index) {

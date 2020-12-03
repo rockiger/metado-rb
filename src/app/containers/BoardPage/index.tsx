@@ -57,7 +57,6 @@ export function BoardPage() {
     boardId: string;
   }>();
 
-  console.log('Boardpage');
   const [status, setStatus] = useState<
     'init' | 'profileLoaded' | 'boardConnected' | 'tasksConnected' | 'synced'
   >('init');
