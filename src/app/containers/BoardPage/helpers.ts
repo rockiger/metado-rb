@@ -1,20 +1,18 @@
 import * as githubConnector from '../Database/connectors/github';
 import * as googletasksConnector from '../Database/connectors/googletasks';
 import { db } from '../Database/firebase';
-import { Board, Task } from '../Database/types';
+import { Board, ProjectMap, Task, TaskMap } from '../Database/types';
 
 export async function syncBoardFromProviders(
-  board,
-  setBoard,
-  tasks,
+  board: Board,
+  projects: ProjectMap,
+  setBoard: (p: any) => void,
+  tasks: TaskMap,
   uid: string,
 ) {
-  const projectIds = board.projects;
-
   try {
-    for (const projectId of projectIds) {
-      const [, projectType] = projectId.split('-');
-      if (projectType === 'github') {
+    for (const project of Object.values(projects)) {
+      if (project.type === 'github') {
         //! get githubtoken
         const profileRef = db.collection('users').doc(uid);
         const profileSnapshot = await profileRef.get();
@@ -22,13 +20,13 @@ export async function syncBoardFromProviders(
         await githubConnector.sync(
           db,
           tasks,
-          projectId,
+          project,
           uid,
           profile?.githubToken,
         );
       }
-      if (projectType === 'googletasks') {
-        await googletasksConnector.sync(db, tasks, projectId, uid);
+      if (project.type === 'googletasks') {
+        await googletasksConnector.sync(db, tasks, project.id, uid);
       }
 
       // correctPositionInBoard
@@ -36,10 +34,10 @@ export async function syncBoardFromProviders(
       let updatedTasks: any[] = [];
       const updatedTasksRef = db
         .collection('tasks')
-        // projectIds can't be longer then 10, otherwise firestore
+        // board.projects can't be longer then 10, otherwise firestore
         // throws an error. If more projects are needed. This call needs
         // to be rewritten.
-        .where('project', 'in', projectIds)
+        .where('project', 'in', board.projects)
         .where('user', '==', uid);
       const updatedTaskQuery = await updatedTasksRef.get();
       updatedTaskQuery.forEach(

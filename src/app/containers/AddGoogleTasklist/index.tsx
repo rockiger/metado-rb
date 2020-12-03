@@ -45,6 +45,7 @@ import GoogleTasksService, { TaskList } from 'utils/GoogleTasksService';
 import logo from './google-tasks-logo.png';
 import { now } from 'utils/helper';
 import { syncBoardFromProviders } from '../BoardPage/helpers';
+import { getProjectsById } from '../Database';
 
 const BASE_ROUTE = '/projects/add/googletasks/';
 const STEPS = ['0', '1', '2', '3'];
@@ -421,7 +422,7 @@ async function addGoogleTasksProject(
     // are only searches for 10 projects possible with firestore.
     // See syncBoardFromProviders
     if (board && board.projects && board.projects.length < 10) {
-      const changedBoard = produce(board, draftBoard => {
+      const changedBoard = produce(board as Board, draftBoard => {
         draftBoard.projects.push(projectId);
       });
       await boardRef.set(changedBoard);
@@ -435,7 +436,13 @@ async function addGoogleTasksProject(
       let tasks = {};
       tasksSnapshot.forEach(doc => (tasks[doc.id] = doc.data()));
 
-      await syncBoardFromProviders(changedBoard, () => {}, tasks, uid);
+      await syncBoardFromProviders(
+        changedBoard,
+        await getProjectsById(changedBoard.projects),
+        () => {},
+        tasks,
+        uid,
+      );
       setAddingProjectStatus('success');
     } else {
       console.error('Board already has maximum of 10 projects.');

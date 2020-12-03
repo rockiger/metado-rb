@@ -28,6 +28,7 @@ import {
 } from 'app/components/UiComponents';
 
 import {
+  Board,
   Board as BoardType,
   ProjectMap,
   Task,
@@ -48,6 +49,7 @@ import {
 } from '../Database/connectors/github';
 import * as googletasksConnector from '../Database/connectors/googletasks';
 import { now } from 'utils/helper';
+import { connectBoard, getProjectsById } from '../Database';
 
 export function BoardPage() {
   const { ownerId, boardId } = useParams<{
@@ -55,7 +57,6 @@ export function BoardPage() {
     boardId: string;
   }>();
 
-  console.log('Boardpage');
   const [status, setStatus] = useState<
     'init' | 'profileLoaded' | 'boardConnected' | 'tasksConnected' | 'synced'
   >('init');
@@ -65,7 +66,7 @@ export function BoardPage() {
 
   const { user, profile } = useAuth();
   const uid = user?.uid;
-  const [board, setBoard] = useState<any>({});
+  const [board, setBoard] = useState<Board>(initialBoard);
   const [listeners, setListeners] = useState<(() => void)[]>([]);
   const [projects, setProjects] = useState<any>({});
   const activeBoard = profile?.activeBoard;
@@ -77,25 +78,16 @@ export function BoardPage() {
     const getData = async () => {
       if (user && boardId && ownerId === user.uid && status === 'init') {
         // connect board
-        const boardRef = db
-          .collection('users')
-          .doc(ownerId)
-          .collection('boards')
-          .doc(boardId);
-        const boardSnapshot = await boardRef.get();
-        const boardData = boardSnapshot.data();
-        const boardListener = boardRef.onSnapshot(doc => setBoard(doc.data()));
+        const { boardListener, boardData } = await connectBoard(
+          ownerId,
+          boardId,
+          doc => setBoard(doc),
+        );
         setListeners([...listeners, boardListener]);
         setStatus('boardConnected');
 
         if (boardData?.projects.length) {
-          // get projects
-          const projectsRef = db
-            .collection('projects')
-            .where('id', 'in', boardData.projects);
-          const projectsSnapshot = await projectsRef.get();
-          let projectsData = {};
-          projectsSnapshot.forEach(doc => (projectsData[doc.id] = doc.data()));
+          const projectsData = await getProjectsById(boardData.projects);
           setProjects(projectsData);
 
           // connect tasks
@@ -115,7 +107,13 @@ export function BoardPage() {
           setStatus('tasksConnected');
 
           // sync board with connectors
-          await syncBoardFromProviders(boardData, setBoard, tasksData, ownerId);
+          await syncBoardFromProviders(
+            boardData,
+            projectsData,
+            setBoard,
+            tasksData,
+            ownerId,
+          );
           // colocato projects
         }
       }
@@ -506,3 +504,12 @@ export const BoardContent = styled(Row)<{ ref: any }>`
     padding: 2rem 4rem;
   `};
 `;
+
+const initialBoard: Board = {
+  columns: [],
+  id: '',
+  isDeleted: false,
+  projects: [],
+  showBacklog: true,
+  title: '',
+};

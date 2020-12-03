@@ -336,6 +336,10 @@ export class GoogleTasksService {
       : '';
   }
 
+  reloadAuth(): Promise<any> {
+    return this.auth.currentUser.get().reloadAuthResponse();
+  }
+
   /****************************************
    * END Copyright (c) 2019 Marco Laspe   *
    ****************************************/
