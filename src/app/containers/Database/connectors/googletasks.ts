@@ -24,7 +24,7 @@ export async function sync(
     .then(async () => {
       try {
         const externalTasks = await GoogleTasksService.listTasks(taskListId);
-        console.log('Google sync', { externalTasks });
+        // console.log('Google sync', { externalTasks });
         for (const externalTask of externalTasks) {
           const newOrUpdatedTask = createOrUpdateTask(
             externalTask,
@@ -125,7 +125,16 @@ export function createOrUpdateTask(
 }
 
 export async function createTask(project: Project, taskData) {
-  await GoogleTasksService.load(() => {});
+  return GoogleTasksService.load(() => {})
+    .catch(async error => {
+      console.error('Error loading google services:', error);
+    })
+    .then(async () => {
+      return await createTaskHelper(project, taskData);
+    });
+}
+
+async function createTaskHelper(project: Project, taskData: any) {
   const [, , , listId] = project.id.split('-');
   const task = {
     id: '',
@@ -139,34 +148,60 @@ export async function createTask(project: Project, taskData) {
     subtasks: [],
     isDirty: false,
   };
-  const response = await GoogleTasksService.insertTask(task);
+
+  let response: any;
+  try {
+    response = await GoogleTasksService.insertTask(task);
+  } catch (error) {
+    console.error('Error loading google services:', error);
+    if (error?.result?.error?.status === 'UNAUTHENTICATED') {
+      console.log('Unauthenticated, try to sign in.');
+      await GoogleTasksService.reloadAuth();
+      console.log('Signed in, try to update task again once.');
+      response = await GoogleTasksService.insertTask(task);
+    }
+  }
   console.log(response);
   return response;
 }
 
 export async function updateTask(taskData: Task, project: Project) {
-  GoogleTasksService.load(() => {})
-    .catch(error => {
+  return GoogleTasksService.load(() => {})
+    .catch(async error => {
       console.error('Error loading google services:', error);
-      GoogleTasksService.signIn();
     })
     .then(async () => {
-      const [, , , listId, taskId] = taskData.id.split('-');
-      console.log({ listId, taskId });
-      const task = {
-        id: taskId,
-        title: taskData.title,
-        notes: taskData.description,
-        completed: taskData.status === 'Done',
-        completedAt: taskData.finished,
-        parent: '',
-        updatedAt: taskData.edited || now(),
-        status: taskData.status === 'Done' ? 'completed' : 'needsAction',
-        listId: listId,
-        subtasks: [],
-        isDirty: false,
-      };
-      console.log('await GoogleTasksService.updateTask(task);');
-      await GoogleTasksService.updateTask(task);
+      return await updateHelper(taskData);
     });
+}
+
+async function updateHelper(taskData: Task) {
+  //! Could be a problem if name of taskslist has a hyphen
+  const [, , , listId, taskId] = taskData.id.split('-');
+  console.log({ listId, taskId });
+  const task = {
+    id: taskId,
+    title: taskData.title,
+    notes: taskData.description,
+    completed: taskData.status === 'Done',
+    completedAt: taskData.finished,
+    parent: '',
+    updatedAt: taskData.edited || now(),
+    status: taskData.status === 'Done' ? 'completed' : 'needsAction',
+    listId: listId,
+    subtasks: [],
+    isDirty: false,
+  };
+  console.log('await GoogleTasksService.updateTask(task);');
+  try {
+    await GoogleTasksService.updateTask(task);
+  } catch (error) {
+    console.error('Error loading google services:', error);
+    if (error?.result?.error?.status === 'UNAUTHENTICATED') {
+      console.log('Unauthenticated, try to sign in.');
+      await GoogleTasksService.reloadAuth();
+      console.log('Signed in, try to update task again once.');
+      await GoogleTasksService.updateTask(task);
+    }
+  }
 }
