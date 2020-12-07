@@ -138,19 +138,19 @@ export const GroupButton = styled(ButtonOutlined)`
 
 export const A = styled.a``;
 
-type LabelProps = { color?: string };
-export const Label = styled.div`
+type LabelProps = { color?: string; round?: boolean };
+export const Label = styled.div<LabelProps>`
   display: inline-block;
   line-height: 1;
   vertical-align: middle;
 
   background-color: ${p => p.color || 'var(--color-lightGrey)'};
   padding: 0.7rem 1rem;
-  color: white;
+  color: ${p => (p.color ? 'white' : 'var(--color-grey)')};
   font-size: 1.2rem;
   font-weight: 700;
 
-  border-radius: var(--border-radius);
+  border-radius: ${p => (p.round ? '500rem' : 'var(--border-radius)')};
   transition: var(--transition);
 `;
 

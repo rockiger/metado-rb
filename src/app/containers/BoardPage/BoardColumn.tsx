@@ -49,7 +49,9 @@ export function BoardColumn({
   return (
     <Column key={col.title}>
       <ColumnTitle>
-        <ColumnIcon size="2rem" /> <Spacer>{col.title}</Spacer>
+        <ColumnIcon size="2rem" />
+        {col.title}
+        <span style={{ padding: '0.25rem' }} />
         {col.title === 'Done' && (
           <DoneColumnMenu
             colTitle={col.title}
@@ -57,6 +59,8 @@ export function BoardColumn({
             setNoOfTasksToShow={setNoOfTasksToShow}
           />
         )}
+        <Spacer />
+        <Label round>{col.taskIds.length}</Label>
       </ColumnTitle>
       <Droppable droppableId={`${index}`}>
         {provided => (
