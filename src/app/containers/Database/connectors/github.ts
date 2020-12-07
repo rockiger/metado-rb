@@ -109,15 +109,25 @@ function createOrUpdateTask(
 }
 
 async function fetchIssuesFromGithubRepo(repoFullname, githubToken) {
-  const response = await fetch(
-    `https://api.github.com/repos/${repoFullname}/issues?state=all`,
-    {
-      headers: {
-        Authorization: `token ${githubToken}`,
+  let externalTasks: any[] = [];
+  console.log('fetchIssuesFromGithubRepo');
+  let page = 1;
+  while (true) {
+    const response = await fetch(
+      `https://api.github.com/repos/${repoFullname}/issues?state=all&per_page=100&page=${page}`,
+      {
+        headers: {
+          Authorization: `token ${githubToken}`,
+        },
       },
-    },
-  );
-  const externalTasks: any[] = await response.json();
+    );
+    const json = await response.json();
+    console.log({ json });
+    if (json.length === 0) break;
+    externalTasks = [...externalTasks, ...json];
+    page += 1;
+  }
+  console.log({ externalTasks });
   return externalTasks;
 }
 
