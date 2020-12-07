@@ -127,7 +127,6 @@ async function fetchIssuesFromGithubRepo(repoFullname, githubToken) {
     externalTasks = [...externalTasks, ...json];
     page += 1;
   }
-  console.log({ externalTasks });
   return externalTasks;
 }
 

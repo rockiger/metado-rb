@@ -85,7 +85,7 @@ export function correctPositionsInBoardHelper(board: Board, task: Task) {
         return column;
       } else {
         needsUpdate = true;
-        return { ...column, taskIds: [...column.taskIds, task.id] };
+        return { ...column, taskIds: [task.id, ...column.taskIds] };
       }
     } else {
       if (column.taskIds.indexOf(task.id) !== -1) {
