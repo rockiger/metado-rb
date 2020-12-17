@@ -22,6 +22,7 @@ export const GlobalStyle = createGlobalStyle`
     --font-family: 'Lato', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
     --font-size: 1.6rem;
     --margin: 1.4rem 0;
+    --margin-button: 0.75rem;
     --min-height: 4rem;
     --grid-maxWidth: 120rem;
     --grid-gutter: 2rem;

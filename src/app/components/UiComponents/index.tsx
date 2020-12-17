@@ -1,4 +1,6 @@
+import React from 'react';
 import { Button as ReaButton } from 'reakit/Button';
+import { Checkbox as ReaCheckbox } from 'reakit/Checkbox';
 import styled from 'styled-components/macro';
 import media from 'styled-media-query';
 
@@ -43,6 +45,7 @@ export const PageTitle = styled.h1`
   font-size: 2rem;
   font-weight: 500;
   margin: 0;
+  padding-right: var(--margin-button);
 `;
 
 export const Section = styled.section`
@@ -138,6 +141,18 @@ export const GroupButton = styled(ButtonOutlined)`
 
 export const A = styled.a``;
 
+export const IconButton = styled(ButtonClear)`
+  && {
+    line-height: 1.25rem;
+    padding: 0 1rem;
+    margin: -0.9rem 0;
+
+    &[aria-checked='true'] {
+      background-color: var(--bg-color-primary);
+    }
+  }
+`;
+
 type LabelProps = { color?: string; round?: boolean };
 export const Label = styled.div<LabelProps>`
   display: inline-block;
@@ -162,3 +177,19 @@ export const Column = styled.div<ColumnProps>`
   justify-content: ${p => p.align};
   width: 100%;
 `;
+
+type ToggleButtonProps = {
+  isActive?: boolean;
+  onClick?: (ev) => void;
+};
+export const ToggleButton: React.FunctionComponent<ToggleButtonProps> = ({
+  children,
+  isActive = false,
+  onClick = () => {},
+}) => {
+  return (
+    <ReaCheckbox as={IconButton} checked={isActive} onClick={onClick}>
+      {children}
+    </ReaCheckbox>
+  );
+};

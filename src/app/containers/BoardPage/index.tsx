@@ -12,6 +12,7 @@ import { useDialogState } from 'reakit/Dialog';
 import produce from 'immer';
 import * as _ from 'lodash';
 import styled from 'styled-components/macro';
+import { Buffer } from 'styled-icons/simple-icons';
 import media from 'styled-media-query';
 
 import { Navbar } from 'app/components/PrivateNavbar';
@@ -25,6 +26,7 @@ import {
   PrivatePage,
   Row,
   Spacer,
+  ToggleButton,
 } from 'app/components/UiComponents';
 
 import {
@@ -149,6 +151,9 @@ export function BoardPage() {
 
       <PageHeader>
         <PageTitle>{board?.title}</PageTitle>
+        <ToggleButton isActive={true}>
+          <Buffer size="1.5rem" />
+        </ToggleButton>
         <Spacer />
         {status === 'tasksConnected' && !_.isEmpty(board?.projects) && (
           <>
