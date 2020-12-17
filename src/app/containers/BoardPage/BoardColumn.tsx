@@ -187,7 +187,7 @@ const Column = styled.div`
   background-color: white;
   min-height: 16rem;
   padding: 1.6rem;
-  width: 25%;
+  width: 33%;
 `;
 
 const ColumnTitle = styled.h2`

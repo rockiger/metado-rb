@@ -151,7 +151,10 @@ export function BoardPage() {
 
       <PageHeader>
         <PageTitle>{board?.title}</PageTitle>
-        <ToggleButton isActive={true}>
+        <ToggleButton
+          isActive={board.showBacklog}
+          onClick={ev => toggleBacklog(board, uid)}
+        >
           <Buffer size="1.5rem" />
         </ToggleButton>
         <Spacer />
@@ -357,6 +360,20 @@ export function BoardPage() {
       draft.columns[colNo]['noOfTasksToShow'] = noOfTasks;
     });
     updateBoard(newBoard, uid);
+  }
+
+  async function toggleBacklog(board, uid) {
+    setBoard({ ...board, showBacklog: !board.showBacklog });
+    const boardRef = db
+      .collection('users')
+      .doc(uid)
+      .collection('boards')
+      .doc(board.id);
+    try {
+      await boardRef.update({ showBacklog: !board.showBacklog });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async function updateBoard(board: any, uid: any) {
