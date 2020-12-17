@@ -181,14 +181,21 @@ export const Column = styled.div<ColumnProps>`
 type ToggleButtonProps = {
   isActive?: boolean;
   onClick?: (ev) => void;
+  title?: string;
 };
 export const ToggleButton: React.FunctionComponent<ToggleButtonProps> = ({
   children,
   isActive = false,
   onClick = () => {},
+  title,
 }) => {
   return (
-    <ReaCheckbox as={IconButton} checked={isActive} onClick={onClick}>
+    <ReaCheckbox
+      as={IconButton}
+      checked={isActive}
+      onClick={onClick}
+      title={title || ''}
+    >
       {children}
     </ReaCheckbox>
   );

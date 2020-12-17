@@ -154,6 +154,7 @@ export function BoardPage() {
         <ToggleButton
           isActive={board.showBacklog}
           onClick={ev => toggleBacklog(board, uid)}
+          title={board.showBacklog ? 'Hide backlog' : 'Show backlog'}
         >
           <Buffer size="1.5rem" />
         </ToggleButton>
