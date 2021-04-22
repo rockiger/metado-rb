@@ -74,6 +74,7 @@ export function BoardPage() {
   const activeBoard = profile?.activeBoard;
   const [tasks, setTasks] = useState<any>({});
 
+  console.log({ projects, tasks });
   // console.log({ activeBoard, board, status, tasks, uid: uid, user });
 
   useEffect(() => {
@@ -158,6 +159,10 @@ export function BoardPage() {
         >
           <Buffer size="1.5rem" />
         </ToggleButton>
+        <ProjectFilterLabel>Project-Filter:</ProjectFilterLabel>
+        {_.map(projects, el => (
+          <ToggleButton>{el.name}</ToggleButton>
+        ))}
         <Spacer />
         {status === 'tasksConnected' && !_.isEmpty(board?.projects) && (
           <>
@@ -199,7 +204,14 @@ export function BoardPage() {
                     index={index}
                     key={index}
                     projects={projects}
-                    tasks={tasks}
+                    tasks={
+                      _.pickBy(
+                        tasks,
+                        (el: Task) =>
+                          el.project ===
+                          'qn9QsBo3i2SQzXY6Gr31dHlHewW2-github-rockiger-junto',
+                      ) as TaskMap
+                    }
                     handleClickTask={handleClickTask}
                     setNoOfTasksToShow={setNoOfTasksToShow}
                   />
@@ -536,3 +548,8 @@ const initialBoard: Board = {
   showBacklog: true,
   title: '',
 };
+
+const ProjectFilterLabel = styled.div`
+  line-height: 1.25;
+  padding: 0 0.5rem 0 1.5rem;
+`;
