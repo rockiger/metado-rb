@@ -68,6 +68,9 @@ export const MenuItem = styled(ReaMenuItem)`
   &::first-child {
     border-radius: var(--border-radius) 0 0 var(--border-radius);
   }
+  & > * {
+    width: 100%;
+  }
 `;
 
 export const MenuSeparator = styled(ReaMenuSeparator)`

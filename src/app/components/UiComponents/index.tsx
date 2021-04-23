@@ -37,6 +37,7 @@ export const PrivatePage = styled.div`
 export const PageHeader = styled.header`
   align-items: center;
   display: flex;
+  gap: 0.5rem;
   padding: 3.2rem 5.92rem 0;
   width: 100%;
 `;
@@ -147,7 +148,7 @@ export const IconButton = styled(ButtonClear)`
     padding: 0 1rem;
     margin: -0.9rem 0;
 
-    &[aria-checked='true'] {
+    &&[aria-checked='true'] {
       background-color: var(--bg-color-primary);
     }
   }

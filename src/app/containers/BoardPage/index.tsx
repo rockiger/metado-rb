@@ -14,6 +14,7 @@ import * as _ from 'lodash';
 import styled from 'styled-components/macro';
 import { Buffer } from 'styled-icons/simple-icons';
 import media from 'styled-media-query';
+import createPersistedState from 'use-persisted-state';
 
 import { Navbar } from 'app/components/PrivateNavbar';
 import {
@@ -38,8 +39,9 @@ import {
   TaskState,
 } from 'app/containers/Database/types';
 
-import { BoardColumn } from './BoardColumn';
 import { AddCard } from './AddTask';
+import { BoardColumn } from './BoardColumn';
+import { BoardMenu } from './BoardMenu';
 import { EditTask } from './EditTask';
 import { db, useAuth } from '../Database/firebase';
 import { syncBoardFromProviders } from './helpers';
@@ -53,6 +55,8 @@ import * as googletasksConnector from '../Database/connectors/googletasks';
 import { now } from 'utils/helper';
 import { connectBoard, getProjectsById } from '../Database';
 
+const useFilterState = createPersistedState('filter');
+
 export function BoardPage() {
   const { ownerId, boardId } = useParams<{
     ownerId: string;
@@ -65,6 +69,7 @@ export function BoardPage() {
   const editDialogState = useDialogState();
   const [editTaskState, setEditTaskState] = useState<Task | null>(null);
   const editDialogFinalFocusRef = useRef<HTMLElement>(null);
+  const [filters, setFilters] = useFilterState<string[]>([]);
 
   const { user, profile } = useAuth();
   const uid = user?.uid;
@@ -73,9 +78,6 @@ export function BoardPage() {
   const [projects, setProjects] = useState<any>({});
   const activeBoard = profile?.activeBoard;
   const [tasks, setTasks] = useState<any>({});
-
-  console.log({ projects, tasks });
-  // console.log({ activeBoard, board, status, tasks, uid: uid, user });
 
   useEffect(() => {
     const getData = async () => {
@@ -161,20 +163,25 @@ export function BoardPage() {
         </ToggleButton>
         <ProjectFilterLabel>Project-Filter:</ProjectFilterLabel>
         {_.map(projects, el => (
-          <ToggleButton>{el.name}</ToggleButton>
+          <ToggleButton
+            isActive={_.includes(filters, el.id)}
+            onClick={() => toggleFilter(el.id)}
+          >
+            {el.name}
+          </ToggleButton>
         ))}
         <Spacer />
         {status === 'tasksConnected' && !_.isEmpty(board?.projects) && (
           <>
             {board?.projects?.length < 10 && (
-              <>
+              <BoardMenu>
                 <ButtonClear as={Link} to={`/projects/add/googletasks`}>
                   Add Google Tasks List
                 </ButtonClear>
                 <ButtonClear as={Link} to={`/projects/add/github`}>
                   Add GitHub Repo
                 </ButtonClear>
-              </>
+              </BoardMenu>
             )}
             {board && (
               <AddCard
@@ -205,12 +212,11 @@ export function BoardPage() {
                     key={index}
                     projects={projects}
                     tasks={
-                      _.pickBy(
-                        tasks,
-                        (el: Task) =>
-                          el.project ===
-                          'qn9QsBo3i2SQzXY6Gr31dHlHewW2-github-rockiger-junto',
-                      ) as TaskMap
+                      _.isEmpty(filters)
+                        ? tasks
+                        : (_.pickBy(tasks, (el: Task) =>
+                            _.some(filters, filter => filter === el.project),
+                          ) as TaskMap)
                     }
                     handleClickTask={handleClickTask}
                     setNoOfTasksToShow={setNoOfTasksToShow}
@@ -389,6 +395,14 @@ export function BoardPage() {
     }
   }
 
+  function toggleFilter(projectId) {
+    setFilters(oldFilters =>
+      _.includes(oldFilters, projectId)
+        ? _.without(oldFilters, projectId)
+        : _.concat(oldFilters, projectId),
+    );
+  }
+
   async function updateBoard(board: any, uid: any) {
     setBoard(board);
     const boardRef = db
@@ -550,6 +564,6 @@ const initialBoard: Board = {
 };
 
 const ProjectFilterLabel = styled.div`
-  line-height: 1.25;
+  line-height: 1;
   padding: 0 0.5rem 0 1.5rem;
 `;
