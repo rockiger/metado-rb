@@ -36,12 +36,14 @@ export type LoadingStatus = 'init' | 'fetching' | 'error' | 'success';
 
 export interface Project {
   created: string;
-  fullname: string;
+  fullname?: string;
   id: string;
   name: string;
   owner: string;
+  trelloBoardId?: string;
   type: string;
   user: string;
+  listAssignments?: Dict;
 }
 
 export interface ProjectMap {

@@ -164,6 +164,7 @@ export function BoardPage() {
         <ProjectFilterLabel>Project-Filter:</ProjectFilterLabel>
         {_.map(projects, el => (
           <ToggleButton
+            key={el.id}
             isActive={_.includes(filters, el.id)}
             onClick={() => toggleFilter(el.id)}
           >
@@ -175,11 +176,14 @@ export function BoardPage() {
           <>
             {board?.projects?.length < 10 && (
               <BoardMenu>
+                <ButtonClear as={Link} to={`/projects/add/github`}>
+                  Add GitHub Repo
+                </ButtonClear>
                 <ButtonClear as={Link} to={`/projects/add/googletasks`}>
                   Add Google Tasks List
                 </ButtonClear>
-                <ButtonClear as={Link} to={`/projects/add/github`}>
-                  Add GitHub Repo
+                <ButtonClear as={Link} to={`/projects/add/trello`}>
+                  Add Trello Board
                 </ButtonClear>
               </BoardMenu>
             )}
@@ -264,6 +268,10 @@ export function BoardPage() {
               <p></p>
               <Button as={Link} to={`/projects/add/github`}>
                 Add GitHub Project
+              </Button>
+              <p></p>
+              <Button as={Link} to={`/projects/add/trello`}>
+                Add Trello Board
               </Button>
             </Column>
           </Card>

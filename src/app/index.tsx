@@ -14,6 +14,7 @@ import { GlobalStyle } from 'styles/global-styles';
 
 import { AddGithubRepo } from './containers/AddGithubRepo/Loadable';
 import { AddGoogleTasklist } from './containers/AddGoogleTasklist/Loadable';
+import { AddTrelloBoard } from './containers/AddTrelloBoard/Loadable';
 import { BoardPage } from './containers/BoardPage/Loadable';
 import { LoginPage } from './components/LoginPage/Loadable';
 import { HomePage } from './containers/HomePage/Loadable';
@@ -54,6 +55,16 @@ export function App() {
           exact
           path="/projects/add/googletasks/:step"
           component={AddGoogleTasklist}
+        />
+        <PrivateRoute
+          exact
+          path="/projects/add/trello"
+          component={AddTrelloBoard}
+        />
+        <PrivateRoute
+          exact
+          path="/projects/add/trello/:step"
+          component={AddTrelloBoard}
         />
         <Route exact path="/terms" component={TermsPage} />
 

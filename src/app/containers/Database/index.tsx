@@ -39,13 +39,25 @@ export async function getProjectsById(projectIds: string[]) {
   const projectsSnapshot = await projectsRef.get();
   let projectsData: ProjectMap = {};
   projectsSnapshot.forEach(doc => {
-    const { created, fullname, id, name, owner, type, user } = doc.data();
+    const {
+      created,
+      fullname,
+      id,
+      listAssignments,
+      name,
+      owner,
+      trelloBoardId,
+      type,
+      user,
+    } = doc.data();
     projectsData[doc.id] = {
       created,
       fullname,
       id,
+      listAssignments,
       name,
       owner,
+      trelloBoardId,
       type,
       user,
     };

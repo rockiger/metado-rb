@@ -1,5 +1,6 @@
 import * as githubConnector from '../Database/connectors/github';
 import * as googletasksConnector from '../Database/connectors/googletasks';
+import * as trelloConnector from '../Database/connectors/trello';
 import { db } from '../Database/firebase';
 import { Board, ProjectMap, Task, TaskMap } from '../Database/types';
 
@@ -28,7 +29,19 @@ export async function syncBoardFromProviders(
       if (project.type === 'googletasks') {
         await googletasksConnector.sync(db, tasks, project.id, uid);
       }
-
+      if (project.type === 'trello') {
+        //! get trelloToken
+        const profileRef = db.collection('users').doc(uid);
+        const profileSnapshot = await profileRef.get();
+        const profile = profileSnapshot.data();
+        await trelloConnector.sync(
+          db,
+          tasks,
+          project,
+          uid,
+          profile?.trelloToken,
+        );
+      }
       // correctPositionInBoard
       // get tasks of this board
       let updatedTasks: any[] = [];
